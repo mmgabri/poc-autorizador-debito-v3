@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="ee1d5e1c-e73f-4d80-98b3-64b1386759a3" activeEnvironment="Default" name="Collection_SOAP" resourceRoot="" soapui-version="5.9.1" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:WsdlInterface" id="13215100-306b-4c24-a350-a1cf85852dca" wsaVersion="NONE" name="ListingServiceSoapBinding" type="wsdl" bindingName="{http://nicolebertolo.com.br/listings}ListingServiceSoapBinding" soapVersion="1_1" anonymous="optional" definition="file:/C:/Users/Nicole/Documents/grpc-java25/grpc-java25-demo/src/main/resources/Collection_SOAP.wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart="file:\C:\Users\Nicole\Documents\grpc-java25\grpc-java25-demo\src\main\resources\Collection_SOAP.wsdl"><con:part><con:url>file:\C:\Users\Nicole\Documents\grpc-java25\grpc-java25-demo\src\main\resources\Collection_SOAP.wsdl</con:url><con:content><![CDATA[<definitions targetNamespace="http://nicolebertolo.com.br/listings" name="ListingService" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://nicolebertolo.com.br/listings">
+  <!--=========================
+         SCHEMA (Embedded XSD)
+    =========================-->
+  <types>
+    <xs:schema targetNamespace="http://nicolebertolo.com.br/listings" elementFormDefault="qualified">
+      <xs:complexType name="Image">
+        <xs:sequence>
+          <xs:element name="id" type="xs:string"/>
+          <xs:element name="data" type="xs:base64Binary"/>
+          <xs:element name="mime" type="xs:string"/>
+          <xs:element name="caption" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="PropertyListing">
+        <xs:sequence>
+          <xs:element name="id" type="xs:string"/>
+          <xs:element name="title" type="xs:string"/>
+          <xs:element name="description" type="xs:string" minOccurs="0"/>
+          <xs:element name="features" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="images" type="tns:Image" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Inspection">
+        <xs:sequence>
+          <xs:element name="id" type="xs:string"/>
+          <xs:element name="propertyId" type="xs:string"/>
+          <xs:element name="inspector" type="xs:string"/>
+          <xs:element name="notes" type="xs:string" minOccurs="0"/>
+          <xs:element name="photos" type="tns:Image" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="UploadStatus">
+        <xs:sequence>
+          <xs:element name="id" type="xs:string"/>
+          <xs:element name="ok" type="xs:boolean"/>
+          <xs:element name="message" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="GetListingRequest">
+        <xs:sequence>
+          <xs:element name="id" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="GetListingResponse">
+        <xs:sequence>
+          <xs:element name="listing" type="tns:PropertyListing"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="StreamListingsRequest">
+        <xs:sequence>
+          <xs:element name="city" type="xs:string"/>
+          <xs:element name="tags" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="StreamListingsResponse">
+        <xs:sequence>
+          <xs:element name="listings" type="tns:PropertyListing" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="UploadInspectionsRequest">
+        <xs:sequence>
+          <xs:element name="inspections" type="tns:Inspection" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="UploadInspectionsResponse">
+        <xs:sequence>
+          <xs:element name="uploadStatus" type="tns:UploadStatus"/>
+        </xs:sequence>
+      </xs:complexType>
+      <!--ROOT ELEMENTS-->
+      <xs:element name="GetListingRequest" type="tns:GetListingRequest"/>
+      <xs:element name="GetListingResponse" type="tns:GetListingResponse"/>
+      <xs:element name="StreamListingsRequest" type="tns:StreamListingsRequest"/>
+      <xs:element name="StreamListingsResponse" type="tns:StreamListingsResponse"/>
+      <xs:element name="UploadInspectionsRequest" type="tns:UploadInspectionsRequest"/>
+      <xs:element name="UploadInspectionsResponse" type="tns:UploadInspectionsResponse"/>
+    </xs:schema>
+  </types>
+  <!--=========================
+         MESSAGES
+    =========================-->
+  <message name="GetListingRequest">
+    <part name="parameters" element="tns:GetListingRequest"/>
+  </message>
+  <message name="GetListingResponse">
+    <part name="parameters" element="tns:GetListingResponse"/>
+  </message>
+  <message name="StreamListingsRequest">
+    <part name="parameters" element="tns:StreamListingsRequest"/>
+  </message>
+  <message name="StreamListingsResponse">
+    <part name="parameters" element="tns:StreamListingsResponse"/>
+  </message>
+  <message name="UploadInspectionsRequest">
+    <part name="parameters" element="tns:UploadInspectionsRequest"/>
+  </message>
+  <message name="UploadInspectionsResponse">
+    <part name="parameters" element="tns:UploadInspectionsResponse"/>
+  </message>
+  <!--=========================
+         PORT TYPE
+    =========================-->
+  <portType name="ListingServicePortType">
+    <operation name="GetListing">
+      <input message="tns:GetListingRequest"/>
+      <output message="tns:GetListingResponse"/>
+    </operation>
+    <operation name="StreamListings">
+      <input message="tns:StreamListingsRequest"/>
+      <output message="tns:StreamListingsResponse"/>
+    </operation>
+    <operation name="UploadInspections">
+      <input message="tns:UploadInspectionsRequest"/>
+      <output message="tns:UploadInspectionsResponse"/>
+    </operation>
+  </portType>
+  <!--=========================
+         BINDING (SOAP 1.1)
+    =========================-->
+  <binding name="ListingServiceSoapBinding" type="tns:ListingServicePortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="GetListing">
+      <soap:operation soapAction="http://nicolebertolo.com.br/listings/GetListing"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="StreamListings">
+      <soap:operation soapAction="http://nicolebertolo.com.br/listings/StreamListings"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="UploadInspections">
+      <soap:operation soapAction="http://nicolebertolo.com.br/listings/UploadInspections"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+  <!--=========================
+         SERVICE
+    =========================-->
+  <service name="ListingService">
+    <documentation>SOAP Service for Property Listings (equivalent to gRPC ListingService)</documentation>
+    <port name="ListingServicePort" binding="tns:ListingServiceSoapBinding">
+      <soap:address location="http://localhost:8080/ws"/>
+    </port>
+  </service>
+</definitions>]]></con:content><con:type>http://schemas.xmlsoap.org/wsdl/</con:type></con:part></con:definitionCache><con:endpoints><con:endpoint>http://localhost:8080/ws</con:endpoint></con:endpoints><con:operation id="69810fbe-6750-4877-a224-db0c7bf5d206" isOneWay="false" action="http://nicolebertolo.com.br/listings/GetListing" name="GetListing" bindingOperationName="GetListing" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="2a998ecd-a7e9-4c7c-911a-f9e329835be4" name="Request 1"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/api/ws/listagem.wsd</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lis="http://nicolebertolo.com.br/listings">\r
+   <soapenv:Header/>\r
+   <soapenv:Body>\r
+      <lis:GetListingRequest>\r
+         <lis:id>?</lis:id>\r
+      </lis:GetListingRequest>\r
+   </soapenv:Body>\r
+</soapenv:Envelope>]]></con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://nicolebertolo.com.br/listings/GetListing"/><con:wsrmConfig version="1.2"/></con:call></con:operation><con:operation id="047c04ae-0eca-42a7-8385-3852b8cf01d2" isOneWay="false" action="http://nicolebertolo.com.br/listings/StreamListings" name="StreamListings" bindingOperationName="StreamListings" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="5d3f74aa-1c28-4bfe-b338-59e6a5123d39" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/ws</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lis="http://nicolebertolo.com.br/listings">\r
+   <soapenv:Header/>\r
+   <soapenv:Body>\r
+      <lis:StreamListingsRequest>\r
+         <lis:city>?</lis:city>\r
+         <!--Zero or more repetitions:-->\r
+         <lis:tags>?</lis:tags>\r
+      </lis:StreamListingsRequest>\r
+   </soapenv:Body>\r
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://nicolebertolo.com.br/listings/StreamListings"/></con:call></con:operation><con:operation id="bed8783f-0464-4769-a284-b2f45c15b5c7" isOneWay="false" action="http://nicolebertolo.com.br/listings/UploadInspections" name="UploadInspections" bindingOperationName="UploadInspections" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="2c28bc88-2d44-460e-994e-7142dd4e5221" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/ws</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lis="http://nicolebertolo.com.br/listings">\r
+   <soapenv:Header/>\r
+   <soapenv:Body>\r
+      <lis:UploadInspectionsRequest>\r
+         <!--1 or more repetitions:-->\r
+         <lis:inspections>\r
+            <lis:id>?</lis:id>\r
+            <lis:propertyId>?</lis:propertyId>\r
+            <lis:inspector>?</lis:inspector>\r
+            <!--Optional:-->\r
+            <lis:notes>?</lis:notes>\r
+            <!--Zero or more repetitions:-->\r
+            <lis:photos>\r
+               <lis:id>?</lis:id>\r
+               <lis:data>cid:510748790497</lis:data>\r
+               <lis:mime>?</lis:mime>\r
+               <!--Optional:-->\r
+               <lis:caption>?</lis:caption>\r
+            </lis:photos>\r
+         </lis:inspections>\r
+      </lis:UploadInspectionsRequest>\r
+   </soapenv:Body>\r
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://nicolebertolo.com.br/listings/UploadInspections"/></con:call></con:operation></con:interface><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/></con:soapui-project>

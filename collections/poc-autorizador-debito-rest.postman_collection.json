@@ -1,0 +1,95 @@
+{
+  "info": {
+    "_postman_id": "ad199ab2-3a32-42e9-8add-ec75790ae38d",
+    "name": "poc-autorizador-debito-rest",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "6698117"
+  },
+  "item": [
+    {
+      "name": "localhost:8080/transaction",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"customReturnFraude\": \"000\",\r\n    \"customReturnLancamentoConta\": \"000\",\r\n    \"customReturnLimite\": \"000\",\r\n    \"customReturnLimitePortador\": \"000\",\r\n    \"customReturnSeguranca\": \"000\",\r\n    \"de02\" :  \"5899168602146263\",\r\n    \"de03\" : \"002000\",\r\n    \"de04\" : \"000000010050\",\r\n    \"de07\" : \"0220170800\",\r\n    \"de12\" : \"0222\",\r\n    \"de18\" : \"5118\",\r\n    \"de22\" : \"051\",\r\n    \"de43\" : \"pao de acucar\",\r\n    \"de49\" : \"986\",\r\n    \"de52\" : \"123456\",\r\n    \"de55\" : \"55A0A161A0011221C0110A50006020501070100002501000226009F3B9F409F419F529F539F549F559F569F579F589F599F609F619F629F63\",\r\n    \"de63\" : \"123456789\",\r\n    \"isReversal\": false,\r\n    \"transactionId\": \"{{$guid}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "localhost:8080/transaction",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "transaction"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "metrics",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"delay\": 100\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "localhost:8080/increment",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "increment"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "metrics - ecs",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"delay\": 10\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "poc-metrics-nlb-d5bb803396a9ee07.elb.us-east-1.amazonaws.com:8080/increment",
+          "host": [
+            "poc-metrics-nlb-d5bb803396a9ee07",
+            "elb",
+            "us-east-1",
+            "amazonaws",
+            "com"
+          ],
+          "port": "8080",
+          "path": [
+            "increment"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

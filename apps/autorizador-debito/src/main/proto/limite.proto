@@ -1,0 +1,27 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.mmgabri.grpc;
+
+import "comuns/header_message_grpc.proto";
+
+service LimiteService {
+    rpc AtualizarLimite (LimiteRequest) returns (LimiteResponse);
+}
+
+message LimiteRequest {
+    br.com.mmgabri.grpc.comuns.HeaderMessageGrpc headerMessageGrpc = 1;
+    string contaId = 2;
+    string valor = 3;
+    string type = 4;
+    string customReturnLimite = 5;
+    int32 sleepLimite = 6;
+}
+
+message LimiteResponse {
+    br.com.mmgabri.grpc.comuns.HeaderMessageGrpc headerMessageGrpc = 1;
+    string contaId = 2;
+    bool aprovado = 3;
+    string errorCode = 4;
+    string errorDescription = 5;
+}
+

@@ -1,0 +1,227 @@
+# ------------------------------
+# Namespace
+# ------------------------------
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: grpc-demo
+  labels:
+    istio-injection: enabled
+---
+# ------------------------------
+# Deployment
+# ------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-server
+  namespace: grpc-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpc-server
+  template:
+    metadata:
+      labels:
+        app: grpc-server
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/api/actuator/prometheus"
+        prometheus.io/port: "8080"
+    spec:
+      containers:
+        - name: grpc-server
+          image: nihbertolo97/grpc-java25-server:v0.0.1
+          ports:
+            - containerPort: 50051
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /api/actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 20
+---
+# ------------------------------
+# Service
+# ------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpc-server
+  namespace: grpc-demo
+spec:
+  selector:
+    app: grpc-server
+  ports:
+    - name: grpc
+      protocol: TCP
+      port: 50051
+      targetPort: 50051
+    - name: rest
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+# ------------------------------
+# NetworkPolicy
+# ------------------------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-grpc
+  namespace: grpc-demo
+spec:
+  podSelector:
+    matchLabels:
+      app: grpc-server
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: grpc-client
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 50051
+  policyTypes:
+    - Ingress
+---
+# ------------------------------
+# Istio Gateway
+# (expor REST e gRPC para fora)
+# ------------------------------
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: grpc-gateway
+  namespace: grpc-demo
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+    - port:
+        number: 50051
+        name: grpc
+        protocol: GRPC
+      hosts:
+        - "*"
+---
+# ------------------------------
+# VirtualService
+# ------------------------------
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: grpc-server-vs
+  namespace: grpc-demo
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - grpc-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: grpc-server.grpc-demo.svc.cluster.local
+            port:
+              number: 8080
+  tls:
+    - match:
+        - port: 50051
+          sniHosts:
+            - "*"
+      route:
+        - destination:
+            host: grpc-server.grpc-demo.svc.cluster.local
+            port:
+              number: 50051
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: istiod-monitor
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - istio-system
+  selector:
+    matchLabels:
+      app: istiod
+  endpoints:
+    - port: http-monitoring
+      path: /metrics
+      interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: istio-ingress-monitor
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - istio-system
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  endpoints:
+    - port: status-port
+      path: /stats/prometheus
+      interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: istio-sidecar
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchExpressions:
+      - key: istio.io/rev
+        operator: Exists
+  podMetricsEndpoints:
+    - port: envoy-prometheus
+      path: /stats/prometheus
+      interval: 15s
+
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: grpc-server-scaled
+  namespace: grpc-demo
+spec:
+  scaleTargetRef:
+    kind: Deployment
+    name: grpc-server
+  minReplicaCount: 1
+  maxReplicaCount: 10
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://monitoring-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
+        metricName: istio_requests_total
+        threshold: '100'
+        query: |
+          sum(rate(istio_requests_total{destination_workload="grpc-server",response_code="200"}[1m]))

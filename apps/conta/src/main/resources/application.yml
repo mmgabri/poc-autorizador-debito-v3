@@ -1,0 +1,26 @@
+server:
+  port: 9098
+
+grpc:
+  ledger-service-client:
+    host: localhost
+    port: 59096
+    timeout: 3600000
+
+custom:
+  sleep: 1
+
+aws:
+  sqs:
+    enabled: true
+    region: "us-east-1"
+    queue-name: "queue-comando-conta"
+    max-messages: 10
+    wait-time-seconds: 20
+    visibility-timeout-seconds: 30
+    error-backoff-millis: 2000
+    consumer-threads: 10
+
+logging:
+  level:
+    br.com.mmgabri: DEBUG

@@ -1,0 +1,53 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.mmgabri.grpc;
+
+import "comuns/header_message_grpc.proto";
+
+service DataEnrichmentService {
+  rpc EnrichByCard(EnrichByCardRequest) returns (EnrichByCardResponse);
+}
+
+message EnrichByCardRequest {
+  br.com.mmgabri.grpc.comuns.HeaderMessageGrpc headerMessageGrpc = 1;
+  string numeroCartao = 2;
+  string customReturnDataEnrichment = 3;
+  int32 sleepDataEnrichment = 4;
+}
+
+message EnrichByCardResponse {
+  br.com.mmgabri.grpc.comuns.HeaderMessageGrpc headerMessageGrpc = 1;
+  CartaoData cartao = 2;
+  ContaData conta = 3;
+  ClienteData cliente = 4;
+  TokenData token = 5;
+  bool aprovado = 6;
+  string errorCode = 7;
+  string errorDescription = 8;
+}
+
+message CartaoData {
+  string numeroCartao = 1;
+  string hashCartao = 2;
+  string contaId = 3;
+  string titular = 4;
+}
+
+message ContaData {
+  string contaId = 1;
+  string categoria = 2;
+  string segmento = 3;
+  string tipo = 4;
+}
+
+message ClienteData {
+  string clienteId = 1;
+  string cpfCnpj = 2;
+  string telefone = 3;
+}
+
+message TokenData {
+  string tokenId = 1;
+  string status = 2;
+  string carteira = 3;
+}

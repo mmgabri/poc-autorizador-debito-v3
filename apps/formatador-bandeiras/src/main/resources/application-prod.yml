@@ -1,0 +1,35 @@
+spring:
+  threads:
+    virtual:
+      enabled=true:
+server:
+  port: 9090
+
+grpc:
+  autorizador-client:
+    port: 59091
+    host: autorizador-service.autorizador-debito.local
+    timeout: 6000
+
+custom:
+  sleep: 1000
+
+logging:
+  level:
+    br.com.mmgabri: error
+
+management:
+  metrics:
+    distribution:
+      percentiles-histogram:
+        all: true
+  datadog:
+    metrics:
+      export:
+        apiKey: ${DD_API_KEY}
+        step: 5s
+        uri: https://us5.datadoghq.com/
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

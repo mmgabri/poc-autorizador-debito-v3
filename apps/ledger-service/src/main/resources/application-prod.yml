@@ -1,0 +1,14 @@
+server:
+  port: 9096
+
+grpc:
+  async-bridge-client:
+    host: async-bridge-service.autorizador-debito.local
+    port: 58088
+    timeout-ms: 1100
+
+logging:
+  level:
+    br.com.mmgabri: ${LOGGING_LEVEL:INFO}
+  pattern:
+    level: "%5p [ledger-service=${INSTANCIA_IP:localhost}]"

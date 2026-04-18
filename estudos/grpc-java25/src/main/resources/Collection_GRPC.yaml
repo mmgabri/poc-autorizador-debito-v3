@@ -1,0 +1,117 @@
+type: collection.insomnia.rest/5.0
+name: ⚡ gRPC Performance - Property Listing Service
+meta:
+  id: wrk_grpc_perf_listing
+  created: 1762634000100
+  modified: 1762634000100
+  description: "Performance test collection for gRPC endpoints (Unary, Server Stream, Client Stream, BiDi Stream)"
+
+collection:
+  # UNARY
+  - url: "{{grpc_host}}"
+    name: 🔸 GetListing (Unary - 1000 req)
+    meta:
+      id: greq_perf_get_listing
+      created: 1762634000101
+      modified: 1762634000101
+      description: "Busca de um imóvel por ID (Unary gRPC)"
+    body:
+      text: |-
+        {
+          "id": "00000000-0000-0000-0000-000000000001"
+        }
+    protoFileId: pf_listing_proto
+    protoMethodName: /ListingService/GetListing
+    reflectionApi:
+      enabled: false
+
+  # SERVER STREAMING
+  - url: "{{grpc_host}}"
+    name: 🔸 StreamListings (Server Streaming - 500 req)
+    meta:
+      id: greq_perf_stream_listings
+      created: 1762634000102
+      modified: 1762634000102
+      description: "Recebe stream contínuo de listagens (Server Streaming)"
+    body:
+      message:
+        city: "São Paulo"
+        tags:
+          - "luxo"
+          - "3 dormitórios"
+    protoFileId: pf_listing_proto
+    protoMethodName: /ListingService/StreamListings
+    reflectionApi:
+      enabled: false
+
+  # CLIENT STREAMING
+  - url: "{{grpc_host}}"
+    name: 🔸 UploadInspections (Client Streaming - 200 req)
+    meta:
+      id: greq_perf_upload_inspections
+      created: 1762634000103
+      modified: 1762634000103
+      description: "Envia múltiplas inspeções em stream (Client Streaming)"
+    body:
+      stream:
+        - id: "I{{random_int}}"
+          propertyId: "P{{random_int}}"
+          inspector: "PerfUser_{{random_int}}"
+          notes: "Inspeção inicial - teste de performance"
+          photos:
+            - id: "IMG_{{random_int}}"
+              mime: "image/jpeg"
+              caption: "Fachada"
+              data: "SGVsbG8gZ3JwYyB3b3JsZA=="
+        - id: "I{{random_int}}"
+          propertyId: "P{{random_int}}"
+          inspector: "PerfUser_{{random_int}}"
+          notes: "Inspeção final - carga simulada"
+          photos:
+            - id: "IMG_{{random_int}}"
+              mime: "image/png"
+              caption: "Cozinha"
+              data: "U2FtcGxlIHBob3RvIGRhdGE="
+    protoFileId: pf_listing_proto
+    protoMethodName: /ListingService/UploadInspections
+    reflectionApi:
+      enabled: false
+
+  # BIDIRECTIONAL STREAMING
+  - url: "{{grpc_host}}"
+    name: 🔸 LiveInspection (BiDi Streaming - 200 req)
+    meta:
+      id: greq_perf_live_inspection
+      created: 1762634000104
+      modified: 1762634000104
+      description: "Canal bidirecional contínuo entre cliente e servidor"
+    body:
+      stream:
+        - id: "LIVE_{{random_int}}"
+          propertyId: "P{{random_int}}"
+          inspector: "PerfUser_{{random_int}}"
+          notes: "Início da inspeção ao vivo"
+        - id: "LIVE_{{random_int}}"
+          propertyId: "P{{random_int}}"
+          inspector: "PerfUser_{{random_int}}"
+          notes: "Verificando telhado..."
+        - id: "LIVE_{{random_int}}"
+          propertyId: "P{{random_int}}"
+          inspector: "PerfUser_{{random_int}}"
+          notes: "Encerrando inspeção"
+    protoFileId: pf_listing_proto
+    protoMethodName: /ListingService/LiveInspection
+    reflectionApi:
+      enabled: false
+
+environments:
+  name: Base Environment
+  meta:
+    id: env_grpc_perf_listing
+    created: 1762634000120
+    modified: 1762634000120
+  data:
+    grpc_host: "localhost:50051"
+    proto_path: "./proto/listing.proto"
+    random_int: "{{Math.floor(Math.random() * 10000)}}"
+    pf_listing_proto: "{{proto_path}}"

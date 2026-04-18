@@ -1,0 +1,74 @@
+type: collection.insomnia.rest/5.0
+name: ⚡ REST Performance - Property Listing Service
+meta:
+  id: wrk_rest_perf_listing
+  created: 1762634000000
+  modified: 1762634000000
+  description: "Performance test collection for REST endpoints"
+
+collection:
+  - url: "{{rest_host}}/api/listings/{{listing_id}}"
+    name: 🔸 GET Listing by ID (Unary - 1000 req)
+    method: GET
+    meta:
+      id: req_rest_perf_get_listing
+      created: 1762634000001
+      modified: 1762634000001
+      description: "Massive single GET request simulation"
+    parameters:
+      - name: listing_id
+        value: "{{random_id}}"
+
+  - url: "{{rest_host}}/api/listings"
+    name: 🔸 GET StreamListings (City Search - 1000 req)
+    method: GET
+    meta:
+      id: req_rest_perf_stream_listings
+      created: 1762634000002
+      modified: 1762634000002
+      description: "Simulate heavy listing search"
+    parameters:
+      - name: city
+        value: "{{random_city}}"
+      - name: tags
+        value: "luxo,3 dormitórios"
+
+  - url: "{{rest_host}}/api/listings/inspections"
+    name: 🔸 POST UploadInspections (Batch - 500 req)
+    method: POST
+    meta:
+      id: req_rest_perf_upload_inspections
+      created: 1762634000003
+      modified: 1762634000003
+      description: "Bulk uploads of inspections"
+    headers:
+      - name: Content-Type
+        value: application/json
+    body:
+      type: json
+      text: |-
+        [
+          {
+            "id": "I{{random_int}}",
+            "propertyId": "P{{random_int}}",
+            "inspector": "PerfUser_{{random_int}}",
+            "notes": "Stress test inspection batch upload"
+          },
+          {
+            "id": "I{{random_int}}",
+            "propertyId": "P{{random_int}}",
+            "inspector": "PerfUser_{{random_int}}",
+            "notes": "Massive performance simulation"
+          }
+        ]
+environments:
+  name: Base Environment
+  meta:
+    id: env_rest_perf_listing
+    created: 1762634000010
+    modified: 1762634000010
+  data:
+    rest_host: http://localhost:8080
+    random_id: "00000000-0000-0000-0000-000000000001"
+    random_city: "São Paulo"
+    random_int: "{{Math.floor(Math.random() * 10000)}}"

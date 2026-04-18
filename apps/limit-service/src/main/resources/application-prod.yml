@@ -1,0 +1,16 @@
+server:
+  port: 9095
+
+grpc:
+  server:
+    port: 59095
+  client:
+    user-service:
+      negotiationType: PLAINTEXT
+
+custom:
+  sleep: 1
+
+logging:
+  level:
+    br.com.mmgabri: error

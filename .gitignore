@@ -1,0 +1,58 @@
+# Ignorar todas as pastas target dentro de qualquer módulo
+**/target/
+
+# Arquivos de compilação e dependências
+**/bin/
+**/out/
+**/build/
+
+# Configuração do Maven
+**/pom.xml.tag
+**/pom.xml.releaseBackup
+**/pom.xml.versionsBackup
+**/dependency-reduced-pom.xml
+**/release.properties
+
+# Configuração do Gradle
+**/.gradle/
+**/build.gradle.lock
+**/gradle-app.setting
+
+# Arquivos do IntelliJ IDEA
+**/.idea/
+**/*.iml
+**/*.ipr
+**/*.iws
+
+# Arquivos do Eclipse
+**/.classpath
+**/.project
+**/.settings/
+
+# Logs e dumps de erro
+**/*.log
+**/hs_err_pid*.log
+
+# Arquivos temporários do sistema operacional
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Credenciais e configurações locais
+**/local.properties
+**/secrets/
+**/*.env
+**/.env
+**/.vscode/
+**/.gitignore.local
+
+# Terraform
+**/.terraform/
+**/.terraform/*
+**/.terraform.lock.hcl
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfplan
+**/crash.log
+**/*.backup

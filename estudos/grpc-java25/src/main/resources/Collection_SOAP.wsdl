@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="http://nicolebertolo.com.br/listings"
+        targetNamespace="http://nicolebertolo.com.br/listings"
+        name="ListingService">
+
+    <!-- =========================
+         SCHEMA (Embedded XSD)
+    ========================= -->
+    <types>
+        <xs:schema
+                targetNamespace="http://nicolebertolo.com.br/listings"
+                elementFormDefault="qualified">
+
+            <xs:complexType name="Image">
+                <xs:sequence>
+                    <xs:element name="id" type="xs:string"/>
+                    <xs:element name="data" type="xs:base64Binary"/>
+                    <xs:element name="mime" type="xs:string"/>
+                    <xs:element name="caption" type="xs:string" minOccurs="0"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <xs:complexType name="PropertyListing">
+                <xs:sequence>
+                    <xs:element name="id" type="xs:string"/>
+                    <xs:element name="title" type="xs:string"/>
+                    <xs:element name="description" type="xs:string" minOccurs="0"/>
+                    <xs:element name="features" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+                    <xs:element name="images" type="tns:Image" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <xs:complexType name="Inspection">
+                <xs:sequence>
+                    <xs:element name="id" type="xs:string"/>
+                    <xs:element name="propertyId" type="xs:string"/>
+                    <xs:element name="inspector" type="xs:string"/>
+                    <xs:element name="notes" type="xs:string" minOccurs="0"/>
+                    <xs:element name="photos" type="tns:Image" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <xs:complexType name="UploadStatus">
+                <xs:sequence>
+                    <xs:element name="id" type="xs:string"/>
+                    <xs:element name="ok" type="xs:boolean"/>
+                    <xs:element name="message" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <xs:complexType name="GetListingRequest">
+                <xs:sequence>
+                    <xs:element name="id" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <xs:complexType name="GetListingResponse">
+                <xs:sequence>
+                    <xs:element name="listing" type="tns:PropertyListing"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <xs:complexType name="StreamListingsRequest">
+                <xs:sequence>
+                    <xs:element name="city" type="xs:string"/>
+                    <xs:element name="tags" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <xs:complexType name="StreamListingsResponse">
+                <xs:sequence>
+                    <xs:element name="listings" type="tns:PropertyListing" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <xs:complexType name="UploadInspectionsRequest">
+                <xs:sequence>
+                    <xs:element name="inspections" type="tns:Inspection" minOccurs="1" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <xs:complexType name="UploadInspectionsResponse">
+                <xs:sequence>
+                    <xs:element name="uploadStatus" type="tns:UploadStatus"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <!-- ROOT ELEMENTS -->
+            <xs:element name="GetListingRequest" type="tns:GetListingRequest"/>
+            <xs:element name="GetListingResponse" type="tns:GetListingResponse"/>
+
+            <xs:element name="StreamListingsRequest" type="tns:StreamListingsRequest"/>
+            <xs:element name="StreamListingsResponse" type="tns:StreamListingsResponse"/>
+
+            <xs:element name="UploadInspectionsRequest" type="tns:UploadInspectionsRequest"/>
+            <xs:element name="UploadInspectionsResponse" type="tns:UploadInspectionsResponse"/>
+
+        </xs:schema>
+    </types>
+
+    <!-- =========================
+         MESSAGES
+    ========================= -->
+    <message name="GetListingRequest">
+        <part name="parameters" element="tns:GetListingRequest"/>
+    </message>
+    <message name="GetListingResponse">
+        <part name="parameters" element="tns:GetListingResponse"/>
+    </message>
+
+    <message name="StreamListingsRequest">
+        <part name="parameters" element="tns:StreamListingsRequest"/>
+    </message>
+    <message name="StreamListingsResponse">
+        <part name="parameters" element="tns:StreamListingsResponse"/>
+    </message>
+
+    <message name="UploadInspectionsRequest">
+        <part name="parameters" element="tns:UploadInspectionsRequest"/>
+    </message>
+    <message name="UploadInspectionsResponse">
+        <part name="parameters" element="tns:UploadInspectionsResponse"/>
+    </message>
+
+    <!-- =========================
+         PORT TYPE
+    ========================= -->
+    <portType name="ListingServicePortType">
+        <operation name="GetListing">
+            <input message="tns:GetListingRequest"/>
+            <output message="tns:GetListingResponse"/>
+        </operation>
+
+        <operation name="StreamListings">
+            <input message="tns:StreamListingsRequest"/>
+            <output message="tns:StreamListingsResponse"/>
+        </operation>
+
+        <operation name="UploadInspections">
+            <input message="tns:UploadInspectionsRequest"/>
+            <output message="tns:UploadInspectionsResponse"/>
+        </operation>
+    </portType>
+
+    <!-- =========================
+         BINDING (SOAP 1.1)
+    ========================= -->
+    <binding name="ListingServiceSoapBinding" type="tns:ListingServicePortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+        <operation name="GetListing">
+            <soap:operation soapAction="http://nicolebertolo.com.br/listings/GetListing"/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+
+        <operation name="StreamListings">
+            <soap:operation soapAction="http://nicolebertolo.com.br/listings/StreamListings"/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+
+        <operation name="UploadInspections">
+            <soap:operation soapAction="http://nicolebertolo.com.br/listings/UploadInspections"/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+    </binding>
+
+    <!-- =========================
+         SERVICE
+    ========================= -->
+    <service name="ListingService">
+        <documentation>SOAP Service for Property Listings (equivalent to gRPC ListingService)</documentation>
+        <port name="ListingServicePort" binding="tns:ListingServiceSoapBinding">
+            <soap:address location="http://localhost:8080/ws"/>
+        </port>
+    </service>
+
+</definitions>

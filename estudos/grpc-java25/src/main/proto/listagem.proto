@@ -1,0 +1,53 @@
+syntax = "proto3"; // Versão do Protobuf
+
+option java_multiple_files = true; // Gera múltiplos arquivos Java
+option java_package = "br.com.nicolebertolo.proto.listing"; // Pacote Java gerado
+option java_outer_classname = "ListingProto"; // Nome do arquivo Java gerado
+
+message PropertyListing {
+    string id = 1;
+    string title = 2;
+    string description = 3;
+    repeated string features = 4;
+    repeated Image images = 5;
+}
+
+message Image {
+    string id = 1;
+    bytes data = 2; // binario
+    string mime = 3;
+    string caption = 4;
+}
+
+message Inspection {
+    string id = 1;
+    string propertyId = 2;
+    string inspector = 3;
+    string notes = 4;
+    repeated Image photos = 5;
+}
+
+message UploadStatus {
+    string id = 1;
+    bool ok = 2;
+    string message = 3;
+}
+
+
+message GetRequest { string id = 1; }
+message ListingsFilter { string city = 1; repeated string tags = 2; }
+
+// Definição do serviço gRPC
+service ListingService {
+    // UNARY: requisição simples e resposta simples
+    rpc GetListing(GetRequest) returns (PropertyListing);
+
+    // SERVER STREAMING: muitas respostas para uma requisição
+    rpc StreamListings(ListingsFilter) returns (stream PropertyListing);
+
+    // CLIENT STREAMING: muitas requisições para uma resposta
+    rpc UploadInspections(stream Inspection) returns (UploadStatus);
+
+    // BIDI STREAMING: muitas requisições e muitas respostas
+    rpc LiveInspection(stream Inspection) returns (stream UploadStatus);
+}

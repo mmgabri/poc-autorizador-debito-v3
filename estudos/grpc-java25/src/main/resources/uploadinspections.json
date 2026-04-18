@@ -1,0 +1,32 @@
+{
+  "id": "10000000-0000-0000-0000-000000000001",
+  "propertyId": "00000000-0000-0000-0000-000000000001",
+  "inspector": "Ricardo Alves",
+  "notes": "Tudo em ordem",
+  "photos": [
+    {
+      "id": "20000000-0000-0000-0000-000000000001",
+      "data": "U2FtcGxlQmluYXJ5RGF0YQ==",
+      "mime": "image/jpeg",
+      "caption": "Fachada principal"
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000002",
+      "data": "U2FtcGxlQmluYXJ5RGF0YTItU2FsYQ==",
+      "mime": "image/jpeg",
+      "caption": "Sala de estar"
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000003",
+      "data": "U2FtcGxlQmluYXJ5RGF0YTMtVmFyYW5kYQ==",
+      "mime": "image/png",
+      "caption": "Varanda"
+    }
+  ]
+}
+"/c/Users/Nicole/grpcurl.exe" \
+-plaintext \
+-import-path "/c/Users/Nicole/Documents/grpc-java25/grpc-java25-demo/src/main/proto" \
+-proto listagem.proto \
+-d @/c/Users/Nicole/Documents/grpc-java25/grpc-java25-demo/src/main/resources/uploadinspections.json \
+localhost:50051 br.com.nicolebertolo.proto.listing.ListingService/UploadInspections

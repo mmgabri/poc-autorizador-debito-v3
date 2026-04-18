@@ -1,0 +1,28 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.mmgabri.grpc;
+
+import "comuns/header_message_grpc.proto";
+
+service LancamentoContaService {
+    rpc GerarLancamento (LancamentoContaRequest) returns (LancamentoContaResponse);
+}
+
+message LancamentoContaRequest {
+   br.com.mmgabri.grpc.comuns.HeaderMessageGrpc headerMessageGrpc = 1;
+    string contaId = 2;
+    string valor = 3;
+    string literal = 4;
+    string roteiroContabil = 5;
+    string customReturnLancamentoConta = 6;
+    int32 sleepLancamentoConta = 7;
+}
+
+message LancamentoContaResponse {
+    br.com.mmgabri.grpc.comuns.HeaderMessageGrpc headerMessageGrpc = 1;
+    string contaId = 2;
+    bool aprovado = 3;
+    string errorCode = 4;
+    string errorDescription = 5;
+}
+

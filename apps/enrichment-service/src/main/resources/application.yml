@@ -1,0 +1,17 @@
+server:
+  port: 9092
+
+grpc:
+  server:
+    port: 59092
+  client:
+    user-service:
+      negotiationType: PLAINTEXT
+
+custom:
+  sleep: 1
+
+logging:
+  level:
+    io.grpc.netty.shaded.io.netty: ERROR
+    io.grpc.netty.shaded.io.netty.handler.codec.http2: ERROR

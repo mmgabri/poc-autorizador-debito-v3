@@ -1,0 +1,210 @@
+{
+    "@timestamp": "2025-05-10T18:28:23.3060398-03:00",
+    "logger_name": "br.com.mmgabri.adapters.grpc.server.ControllerFormatador",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Iniciando transação..."
+}
+{
+    "@timestamp": "2025-05-10T18:28:23.3060398-03:00",
+    "logger_name": "br.com.mmgabri.application.service.ProductDiscoveryService",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Discovery concluido - Produto: COMPRA_NACIONAL_COM_CHIP_SENHA_MASTER"
+}
+{
+    "@timestamp": "2025-05-10T18:28:23.3073403-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.ValidateIdempotencyAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Idempotência validada com sucesso."
+}
+{
+    "@timestamp": "2025-05-10T18:28:23.3073403-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.DataEnrichmentAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Dados enriquecidos com sucesso"
+}
+{
+    "@timestamp": "2025-05-10T18:28:23.3546276-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.CreateTransactionAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Transação inserida na tabela em 46 ms"
+}
+{
+    "@timestamp": "2025-05-10T18:28:23.3546276-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.RulebookAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Dados consistidos com sucesso."
+}
+{
+    "@timestamp": "2025-05-10T18:28:23.3546276-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.SegurancaAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Chamando Segurança - stage IN_AUTORIZATION"
+}
+{
+    "@timestamp": "2025-05-10T18:28:23.4784693-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.SegurancaAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Chamada do Seguranca em 123 ms"
+}
+{
+    "@timestamp": "2025-05-10T18:28:23.5647624-03:00",
+    "logger_name": "br.com.mmgabri.application.service.TransactionService",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Registro na tabela realizado em 86 ms"
+}
+{
+    "@timestamp": "2025-05-10T18:28:23.5647624-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.LimitePortadorAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Chamando limite-portador - stage IN_AUTORIZATION"
+}
+{
+    "@timestamp": "2025-05-10T18:28:23.6808396-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.LimitePortadorAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Chamada do limite-portador em 116 ms"
+}
+{
+    "@timestamp": "2025-05-10T18:28:23.711754-03:00",
+    "logger_name": "br.com.mmgabri.application.service.TransactionService",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Registro na tabela realizado em 30 ms"
+}
+{
+    "@timestamp": "2025-05-10T18:28:23.7123261-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.LimiteAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Chamando limite - stage IN_AUTORIZATION"
+}
+{
+    "@timestamp": "2025-05-10T18:28:23.8223841-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.LimiteAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Chamada do Limite em 110 ms"
+}
+{
+    "@timestamp": "2025-05-10T18:28:23.9061042-03:00",
+    "logger_name": "br.com.mmgabri.application.service.TransactionService",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Registro na tabela realizado em 83 ms"
+}
+{
+    "@timestamp": "2025-05-10T18:28:23.9066648-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.LancamentoContaAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Chamando lancamento-conta - stage IN_AUTORIZATION"
+}
+{
+    "@timestamp": "2025-05-10T18:28:24.025924-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.LancamentoContaAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Chamada do lancamento-conta concluida em 119 ms"
+}
+{
+    "@timestamp": "2025-05-10T18:28:24.025924-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.LancamentoContaAction",
+    "level": "ERROR",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Transação negada pelo lancamento-conta: SDO - Saldo Insuficiente "
+}
+{
+    "@timestamp": "2025-05-10T18:28:24.0388241-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.UseCaseCompensation",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Iniciando Compensação..."
+}
+{
+    "@timestamp": "2025-05-10T18:28:24.0459984-03:00",
+    "logger_name": "br.com.mmgabri.application.service.GetActionsToRevertService",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Serviços a reverter encontrados: [UseCaseAction(action=ATUALIZAR_LIMITE_PORTADOR, hasCompensation=true, status=APPROVED, errorCode=, errorDescription=, executedAt=2025-05-10T18:28:23.680839600), UseCaseAction(action=ATUALIZAR_LIMITE, hasCompensation=true, status=APPROVED, errorCode=, errorDescription=, executedAt=2025-05-10T18:28:23.822384100)]"
+}
+{
+    "@timestamp": "2025-05-10T18:28:24.0578194-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.LimiteAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Chamando limite - stage IN_COMPENSATION"
+}
+{
+    "@timestamp": "2025-05-10T18:28:24.1679179-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.LimiteAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Chamada do Limite em 110 ms"
+}
+{
+    "@timestamp": "2025-05-10T18:28:24.2434945-03:00",
+    "logger_name": "br.com.mmgabri.application.service.TransactionService",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Registro na tabela realizado em 74 ms"
+}
+{
+    "@timestamp": "2025-05-10T18:28:24.2441192-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.LimitePortadorAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Chamando limite-portador - stage IN_COMPENSATION"
+}
+{
+    "@timestamp": "2025-05-10T18:28:24.3575188-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.actions.LimitePortadorAction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Chamada do limite-portador em 113 ms"
+}
+{
+    "@timestamp": "2025-05-10T18:28:24.4340923-03:00",
+    "logger_name": "br.com.mmgabri.application.service.TransactionService",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Registro na tabela realizado em 76 ms"
+}
+{
+    "@timestamp": "2025-05-10T18:28:24.4340923-03:00",
+    "logger_name": "br.com.mmgabri.application.usecase.UseCaseCompensation",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Compensação concluida com sucesso."
+}
+{
+    "@timestamp": "2025-05-10T18:28:24.4645587-03:00",
+    "logger_name": "br.com.mmgabri.application.service.TransactionService",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Registro na tabela realizado em 29 ms"
+}
+{
+    "@timestamp": "2025-05-10T18:28:24.4676679-03:00",
+    "logger_name": "br.com.mmgabri.application.ProcessTransaction",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Processamento da transação concluido"
+}
+{
+    "@timestamp": "2025-05-10T18:28:24.4676679-03:00",
+    "logger_name": "br.com.mmgabri.adapters.grpc.server.ControllerFormatador",
+    "level": "INFO",
+    "transactionId": "752689bf-b3d1-487f-8d82-0e1fe442108b",
+    "message": "Processamento concluído. Respondendo ao formatador com DE39: 51 em 1161 (ms)"
+}

@@ -1,0 +1,31 @@
+server:
+  port: 9096
+
+grpc:
+  server:
+    port: 59096
+    host: localhost
+
+spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
+aws:
+  sqs:
+    region: "us-east-1"
+    queue-name: "queue-comando-conta"
+
+app:
+  async:
+    response-timeout-seconds: 30
+
+custom:
+  sleep: 1
+
+logging:
+  level:
+    br.com.mmgabri: DEBUG
+  pattern:
+    level: "%5p [ledger-service=${INSTANCIA_IP:localhost}]"

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        targetNamespace="http://nicolebertolo.com.br/listings"
+        xmlns:tns="http://nicolebertolo.com.br/listings"
+        elementFormDefault="qualified">
+
+    <!-- =======================
+         ELEMENTOS BÁSICOS
+    ======================= -->
+
+    <xs:complexType name="Image">
+        <xs:sequence>
+            <xs:element name="id" type="xs:string" minOccurs="1"/>
+            <xs:element name="data" type="xs:base64Binary" minOccurs="1"/>
+            <xs:element name="mime" type="xs:string" minOccurs="1"/>
+            <xs:element name="caption" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="PropertyListing">
+        <xs:sequence>
+            <xs:element name="id" type="xs:string" minOccurs="1"/>
+            <xs:element name="title" type="xs:string" minOccurs="1"/>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+            <xs:element name="features" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="images" type="tns:Image" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Inspection">
+        <xs:sequence>
+            <xs:element name="id" type="xs:string" minOccurs="1"/>
+            <xs:element name="propertyId" type="xs:string" minOccurs="1"/>
+            <xs:element name="inspector" type="xs:string" minOccurs="1"/>
+            <xs:element name="notes" type="xs:string" minOccurs="0"/>
+            <xs:element name="photos" type="tns:Image" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="UploadStatus">
+        <xs:sequence>
+            <xs:element name="id" type="xs:string" minOccurs="1"/>
+            <xs:element name="ok" type="xs:boolean" minOccurs="1"/>
+            <xs:element name="message" type="xs:string" minOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- =======================
+         REQUESTS / RESPONSES
+    ======================= -->
+
+    <xs:complexType name="GetListingRequest">
+        <xs:sequence>
+            <xs:element name="id" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="GetListingResponse">
+        <xs:sequence>
+            <xs:element name="listing" type="tns:PropertyListing"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="StreamListingsRequest">
+        <xs:sequence>
+            <xs:element name="city" type="xs:string" minOccurs="1"/>
+            <xs:element name="tags" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="StreamListingsResponse">
+        <xs:sequence>
+            <xs:element name="listings" type="tns:PropertyListing" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="UploadInspectionsRequest">
+        <xs:sequence>
+            <xs:element name="inspections" type="tns:Inspection" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="UploadInspectionsResponse">
+        <xs:sequence>
+            <xs:element name="uploadStatus" type="tns:UploadStatus"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- =======================
+         ELEMENTOS ROOT (SOAP)
+    ======================= -->
+
+    <xs:element name="GetListingRequest" type="tns:GetListingRequest"/>
+    <xs:element name="GetListingResponse" type="tns:GetListingResponse"/>
+
+    <xs:element name="StreamListingsRequest" type="tns:StreamListingsRequest"/>
+    <xs:element name="StreamListingsResponse" type="tns:StreamListingsResponse"/>
+
+    <xs:element name="UploadInspectionsRequest" type="tns:UploadInspectionsRequest"/>
+    <xs:element name="UploadInspectionsResponse" type="tns:UploadInspectionsResponse"/>
+
+</xs:schema>

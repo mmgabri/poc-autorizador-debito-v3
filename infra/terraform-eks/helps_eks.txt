@@ -1,0 +1,20 @@
+configurar acesso ao cluster:
+aws eks create-access-entry `   --cluster-name autorizador-debito-eks `   --principal-arn arn:aws:iam::140023369634:user/mmgabri `   --region us-east-1
+aws eks associate-access-policy `   --cluster-name autorizador-debito-eks `   --principal-arn arn:aws:iam::140023369634:user/mmgabri `   --policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy `   --access-scope type=cluster `   --region us-east-1
+aws eks update-kubeconfig --region us-east-1 --name autorizador-debito-eks
+kubectl get nodes
+
+lista nodegroups:
+aws eks list-nodegroups --cluster-name autorizador-debito-eks --region us-east-1
+
+describe nodegroup:
+aws eks describe-nodegroup --cluster-name autorizador-debito-eks --nodegroup-name ng-default-20260216151749358200000008 --region us-east-1 --query "nodegroup.{status:status,health:health,scalingConfig:scalingConfig,subnets:subnets,amiType:amiType,capacityType:capacityType,instanceTypes:instanceTypes}" --output json
+
+describe cluster:
+aws eks describe-cluster --name autorizador-debito-eks --region us-east-1 --query "cluster.{status:status,version:version,endpoint:endpoint}" --output json
+
+describe instancias ec2:
+aws ec2 describe-instances --region us-east-1 --filters "Name=tag:eks:cluster-name,Values=autorizador-debito-eks" --query "Reservations[].Instances[].{Id:InstanceId,State:State.Name,Type:InstanceType,Subnet:SubnetId,AZ:Placement.AvailabilityZone}" --output table
+
+describe autoscaling:
+ aws autoscaling describe-auto-scaling-groups --region us-east-1 --query "AutoScalingGroups[?contains(Tags[?Key=='eks:cluster-name'].Value | [0], 'autorizador-debito-eks')].[AutoScalingGroupName,DesiredCapacity,MinSize,MaxSize]" --output table	

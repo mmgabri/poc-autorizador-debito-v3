@@ -1,0 +1,60 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:grpcdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:V1__create.sql
+      data-locations: classpath:V2__seed.sql
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: none
+    defer-datasource-initialization: true  # <--- ESSA LINHA É O PULO DO GATO
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+management:
+  server:
+    port: ${PORT:8080}          # Porta separada para o Actuator (opcional)
+
+  endpoints:
+    web:
+      exposure:
+        include: "*"        # Exponha somente o necessário em produção
+      base-path: /actuator  # Caminho padrão
+
+  endpoint:
+    health:
+      show-details: always  # Exibe detalhes de health (útil para Kubernetes)
+      probes:
+        enabled: true       # Habilita liveness e readiness nativos
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /api
+    compression:
+        enabled: true
+    grpc:
+        enabled: true
+        port: ${GRPC_PORT:50051}
+        address:

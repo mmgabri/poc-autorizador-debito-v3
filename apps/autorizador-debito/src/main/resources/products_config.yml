@@ -1,0 +1,48 @@
+product-catalog:
+  products:
+    - productName: "COMPRA_NACIONAL_COM_CHIP_SENHA_MASTER"
+      enabled: true
+      operation: "DEBITO"
+      roteiroContabil: "003005901"
+      codigoLiteral: "21055"
+      configSeguranca:
+        - "SEN"
+        - "CHP"
+        - "CVV"
+      servicesToExecute:
+        - "data-enrichment"
+        - "seguranca"
+        - "limite-portador"
+        - "limite"
+        - "lancamento-conta"
+        - "fraudes"
+
+    - productName: "COMPRA_NACIONAL_CONTACTLESS_COM_SENHA_MASTER"
+      enabled: true
+      operation: "DEBITO"
+      roteiroContabil: "003005902"
+      codigoLiteral: "95250"
+      configSeguranca:
+        - "SEN"
+        - "CHP"
+        - "CVV"
+      servicesToExecute:
+        - "data-enrichment"
+        - "seguranca"
+        - "limite-portador"
+        - "lancamento-conta"
+
+    - productName: "COMPRA_NACIONAL_CONTACTLESS_SEM_SENHA_MASTER"
+      enabled: true
+      operation: "DEBITO"
+      roteiroContabil: "003005902"
+      codigoLiteral: "95210"
+      configSeguranca:
+        - "SEN"
+        - "CHP"
+        - "CVV"
+      servicesToExecute:
+        - "data-enrichment"
+        - "seguranca"
+        - "limite-portador"
+        - "lancamento-conta"
