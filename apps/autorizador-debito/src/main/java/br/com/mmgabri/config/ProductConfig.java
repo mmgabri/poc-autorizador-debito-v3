@@ -17,6 +17,5 @@ public class ProductConfig {
     private String roteiroContabil;
     private String codigoLiteral;
     private List<String> configSeguranca = new ArrayList<>();
-    private List<String> servicesToExecute = new ArrayList<>();
 }
 

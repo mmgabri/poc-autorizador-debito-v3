@@ -11,16 +11,23 @@ import org.springframework.context.annotation.Configuration;
 public class GrpcStubsConfig {
 
     @Bean
-    public SegurancaServiceGrpc.SegurancaServiceBlockingV2Stub segurancaServiceV2Stub(
-            @Qualifier("managedChannelSeguranca") ManagedChannel channel, ClientInterceptor grpcMetricsClientInterceptor) {
-        return SegurancaServiceGrpc.newBlockingV2Stub(channel)
+    public DataEnrichmentServiceGrpc.DataEnrichmentServiceBlockingV2Stub dataEnrichmentServiceBlockingV2Stub(
+            @Qualifier("managedChannelDataEnrichment") ManagedChannel channel, ClientInterceptor grpcMetricsClientInterceptor) {
+        return DataEnrichmentServiceGrpc.newBlockingV2Stub(channel)
                 .withInterceptors(grpcMetricsClientInterceptor);
     }
 
     @Bean
-    public DataEnrichmentServiceGrpc.DataEnrichmentServiceBlockingV2Stub dataEnrichmentServiceBlockingV2Stub(
-            @Qualifier("managedChannelDataEnrichment") ManagedChannel channel, ClientInterceptor grpcMetricsClientInterceptor) {
-        return DataEnrichmentServiceGrpc.newBlockingV2Stub(channel)
+    public RulesServiceGrpc.RulesServiceBlockingV2Stub rulesServiceStub(
+            @Qualifier("managedChannelRules") ManagedChannel channel, ClientInterceptor grpcMetricsClientInterceptor) {
+        return RulesServiceGrpc.newBlockingV2Stub(channel)
+                .withInterceptors(grpcMetricsClientInterceptor);
+    }
+
+    @Bean
+    public SegurancaServiceGrpc.SegurancaServiceBlockingV2Stub segurancaServiceV2Stub(
+            @Qualifier("managedChannelSeguranca") ManagedChannel channel, ClientInterceptor grpcMetricsClientInterceptor) {
+        return SegurancaServiceGrpc.newBlockingV2Stub(channel)
                 .withInterceptors(grpcMetricsClientInterceptor);
     }
 
@@ -32,16 +39,16 @@ public class GrpcStubsConfig {
     }
 
     @Bean
-    public LimitePortadorServiceGrpc.LimitePortadorServiceBlockingV2Stub limitePortadorServiceStub(
-            @Qualifier("managedChannelLimitePortador") ManagedChannel channel, ClientInterceptor grpcMetricsClientInterceptor) {
-        return LimitePortadorServiceGrpc.newBlockingV2Stub(channel)
+    public LedgerServiceGrpc.LedgerServiceBlockingV2Stub ledgerServiceStub(
+            @Qualifier("managedChannelLedger") ManagedChannel channel, ClientInterceptor grpcMetricsClientInterceptor) {
+        return LedgerServiceGrpc.newBlockingV2Stub(channel)
                 .withInterceptors(grpcMetricsClientInterceptor);
     }
 
     @Bean
-    public LancamentoContaServiceGrpc.LancamentoContaServiceBlockingV2Stub LancamentoContaServiceStub(
-            @Qualifier("managedChannelLancamentoConta") ManagedChannel channel, ClientInterceptor grpcMetricsClientInterceptor) {
-        return LancamentoContaServiceGrpc.newBlockingV2Stub(channel)
+    public AntiFraudServiceGrpc.AntiFraudServiceBlockingV2Stub antiFraudServiceStub(
+            @Qualifier("managedChannelAntiFraud") ManagedChannel channel, ClientInterceptor grpcMetricsClientInterceptor) {
+        return AntiFraudServiceGrpc.newBlockingV2Stub(channel)
                 .withInterceptors(grpcMetricsClientInterceptor);
     }
 }

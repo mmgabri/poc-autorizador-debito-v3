@@ -6,12 +6,14 @@ import java.util.Arrays;
 
 @Getter
 public enum ServicesEnum {
-    SEGURANCA("seguranca", false, true),
-    DATA_ENRICHMENT("data-enrichment", false, true),
-    LIMITE_PORTADOR("limite-portador", false, true),
-    LIMITE("limite", true, false),
-    LANCAMENTO_CONTA("lancamento-conta", true, false),
-    FRAUDES("fraudes", false, true);
+    ENRICHMENT_SERVICE("enrichment-service", false, true),
+    RULES_SERVICE("rules-service", false, true),
+    SECURITY_SERVICE("security-service", false, true),
+    LIMIT_SERVICE("limit-service", true, false),
+    LEDGER_SERVICE("ledger-service", true, false),
+    LIMIT_SERVICE_SIMULATION("limit-service", false, true),
+    LEDGER_SERVICE_SIMULATION("ledger-service", false, true),
+    ANTIFRAUD_SERVICE("antifraud-service", false, true);
 
     private final String serviceName;
     private final boolean hasCompensation;
@@ -30,14 +32,5 @@ public enum ServicesEnum {
                 .orElseThrow(() -> new IllegalArgumentException("Service não previsto: " + serviceName));
     }
 
-
-//    public static String getIsoCodeByErrorCode(String errorCode) {
-//        for (ServicesEnum error : ServicesEnum.values()) {
-//            if (error.errorCode.equals(errorCode)) {
-//                return error.isoCode;
-//            }
-//        }
-//        return "96";
-//    }
 }
 

@@ -45,7 +45,7 @@ public class LimitService {
 
         LimiteResponse response = LimiteResponse.newBuilder()
                 .setHeaderMessageGrpc(header)
-                .setApproved("000".equals(request.getCustomReturnLimit()))
+                .setApproved(request.getTipoOperacao().equals("EFETIVACAO") ? "000".equals(request.getCustomReturnLimit()) : true)
                 .setErrorCode(request.getCustomReturnLimit())
                 .setErrorDescription(getMessage(request.getCustomReturnLimit()))
                 .setContaId(request.getContaId())

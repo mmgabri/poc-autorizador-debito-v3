@@ -1,14 +1,14 @@
 package br.com.mmgabri.adapters.grpc.mappers;
 
 import br.com.mmgabri.application.domains.Payload;
-import br.com.mmgabri.grpc.SegurancaRequest;
+import br.com.mmgabri.grpc.RulesRequest;
 import br.com.mmgabri.grpc.comuns.HeaderMessageGrpc;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SegurancaMapper {
+public class RulesMapper {
 
-    public SegurancaRequest payloadToSegurancaRequest(Payload payload) {
+    public RulesRequest payloadToRulesRequest(Payload payload) {
 
         HeaderMessageGrpc header = HeaderMessageGrpc.newBuilder()
                 .setTransactionId(payload.getHeaderMessage().getTransactionId())
@@ -19,14 +19,11 @@ public class SegurancaMapper {
                 .setMessage(payload.getHeaderMessage().getMessage())
                 .build();
 
-        return SegurancaRequest.newBuilder()
+        return RulesRequest.newBuilder()
                 .setHeaderMessageGrpc(header)
-                .setContaId(payload.getDataEnrichment().getConta().getContaId())
-                .setDadosChip(payload.getMessageIso().get("055"))
-                .setSenha(payload.getMessageIso().get("052"))
-                .setNumeroCartao(payload.getMessageIso().get("002"))
-                .setCustomReturnSeguranca(payload.getExecutionSimulationConfig().getCustomReturnSeguranca())
-                .setSleepSeguranca(payload.getExecutionSimulationConfig().getSleepSeguranca())
+                .putAllMessageIso(payload.getMessageIso())
+                .setCustomReturnRules(payload.getExecutionSimulationConfig().getCustomReturnRules())
+                .setSleepRules(payload.getExecutionSimulationConfig().getSleepRules())
                 .build();
     }
 }

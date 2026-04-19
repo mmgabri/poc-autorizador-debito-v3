@@ -11,14 +11,12 @@ import io.grpc.protobuf.services.ProtoReflectionService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.ApplicationContext;
 
 import java.util.concurrent.Executors;
 
 @SpringBootApplication
 @EnableConfigurationProperties(ProductCatalogProperties.class)
-@EnableFeignClients
 public class Application {
     public static void main(String[] args) throws Exception {
 
@@ -30,8 +28,10 @@ public class Application {
         AutorizadorServiceGrpc.AutorizadorServiceImplBase autorizadorGrpc =
                 context.getBean(AutorizadorGrpcServer.class);
 
+        int grpcPort = Integer.parseInt(context.getEnvironment().getRequiredProperty("grpc.server.port"));
+
         Server server = ServerBuilder
-                .forPort(58101)
+                .forPort(grpcPort)
                 .addService(autorizadorGrpc)
                 .addService(ProtoReflectionService.newInstance())
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
@@ -39,7 +39,7 @@ public class Application {
                 .build()
                 .start();
 
-        System.out.println("gRPC Server iniciado na porta 58101");
+        System.out.println("gRPC Server iniciado na porta " + grpcPort);
 
         Runtime.getRuntime().addShutdownHook(new Thread(server::shutdown));
         server.awaitTermination();

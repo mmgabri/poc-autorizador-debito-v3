@@ -1,47 +1,12 @@
 spring:
-  cloud:
-    openfeign:
-      client:
-        config:
-          default:
-            connectTimeout: 100
-            readTimeout: 500
-          fraudesClient:
-            connectTimeout: 100
-            readTimeout: 500
   threads:
     virtual:
       enabled: true
   config:
     import: "classpath:products_config.yml"
-  datasource:
-    url: jdbc:h2:mem:autorizador_debito;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  sql:
-    init:
-      mode: always
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-  jpa:
-    hibernate:
-      ddl-auto: create
-    defer-datasource-initialization: true
-    properties:
-      hibernate:
-        format_sql: false
-        show_sql: false
 
 server:
-  port: 8081
-
-rest:
-  clients:
-    fraudes:
-      url: "http://fraudes-service.autorizador-debito.local:8087/api/fraudes"
+  port: 9091
 
 grpc:
   server:
@@ -52,7 +17,7 @@ grpc:
     host: enrichment-service.autorizador-debito.local
     timeout: 1500
   security-service-client:
-    port: 58104
+    port: 59094
     host: security-service.autorizador-debito.local
     timeout: 15000
   rules-service-client:
@@ -72,9 +37,11 @@ grpc:
     host: antifraud-service.autorizador-debito.local
     timeout: 1500
 
+aws:
+  sqs:
+    reversal-notification-queue-url: ${SQS_REVERSAL_NOTIFICATION_QUEUE_URL}
+
 custom:
-  sleep: 1000
-  database-memo: ${DATABASE_MEMO}
   database-mode-async: ${DATABASE_MODE_ASYNC}
 
 logging:

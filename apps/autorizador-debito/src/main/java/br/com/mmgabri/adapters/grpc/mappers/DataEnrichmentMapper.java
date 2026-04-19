@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataEnrichmentMapper {
 
-    public EnrichByCardRequest payloadToEnrichByCardRequestRequest(Payload payload, boolean isReversal) {
+    public EnrichByCardRequest payloadToEnrichByCardRequestRequest(Payload payload) {
 
         HeaderMessageGrpc header = HeaderMessageGrpc.newBuilder()
                 .setTransactionId(payload.getHeaderMessage().getTransactionId())
@@ -17,7 +17,6 @@ public class DataEnrichmentMapper {
                 .setPlataforma(payload.getHeaderMessage().getPlataforma())
                 .setTimestamp(payload.getHeaderMessage().getTimestamp())
                 .setMessage(payload.getHeaderMessage().getMessage())
-                .setIsReversal(isReversal)
                 .build();
 
         return EnrichByCardRequest.newBuilder()

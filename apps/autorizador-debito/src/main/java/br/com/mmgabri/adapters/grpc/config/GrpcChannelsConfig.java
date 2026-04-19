@@ -17,17 +17,17 @@ public class GrpcChannelsConfig {
     @Value("${grpc.enrichment-service-client.port}")
     private int dataEnrichmentPort;
 
+    @Value("${grpc.rules-service-client.host}")
+    private String rulesHost;
+
+    @Value("${grpc.rules-service-client.port}")
+    private int rulesPort;
+
     @Value("${grpc.security-service-client.host}")
     private String segurancaHost;
 
     @Value("${grpc.security-service-client.port}")
     private int segurancaPort;
-
-    @Value("${grpc.rules-service-client.host}")
-    private String limitePortadorHost;
-
-    @Value("${grpc.rules-service-client.port}")
-    private int limitePortadorPort;
 
     @Value("${grpc.limit-service-client.host}")
     private String limiteHost;
@@ -36,10 +36,16 @@ public class GrpcChannelsConfig {
     private int limitePort;
 
     @Value("${grpc.ledger-service-client.host}")
-    private String lancamentoContaHost;
+    private String ledgerHost;
 
     @Value("${grpc.ledger-service-client.port}")
-    private int lancamentoContaPort;
+    private int ledgerPort;
+
+    @Value("${grpc.antifraud-service-client.host}")
+    private String antiFraudHost;
+
+    @Value("${grpc.antifraud-service-client.port}")
+    private int antiFraudPort;
 
     @Bean
     public ManagedChannel managedChannelDataEnrichment() {
@@ -54,12 +60,24 @@ public class GrpcChannelsConfig {
     }
 
     @Bean
+    public ManagedChannel managedChannelRules() {
+        return ManagedChannelBuilder
+                .forTarget("dns:///" + rulesHost + ":" + rulesPort)
+                .defaultLoadBalancingPolicy("round_robin")
+                .usePlaintext()
+                .keepAliveTime(60, TimeUnit.SECONDS)
+                .keepAliveTimeout(60, TimeUnit.SECONDS)
+                .idleTimeout(60, TimeUnit.SECONDS)
+                .build();
+    }
+
+    @Bean
     public ManagedChannel managedChannelSeguranca() {
         return ManagedChannelBuilder
                 .forTarget("dns:///" + segurancaHost + ":" + segurancaPort)
                 .defaultLoadBalancingPolicy("round_robin")
                 .usePlaintext()
-                .keepAliveTime(60, TimeUnit.SECONDS)  // Mantém a conexão ativa
+                .keepAliveTime(60, TimeUnit.SECONDS)
                 .keepAliveTimeout(60, TimeUnit.SECONDS)
                 .idleTimeout(60, TimeUnit.SECONDS)
                 .build();
@@ -71,31 +89,31 @@ public class GrpcChannelsConfig {
                 .forTarget("dns:///" + limiteHost + ":" + limitePort)
                 .defaultLoadBalancingPolicy("round_robin")
                 .usePlaintext()
-                .keepAliveTime(60, TimeUnit.SECONDS)  // Mantém a conexão ativa
+                .keepAliveTime(60, TimeUnit.SECONDS)
                 .keepAliveTimeout(60, TimeUnit.SECONDS)
                 .idleTimeout(60, TimeUnit.SECONDS)
                 .build();
     }
 
     @Bean
-    public ManagedChannel managedChannelLimitePortador() {
+    public ManagedChannel managedChannelLedger() {
         return ManagedChannelBuilder
-                .forTarget("dns:///" + limitePortadorHost + ":" + limitePortadorPort)
+                .forTarget("dns:///" + ledgerHost + ":" + ledgerPort)
                 .defaultLoadBalancingPolicy("round_robin")
                 .usePlaintext()
-                .keepAliveTime(60, TimeUnit.SECONDS)  // Mantém a conexão ativa
+                .keepAliveTime(60, TimeUnit.SECONDS)
                 .keepAliveTimeout(60, TimeUnit.SECONDS)
                 .idleTimeout(60, TimeUnit.SECONDS)
                 .build();
     }
 
     @Bean
-    public ManagedChannel managedChannelLancamentoConta() {
+    public ManagedChannel managedChannelAntiFraud() {
         return ManagedChannelBuilder
-                .forTarget("dns:///" + lancamentoContaHost + ":" + lancamentoContaPort)
+                .forTarget("dns:///" + antiFraudHost + ":" + antiFraudPort)
                 .defaultLoadBalancingPolicy("round_robin")
-                                .usePlaintext()
-                .keepAliveTime(60, TimeUnit.SECONDS)  // Mantém a conexão ativa
+                .usePlaintext()
+                .keepAliveTime(60, TimeUnit.SECONDS)
                 .keepAliveTimeout(60, TimeUnit.SECONDS)
                 .idleTimeout(60, TimeUnit.SECONDS)
                 .build();

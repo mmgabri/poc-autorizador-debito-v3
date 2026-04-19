@@ -1,47 +1,12 @@
 spring:
-  cloud:
-    openfeign:
-      client:
-        config:
-          default:
-            connectTimeout: 100
-            readTimeout: 500
-          fraudesClient:
-            connectTimeout: 100
-            readTimeout: 500
   threads:
     virtual:
       enabled: true
   config:
     import: "classpath:products_config.yml"
-  datasource:
-    url: jdbc:h2:mem:autorizador_debito;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  sql:
-    init:
-      mode: always
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-  jpa:
-    hibernate:
-      ddl-auto: create
-    defer-datasource-initialization: true
-    properties:
-      hibernate:
-        format_sql: false
-        show_sql: false
 
 server:
   port: 9091
-
-rest:
-  clients:
-    fraudes:
-      url: "http://localhost:8107/api/fraudes"
 
 grpc:
   server:
@@ -50,36 +15,38 @@ grpc:
   enrichment-service-client:
     port: 59092
     host: localhost
-    timeout: 1500
+    timeout: 3600000
   security-service-client:
-    port: 58104
+    port: 59094
     host: localhost
-    timeout: 15000
+    timeout: 3600000
   rules-service-client:
     port: 59093
     host: localhost
-    timeout: 15000
+    timeout: 3600000
   limit-service-client:
     port: 59095
     host: localhost
-    timeout: 1500
+    timeout: 3600000
   ledger-service-client:
     port: 59096
     host: localhost
-    timeout: 1500
+    timeout: 3600000
   antifraud-service-client:
     port: 59097
     host: localhost
-    timeout: 1500
+    timeout: 3600000
+
+aws:
+  sqs:
+    reversal-notification-queue-url: "https://sqs.us-east-1.amazonaws.com/000000000000/queue-reversal-notification"
 
 custom:
-  sleep: 1000
-  database-memo: false
   database-mode-async: true
 
 logging:
   level:
-    br.com.mmgabri: info
+    br.com.mmgabri: debug
 
 management:
   metrics:

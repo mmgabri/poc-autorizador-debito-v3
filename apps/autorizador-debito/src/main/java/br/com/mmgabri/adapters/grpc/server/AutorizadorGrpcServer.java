@@ -28,7 +28,7 @@ public class AutorizadorGrpcServer extends AutorizadorServiceGrpc.AutorizadorSer
         logger.info("Incoming gRPC request: autorizarTransacao. transactionId={}", request.getHeaderMessageGrpc().getCorrelationId());
 
         try {
-            var response = processTransaction.process(request);
+            var response = processTransaction.execute(request);
             responseObserver.onNext(response);
             responseObserver.onCompleted();
             onSuccess(startTime, response);

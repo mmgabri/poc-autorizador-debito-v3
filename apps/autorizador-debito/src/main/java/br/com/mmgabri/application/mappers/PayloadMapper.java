@@ -5,8 +5,6 @@ import br.com.mmgabri.grpc.AutorizadorRequest;
 import br.com.mmgabri.grpc.EnrichByCardResponse;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 public class PayloadMapper {
 
@@ -22,19 +20,21 @@ public class PayloadMapper {
                 .build();
 
         ExecutionSimulationConfig executionSimulationConfig = ExecutionSimulationConfig.builder()
-                .customReturnSeguranca(request.getCustomReturnSeguranca())
-                .customReturnLimitePortador(request.getCustomReturnLimitePortador())
-                .customReturnLimite(request.getCustomReturnLimite())
-                .customReturnLancamentoConta(request.getCustomReturnLancamentoConta())
-                .customReturnFraude(request.getCustomReturnFraude())
                 .customReturnDataEnrichment(request.getCustomReturnDataEnrichment())
-                .transactionIdReversal(request.getTransactionIdReversal())
                 .sleepDataEnrichment(request.getSleepDataEnrichment())
+                .customReturnRules(request.getCustomReturnRules())
+                .sleepRules(request.getSleepRules())
+                .customReturnSeguranca(request.getCustomReturnSeguranca())
                 .sleepSeguranca(request.getSleepSeguranca())
-                .sleepLimitePortador(request.getSleepLimitePortador())
-                .sleepLimite(request.getSleepLimite())
-                .sleepLancamentoConta(request.getSleepLancamentoConta())
+                .customReturnLimit(request.getCustomReturnLimit())
+                .sleepLimitEfetivacao(request.getSleepLimitEfetivacao())
+                .sleepLimitSimulacao(request.getSleepLimitSimulacao())
+                .customReturnLedger(request.getCustomReturnLedger())
+                .sleepLedgerEfetivacao(request.getSleepLedgerEfetivacao())
+                .sleepLedgerSimulacao(request.getSleepLedgerSimulacao())
+                .customReturnFraude(request.getCustomReturnFraude())
                 .sleepFraude(request.getSleepFraude())
+                .transactionIdReversal(request.getTransactionIdReversal())
                 .build();
 
         return Payload.builder()
@@ -45,7 +45,7 @@ public class PayloadMapper {
                 .build();
     }
 
-    public Payload mapDadosEnriquecidos(Payload payload, EnrichByCardResponse enrichByCardResponse) {
+    public Payload mapEnrichedData(Payload payload, EnrichByCardResponse enrichByCardResponse) {
 
         CartaoDataDomain cartao = CartaoDataDomain.builder()
                 .numeroCartao(enrichByCardResponse.getCartao().getNumeroCartao())

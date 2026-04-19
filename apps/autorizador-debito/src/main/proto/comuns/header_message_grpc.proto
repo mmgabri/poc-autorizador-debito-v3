@@ -9,4 +9,5 @@ message HeaderMessageGrpc {
     string plataforma = 4;
     string timestamp = 5;
     string message = 6;
+    bool isReversal = 7;
 }

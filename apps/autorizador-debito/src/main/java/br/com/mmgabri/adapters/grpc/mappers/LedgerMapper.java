@@ -1,14 +1,14 @@
 package br.com.mmgabri.adapters.grpc.mappers;
 
 import br.com.mmgabri.application.domains.Payload;
-import br.com.mmgabri.grpc.LimiteRequest;
+import br.com.mmgabri.grpc.LedgerRequest;
 import br.com.mmgabri.grpc.comuns.HeaderMessageGrpc;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LimiteMapper {
+public class LedgerMapper {
 
-    public LimiteRequest payloadToLimiteRequest(Payload payload, String tipoOperacao) {
+    public LedgerRequest payloadToLedgerRequest(Payload payload, String tipoOperacao) {
 
         HeaderMessageGrpc header = HeaderMessageGrpc.newBuilder()
                 .setTransactionId(payload.getHeaderMessage().getTransactionId())
@@ -19,13 +19,20 @@ public class LimiteMapper {
                 .setMessage(payload.getHeaderMessage().getMessage())
                 .build();
 
-        return LimiteRequest.newBuilder()
+        boolean isSimulacao = "SIMULACAO".equalsIgnoreCase(tipoOperacao);
+        int sleep = isSimulacao
+                ? payload.getExecutionSimulationConfig().getSleepLedgerSimulacao()
+                : payload.getExecutionSimulationConfig().getSleepLedgerEfetivacao();
+
+        return LedgerRequest.newBuilder()
                 .setHeaderMessageGrpc(header)
                 .setContaId(payload.getDataEnrichment().getConta().getContaId())
                 .setValor(payload.getMessageIso().get("004"))
-                .setCustomReturnLimit(payload.getExecutionSimulationConfig().getCustomReturnLimit())
-                .setSleepLimitEfetivacao(payload.getExecutionSimulationConfig().getSleepLimitEfetivacao())
-                .setSleepLimitSimulacao(payload.getExecutionSimulationConfig().getSleepLimitSimulacao())
+                .setLiteral(payload.getMessageIso().getOrDefault("043", ""))
+                .setRoteiroContabil(payload.getProductDomain().getRoteiroContabil())
+                .setCustomReturnLedger(payload.getExecutionSimulationConfig().getCustomReturnLedger())
+                .setSleepLedgerEfetivacao(isSimulacao ? 0 : sleep)
+                .setSleepLedgerSimulacao(isSimulacao ? sleep : 0)
                 .setTipoOperacao(tipoOperacao)
                 .build();
     }
