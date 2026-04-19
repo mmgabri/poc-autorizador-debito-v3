@@ -13,9 +13,10 @@ message LimiteRequest {
     string contaId = 2;
     string valor = 3;
     string tipoPessoa = 4;
-    string customReturnLimite = 5;
-    int32 sleepLimite = 6;
-    string tipoOperacao = 7;
+    string tipoOperacao = 5;
+    string customReturnLimit = 6;
+    int32 sleepLimitEfetivacao = 7;
+    int32 sleepLimitSimulacao = 8;
 }
 
 message LimiteResponse {

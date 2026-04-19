@@ -10,19 +10,28 @@ service AutorizadorService {
 message AutorizadorRequest {
     br.com.mmgabri.grpc.comuns.HeaderMessageGrpc headerMessageGrpc = 1;
     map<string, string> messageIso = 2;
+
     string customReturnDataEnrichment = 3;
-    string customReturnSeguranca = 4;
-    string customReturnLimitePortador = 5;
-    string customReturnLimite = 6;
-    string customReturnLancamentoConta = 7;
-    string customReturnFraude = 8;
-    string transactionIdReversal = 9;
-    int32 sleepDataEnrichment = 10;
-    int32 sleepSeguranca = 11;
-    int32 sleepLimitePortador = 12;
-    int32 sleepLimite = 13;
-    int32 sleepLancamentoConta = 14;
-    int32 sleepFraude = 15;
+    int32 sleepDataEnrichment = 4;
+
+    string customReturnRules = 5;
+    int32 sleepRules = 6;
+
+    string customReturnSeguranca = 7;
+    int32 sleepSeguranca = 8;
+
+    string customReturnLimit = 9;
+    int32 sleepLimitEfetivacao = 10;
+    int32 sleepLimitSimulacao = 11;
+
+    string customReturnLedger = 12;
+    int32 sleepLedgerEfetivacao = 13;
+    int32 sleepLedgerSimulacao = 14;
+
+    string customReturnFraude = 15;
+    int32 sleepFraude = 16;
+
+    string transactionIdReversal = 17;
 }
 
 message AutorizadorResponse {

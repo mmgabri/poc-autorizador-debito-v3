@@ -21,7 +21,7 @@ message EnrichByCardResponse {
   ContaData conta = 3;
   ClienteData cliente = 4;
   TokenData token = 5;
-  bool aprovado = 6;
+  bool approved = 6;
   string errorCode = 7;
   string errorDescription = 8;
 }

@@ -4,7 +4,6 @@ import br.com.mmgabri.grpc.LimiteRequest;
 import br.com.mmgabri.grpc.LimiteResponse;
 import br.com.mmgabri.grpc.comuns.HeaderMessageGrpc;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -12,19 +11,26 @@ import java.time.Duration;
 @Service
 public class LimitService {
 
-    @Value("${custom.sleep:100}")
-    long customSleepMillis;
-
     @SneakyThrows
     public LimiteResponse execute(LimiteRequest request) {
 
-        if (request.getSleepLimite() > 0) {
-            sleep(Duration.ofMillis(request.getSleepLimite()));
+
+        if (request.getTipoOperacao().equals("EFETIVACAO")) {
+            if (request.getSleepLimitEfetivacao() > 0) {
+                sleep(Duration.ofMillis(request.getSleepLimitEfetivacao()));
+            } else {
+                sleep(Duration.ofMillis(1));
+            }
         } else {
-            sleep(Duration.ofMillis(customSleepMillis));
+            if (request.getSleepLimitSimulacao() > 0) {
+                sleep(Duration.ofMillis(request.getSleepLimitSimulacao()));
+            } else {
+                sleep(Duration.ofMillis(1));
+            }
         }
 
-        if ("999".equals(request.getCustomReturnLimite())) {
+
+        if ("999".equals(request.getCustomReturnLimit())) {
             throw new RuntimeException("Erro comandado pelo chamador");
         }
 
@@ -39,9 +45,9 @@ public class LimitService {
 
         LimiteResponse response = LimiteResponse.newBuilder()
                 .setHeaderMessageGrpc(header)
-                .setApproved("000".equals(request.getCustomReturnLimite()))
-                .setErrorCode(request.getCustomReturnLimite())
-                .setErrorDescription(getMessage(request.getCustomReturnLimite()))
+                .setApproved("000".equals(request.getCustomReturnLimit()))
+                .setErrorCode(request.getCustomReturnLimit())
+                .setErrorDescription(getMessage(request.getCustomReturnLimit()))
                 .setContaId(request.getContaId())
                 .build();
 

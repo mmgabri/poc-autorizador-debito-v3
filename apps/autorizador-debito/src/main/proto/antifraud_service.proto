@@ -1,0 +1,26 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.mmgabri.grpc;
+
+import "comuns/header_message_grpc.proto";
+
+service AntiFraudService {
+    rpc ValidarFraude (AntiFraudRequest) returns (AntiFraudResponse);
+}
+
+message AntiFraudRequest {
+    br.com.mmgabri.grpc.comuns.HeaderMessageGrpc headerMessageGrpc = 1;
+    string contaId = 2;
+    string valor = 3;
+    string tipoPessoa = 4;
+    string productName = 5;
+    string customReturnFraude = 6;
+    int32 sleepFraude = 7;
+}
+
+message AntiFraudResponse {
+    br.com.mmgabri.grpc.comuns.HeaderMessageGrpc headerMessageGrpc = 1;
+    bool approved = 2;
+    string errorCode = 3;
+    string errorDescription = 4;
+}
