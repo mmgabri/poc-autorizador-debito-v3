@@ -2,10 +2,27 @@ server:
   port: 9096
 
 grpc:
-  async-bridge-client:
-    host: async-bridge-service.autorizador-debito.local
-    port: 58088
-    timeout-ms: 1100
+  server:
+    port: 59096
+    host: localhost
+
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:}
+      port: 6379
+
+aws:
+  sqs:
+    region: "us-east-1"
+    queue-name: "queue-comando-conta"
+
+app:
+  async:
+    response-timeout-seconds: 30
+
+custom:
+  sleep: 1
 
 logging:
   level:

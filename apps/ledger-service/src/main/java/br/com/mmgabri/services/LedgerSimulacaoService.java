@@ -38,7 +38,7 @@ public class LedgerSimulacaoService {
 
         return LedgerResponse.newBuilder()
                 .setHeaderMessageGrpc(header)
-                .setAprovado(true)
+                .setApproved(true)
                 .setContaId(request.getContaId())
                 .build();
     }

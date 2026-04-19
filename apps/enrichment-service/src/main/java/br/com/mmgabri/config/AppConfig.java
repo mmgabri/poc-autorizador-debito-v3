@@ -1,7 +1,7 @@
 package br.com.mmgabri.config;
 
-import br.com.mmgabri.controller.DataEnrichmentControllerGrpc;
-import br.com.mmgabri.services.DataEnrichmentService;
+import br.com.mmgabri.controller.EnrichmentControllerGrpc;
+import br.com.mmgabri.services.EnrichmentService;
 import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +14,8 @@ import java.util.concurrent.Executors;
 public class AppConfig {
 
     @Bean
-    public DataEnrichmentControllerGrpc dataEnrichmentControllerGrpc(DataEnrichmentService dataEnrichmentService) {
-        return new DataEnrichmentControllerGrpc(dataEnrichmentService);
+    public EnrichmentControllerGrpc dataEnrichmentControllerGrpc(EnrichmentService dataEnrichmentService) {
+        return new EnrichmentControllerGrpc(dataEnrichmentService);
     }
 
     @Bean

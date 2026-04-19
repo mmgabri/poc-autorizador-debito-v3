@@ -1,6 +1,6 @@
 package br.com.mmgabri;
 
-import br.com.mmgabri.controller.LimiteControllerGrpc;
+import br.com.mmgabri.controller.LimitControllerGrpc;
 import br.com.mmgabri.grpc.LimiteServiceGrpc;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -18,17 +18,19 @@ public class Application {
         ApplicationContext context = SpringApplication.run(Application.class, args);
 
         LimiteServiceGrpc.LimiteServiceImplBase limiteGrpc =
-                context.getBean(LimiteControllerGrpc.class);
+                context.getBean(LimitControllerGrpc.class);
+
+        int grpcPort = Integer.parseInt(context.getEnvironment().getRequiredProperty("grpc.server.port"));
 
         Server server = ServerBuilder
-                .forPort(58085)
+                .forPort(grpcPort)
                 .addService(limiteGrpc)
                 .addService(ProtoReflectionService.newInstance())
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .build()
                 .start();
 
-        System.out.println("gRPC Server iniciado na porta 58085");
+        System.out.println("gRPC Server iniciado na porta " + grpcPort);
 
         Runtime.getRuntime().addShutdownHook(new Thread(server::shutdown));
         server.awaitTermination();

@@ -1,9 +1,9 @@
 server:
-  port: 9092
+  port: 9097
 
 grpc:
   server:
-    port: 59092
+    port: 59097
 
 logging:
   level:

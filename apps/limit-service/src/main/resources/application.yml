@@ -4,14 +4,7 @@ server:
 grpc:
   server:
     port: 59095
-  client:
-    user-service:
-      negotiationType: PLAINTEXT
-
-custom:
-  sleep: 1
 
 logging:
   level:
-    io.grpc.netty.shaded.io.netty: ERROR
-    io.grpc.netty.shaded.io.netty.handler.codec.http2: ERROR
+    br.com.mmgabri: DEBUG

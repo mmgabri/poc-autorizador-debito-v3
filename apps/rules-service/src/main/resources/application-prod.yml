@@ -4,13 +4,7 @@ server:
 grpc:
   server:
     port: 59093
-  client:
-    user-service:
-      negotiationType: PLAINTEXT
-
-custom:
-  sleep: 1
 
 logging:
   level:
-    br.com.mmgabri: error
+    br.com.mmgabri: ${LOGGING_LEVEL:INFO}

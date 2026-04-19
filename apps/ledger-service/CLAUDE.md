@@ -70,9 +70,9 @@ Located in `src/main/proto/`:
 `ComandoContaRequest` carries two fields for controlled testing:
 - `sleepLedger` — inject artificial delay (ms) forwarded to `conta` via SQS
 - `customReturnLedger` — controls the gRPC response:
-  - `"000"` → `aprovado=true`
+  - `"000"` → `approved=true`
   - `"999"` → throws `RuntimeException` (triggers gRPC `INTERNAL` error)
-  - Other codes (e.g. `"SDO"`, `"LIM"`) → set as `errorCode` in response, `aprovado=false`
+  - Other codes (e.g. `"SDO"`, `"LIM"`) → set as `errorCode` in response, `approved=false`
 
 ### Configuration
 

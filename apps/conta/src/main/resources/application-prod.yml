@@ -23,4 +23,4 @@ aws:
 
 logging:
   level:
-    br.com.mmgabri: info
+    ${LOGGING_LEVEL:INFO}

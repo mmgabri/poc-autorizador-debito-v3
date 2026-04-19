@@ -1,7 +1,6 @@
 package br.com.mmgabri;
 
-import br.com.mmgabri.controller.RulesControllerGrpc;
-import br.com.mmgabri.grpc.RulesServiceGrpc;
+import br.com.mmgabri.controller.AntiFraudControllerGrpc;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.protobuf.services.ProtoReflectionService;
@@ -12,19 +11,18 @@ import org.springframework.context.ApplicationContext;
 import java.util.concurrent.Executors;
 
 @SpringBootApplication
-public class Application {
+public class Aplication {
     public static void main(String[] args) throws Exception {
+        ApplicationContext context = SpringApplication.run(Aplication.class, args);
 
-        ApplicationContext context = SpringApplication.run(Application.class, args);
-
-        RulesServiceGrpc.RulesServiceImplBase rulesGrpc =
-                context.getBean(RulesControllerGrpc.class);
+        AntiFraudControllerGrpc antiFraudGrpc =
+                context.getBean(AntiFraudControllerGrpc.class);
 
         int grpcPort = Integer.parseInt(context.getEnvironment().getRequiredProperty("grpc.server.port"));
 
         Server server = ServerBuilder
                 .forPort(grpcPort)
-                .addService(rulesGrpc)
+                .addService(antiFraudGrpc)
                 .addService(ProtoReflectionService.newInstance())
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .build()
@@ -34,7 +32,5 @@ public class Application {
 
         Runtime.getRuntime().addShutdownHook(new Thread(server::shutdown));
         server.awaitTermination();
-
     }
 }
-

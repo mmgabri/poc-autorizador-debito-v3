@@ -3,8 +3,8 @@ server:
 
 grpc:
   ledger-service-client:
-    host: localhost
     port: 59096
+    host: localhost
     timeout: 3600000
 
 custom:

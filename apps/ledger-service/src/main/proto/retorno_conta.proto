@@ -7,7 +7,7 @@ service RetornoContaService {
 }
 
 message RetornoContaRequest {
-    bool aprovado = 1;
+    bool approved = 1;
     string errorCode = 2;
     string errorDescription = 3;
     string correlationId = 4;

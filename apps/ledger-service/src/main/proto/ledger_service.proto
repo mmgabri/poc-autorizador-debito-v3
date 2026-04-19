@@ -23,7 +23,7 @@ message LedgerRequest {
 message LedgerResponse {
     br.com.mmgabri.grpc.comuns.HeaderMessageGrpc headerMessageGrpc = 1;
     string contaId = 2;
-    bool aprovado = 3;
+    bool approved = 3;
     string errorCode = 4;
     string errorDescription = 5;
 }

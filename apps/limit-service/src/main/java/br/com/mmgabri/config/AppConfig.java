@@ -1,7 +1,7 @@
 package br.com.mmgabri.config;
 
-import br.com.mmgabri.controller.LimiteControllerGrpc;
-import br.com.mmgabri.services.LimiteService;
+import br.com.mmgabri.controller.LimitControllerGrpc;
+import br.com.mmgabri.services.LimitService;
 import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +14,8 @@ import java.util.concurrent.Executors;
 public class AppConfig {
 
     @Bean
-    public LimiteControllerGrpc limiteControllerGrpc(LimiteService limiteService) {
-        return new LimiteControllerGrpc(limiteService);
+    public LimitControllerGrpc limiteControllerGrpc(LimitService limiteService) {
+        return new LimitControllerGrpc(limiteService);
     }
 
     @Bean

@@ -23,7 +23,7 @@ public class RetornoContaControllerGrpc extends RetornoContaServiceGrpc.RetornoC
         try {
             RedisCallbackMessage message = new RedisCallbackMessage(
                     request.getCorrelationId(),
-                    request.getAprovado(),
+                    request.getApproved(),
                     request.getErrorCode(),
                     request.getErrorDescription()
             );

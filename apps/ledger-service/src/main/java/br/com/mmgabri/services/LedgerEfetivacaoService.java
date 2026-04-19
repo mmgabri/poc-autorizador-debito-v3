@@ -55,7 +55,7 @@ public class LedgerEfetivacaoService {
 
         return LedgerResponse.newBuilder()
                 .setHeaderMessageGrpc(header)
-                .setAprovado(callback.aprovado())
+                .setApproved(callback.approved())
                 .setErrorCode(callback.errorCode())
                 .setErrorDescription(callback.errorDescription())
                 .setContaId(request.getContaId())

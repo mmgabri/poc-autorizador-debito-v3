@@ -1,7 +1,5 @@
 package br.com.mmgabri.config;
 
-import br.com.mmgabri.controller.RulesControllerGrpc;
-import br.com.mmgabri.services.RulesService;
 import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,20 +12,12 @@ import java.util.concurrent.Executors;
 public class AppConfig {
 
     @Bean
-    public RulesControllerGrpc RulesControllerGrpc(RulesService RulesService) {
-        return new RulesControllerGrpc(RulesService);
-    }
-
-    @Bean
     public AsyncTaskExecutor applicationTaskExecutor() {
         return new TaskExecutorAdapter(Executors.newVirtualThreadPerTaskExecutor());
     }
 
     @Bean
     public TomcatProtocolHandlerCustomizer<?> protocolHandlerVirtualThreadExecutorCustomizer() {
-        return protocolHandler -> {
-            protocolHandler.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
-        };
+        return protocolHandler -> protocolHandler.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
     }
-
 }

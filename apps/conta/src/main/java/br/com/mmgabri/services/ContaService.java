@@ -24,7 +24,7 @@ public class ContaService {
                 .setInstanceId(payload.instanceId())
                 .setErrorCode(payload.customReturnConta())
                 .setErrorDescription(getMessage(payload.customReturnConta()))
-                .setAprovado("000".equals(payload.customReturnConta()))
+                .setApproved("000".equals(payload.customReturnConta()))
                 .build();
 
         ledgerClient.execute(request);
@@ -48,6 +48,7 @@ public class ContaService {
                 return "Limite Insuficiente";
             case "SEN":
                 return "Senha invalida";
+
             case "CHP":
                 return "Erro na autenticação do chip";
             case "CVV":
