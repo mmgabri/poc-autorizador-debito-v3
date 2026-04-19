@@ -1,7 +1,6 @@
 package br.com.mmgabri.config;
 
 import br.com.mmgabri.controller.SegurancaControllerGrpc;
-import br.com.mmgabri.services.MetricsService;
 import br.com.mmgabri.services.SegurancaService;
 import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -15,8 +14,8 @@ import java.util.concurrent.Executors;
 public class AppConfig {
 
     @Bean
-    public SegurancaControllerGrpc segurancaControllerGrpc(SegurancaService segurancaService, MetricsService metricsService) {
-        return new SegurancaControllerGrpc(segurancaService, metricsService);
+    public SegurancaControllerGrpc segurancaControllerGrpc(SegurancaService segurancaService) {
+        return new SegurancaControllerGrpc(segurancaService);
     }
 
     @Bean

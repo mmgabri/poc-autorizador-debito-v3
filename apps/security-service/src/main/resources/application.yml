@@ -1,29 +1,10 @@
 server:
-  port: 8104
+  port: 9094
 
 grpc:
   server:
-    port: 58104
-  client:
-    user-service:
-      negotiationType: PLAINTEXT
-
-custom:
-  sleep: 1
+    port: 59094
 
 logging:
   level:
-    io.grpc.netty.shaded.io.netty: ERROR
-    io.grpc.netty.shaded.io.netty.handler.codec.http2: ERROR
-
-management:
-  datadog:
-    metrics:
-      export:
-        apiKey: 7d84e7dd51f775e36ac5bf9a76257567
-        step: 5s
-        uri: https://us5.datadoghq.com/
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
+    br.com.mmgabri: DEBUG

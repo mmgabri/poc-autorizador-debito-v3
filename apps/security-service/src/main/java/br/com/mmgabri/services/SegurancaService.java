@@ -39,7 +39,7 @@ public class SegurancaService {
 
         SegurancaResponse response = SegurancaResponse.newBuilder()
                 .setHeaderMessageGrpc(header)
-                .setAprovado("000".equals(request.getCustomReturnSeguranca()))
+                .setApproved("000".equals(request.getCustomReturnSeguranca()))
                 .setErrorCode(request.getCustomReturnSeguranca())
                 .setErrorDescription(getMessage(request.getCustomReturnSeguranca()))
                 .setContaId(request.getContaId())

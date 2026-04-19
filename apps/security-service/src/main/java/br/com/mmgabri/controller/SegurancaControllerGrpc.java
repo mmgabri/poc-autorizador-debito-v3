@@ -3,7 +3,6 @@ package br.com.mmgabri.controller;
 import br.com.mmgabri.grpc.SegurancaRequest;
 import br.com.mmgabri.grpc.SegurancaResponse;
 import br.com.mmgabri.grpc.SegurancaServiceGrpc;
-import br.com.mmgabri.services.MetricsService;
 import br.com.mmgabri.services.SegurancaService;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +18,11 @@ public class SegurancaControllerGrpc extends SegurancaServiceGrpc.SegurancaServi
     private static final Logger logger = LoggerFactory.getLogger(SegurancaControllerGrpc.class);
 
     private final SegurancaService segurancaService;
-    private final MetricsService metricsService;
 
     @Override
     public void validarSeguranca(SegurancaRequest request, StreamObserver<SegurancaResponse> responseObserver) {
         var startTime = OffsetDateTime.now();
-        logger.info("Received validarSeguranca");
+        logger.debug("Received validarSeguranca");
         try {
             var response = segurancaService.execute(request);
             responseObserver.onNext(response);
@@ -45,7 +43,6 @@ public class SegurancaControllerGrpc extends SegurancaServiceGrpc.SegurancaServi
     }
 
     private void onSuccess(OffsetDateTime startTime) {
-        logger.info("Processamento concluído em {} (ms)", Duration.between(startTime, OffsetDateTime.now()).toMillis());
-        metricsService.incrementMetric("app_seg_duration_transaction", startTime);
+        logger.debug("Processamento concluído em {} (ms)", Duration.between(startTime, OffsetDateTime.now()).toMillis());
     }
 }

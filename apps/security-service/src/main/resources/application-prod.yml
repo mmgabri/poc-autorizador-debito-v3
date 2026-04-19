@@ -1,28 +1,10 @@
 server:
-  port: 8083
+  port: 9094
 
 grpc:
   server:
-    port: 58083
-  client:
-    user-service:
-      negotiationType: PLAINTEXT
-
-custom:
-  sleep: 1
+    port: 59094
 
 logging:
   level:
-    br.com.mmgabri: error
-
-management:
-  datadog:
-    metrics:
-      export:
-        apiKey: ${DD_API_KEY}
-        step: 5s
-        uri: https://us5.datadoghq.com/
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
+    br.com.mmgabri: ${LOGGING_LEVEL:INFO}

@@ -82,17 +82,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.datadoghq</groupId>
-            <artifactId>java-dogstatsd-client</artifactId>
-            <version>4.4.4</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-registry-datadog</artifactId>
-        </dependency>
-
     </dependencies>
 
     <!-- plugin: protobuf codegen -->
@@ -142,6 +131,28 @@
                             <goal>compile</goal>
                             <goal>compile-custom</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Registra os fontes gerados pelo protobuf como source roots -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>add-protobuf-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/protobuf/java</source>
+                                <source>${project.build.directory}/generated-sources/protobuf/grpc-java</source>
+                            </sources>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

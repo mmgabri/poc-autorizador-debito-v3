@@ -20,15 +20,17 @@ public class Application {
         SegurancaServiceGrpc.SegurancaServiceImplBase segurancaGrpc =
                 context.getBean(SegurancaControllerGrpc.class);
 
+        int grpcPort = Integer.parseInt(context.getEnvironment().getRequiredProperty("grpc.server.port"));
+
         Server server = ServerBuilder
-                .forPort(58083)
+                .forPort(grpcPort)
                 .addService(segurancaGrpc)
                 .addService(ProtoReflectionService.newInstance())
                 .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .build()
                 .start();
 
-        System.out.println("gRPC Server iniciado na porta 58083");
+        System.out.println("gRPC Server iniciado na porta " + grpcPort);
 
         Runtime.getRuntime().addShutdownHook(new Thread(server::shutdown));
         server.awaitTermination();
