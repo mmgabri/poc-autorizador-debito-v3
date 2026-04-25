@@ -13,53 +13,48 @@ variable "micro_services" {
   type        = list(string)
 }
 
-variable "data_enrichment_ecr_repository" {
-  description = "Nome do repositório ECR para o serviço data-enrichment"
+variable "enrichment_service_ecr_repository" {
+  description = "Nome do repositório ECR para o serviço enrichment-service"
   type        = string
 }
 
-variable "formatador_ecr_repository" {
-  description = "Nome do repositório ECR para o serviço formatador"
+variable "formatador_bandeiras_ecr_repository" {
+  description = "Nome do repositório ECR para o serviço formatador-bandeiras"
   type        = string
 }
 
-variable "seguranca_ecr_repository" {
-  description = "Nome do repositório ECR para o serviço seguranca"
+variable "security_service_ecr_repository" {
+  description = "Nome do repositório ECR para o serviço security-service"
   type        = string
 }
 
-variable "limite_portador_ecr_repository" {
-  description = "Nome do repositório ECR para o serviço limite-portador"
+variable "rules_service_ecr_repository" {
+  description = "Nome do repositório ECR para o serviço rules-service"
   type        = string
 }
 
-variable "limite_ecr_repository" {
-  description = "Nome do repositório ECR para o serviço limite"
+variable "limit_service_ecr_repository" {
+  description = "Nome do repositório ECR para o serviço limit-service"
   type        = string
 }
 
-variable "lancamento_conta_ecr_repository" {
-  description = "Nome do repositório ECR para o serviço lancamento-conta"
+variable "ledger_service_ecr_repository" {
+  description = "Nome do repositório ECR para o serviço ledger-service"
   type        = string
 }
 
-variable "fraudes_ecr_repository" {
-  description = "Nome do repositório ECR para o serviço fraudes"
+variable "antifraud_service_ecr_repository" {
+  description = "Nome do repositório ECR para o serviço antifraud-service"
   type        = string
 }
 
-variable "autorizador_ecr_repository" {
-  description = "Nome do repositório ECR para o autorizador"
+variable "autorizador_debito_ecr_repository" {
+  description = "Nome do repositório ECR para o autorizador-debito"  
   type        = string
 }
 
 variable "conta_ecr_repository" {
   description = "Nome do repositório ECR para o serviço conta"
-  type        = string
-}
-
-variable "async_bridge_repository" {
-  description = "Nome do repositório ECR para o serviço async-bridge"
   type        = string
 }
 

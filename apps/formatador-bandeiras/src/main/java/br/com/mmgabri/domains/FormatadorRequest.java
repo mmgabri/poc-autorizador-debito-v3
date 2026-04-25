@@ -10,16 +10,19 @@ import java.util.Map;
 public class FormatadorRequest {
     private Map<String, String> messageIso;
     private String customReturnDataEnrichment;
-    private String customReturnSeguranca;
-    private String customReturnLimitePortador;
-    private String customReturnLimite;
-    private String customReturnLancamentoConta;
-    private String customReturnFraude;
-    private int sleepSeguranca;
     private int sleepDataEnrichment;
-    private int sleepLimitePortador;
-    private int sleepLimite;
-    private int sleepLancamentoConta;
+    private String customReturnRules;
+    private int sleepRules;
+    private String customReturnSeguranca;
+    private int sleepSeguranca;
+    private String customReturnLimit;
+    private int sleepLimitEfetivacao;
+    private int sleepLimitSimulacao;
+    private String customReturnLedger;
+    private int sleepLedgerEfetivacao;
+    private int sleepLedgerSimulacao;
+    private String customReturnFraude;
     private int sleepFraude;
+    private String transactionIdReversal;
 }
 

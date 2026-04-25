@@ -8,7 +8,6 @@ import lombok.experimental.SuperBuilder;
 public class HeaderMessage {
     private String transactionId;
     private String correlationId;
-    private String clearingId;
     private String bandeira;
     private String plataforma;
     private String timestamp;

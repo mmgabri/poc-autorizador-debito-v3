@@ -6,6 +6,7 @@ import br.com.mmgabri.adapters.redis.RetornoContaRedisPublisher;
 import br.com.mmgabri.adapters.redis.RetornoContaRedisSubscriber;
 import br.com.mmgabri.services.LedgerEfetivacaoService;
 import br.com.mmgabri.services.LedgerSimulacaoService;
+import br.com.mmgabri.services.MetricsService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomizer;
@@ -37,8 +38,9 @@ public class AppConfig {
 
     @Bean
     public LedgerControllerGrpc ledgerControllerGrpc(LedgerSimulacaoService simulacaoService,
-                                                      LedgerEfetivacaoService efetivacaoService) {
-        return new LedgerControllerGrpc(simulacaoService, efetivacaoService);
+                                                     LedgerEfetivacaoService efetivacaoService,
+                                                     MetricsService metricsService) {
+        return new LedgerControllerGrpc(simulacaoService, efetivacaoService, metricsService);
     }
 
     @Bean

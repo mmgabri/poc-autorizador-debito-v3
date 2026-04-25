@@ -1,6 +1,7 @@
 package br.com.mmgabri.adapters.sqs;
 
 import br.com.mmgabri.domain.ComandoContaRequest;
+import br.com.mmgabri.services.MetricsService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.MessageAttributeValue;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
+import java.time.OffsetDateTime;
 import java.util.Map;
 
 @Component
@@ -21,6 +23,7 @@ public class ComandoContaSqsPublisher {
 
     private static final Logger logger = LoggerFactory.getLogger(ComandoContaSqsPublisher.class);
 
+    private final MetricsService metricsService;
     private final SqsClient sqsClient;
     private final ObjectMapper objectMapper;
 
@@ -30,6 +33,7 @@ public class ComandoContaSqsPublisher {
     private volatile String queueUrl;
 
     public void publish(ComandoContaRequest request) {
+        var startTime = OffsetDateTime.now();
         String payload = toJson(request);
         String url = resolveQueueUrl();
 
@@ -43,6 +47,8 @@ public class ComandoContaSqsPublisher {
                                 .build()
                 ))
                 .build());
+
+        metricsService.incrementMetric("app_ledger_duration_publish_sqs", startTime, "instanceId:"+request.instanceId());
 
         logger.debug("Comando publicado no SQS. correlationId={} instanceId={}", request.correlationId(), request.instanceId());
     }

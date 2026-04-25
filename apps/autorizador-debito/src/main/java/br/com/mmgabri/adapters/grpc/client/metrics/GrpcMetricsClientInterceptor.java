@@ -48,7 +48,6 @@ public class GrpcMetricsClientInterceptor implements ClientInterceptor {
                                                 .tag("status", k.status)
                                                 .register(meterRegistry)
                                 );
-
                                 t.record(tookNanos, TimeUnit.NANOSECONDS);
 
                                 super.onClose(status, trailers);

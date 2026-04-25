@@ -1,0 +1,15 @@
+# Iniciar
+Start-Service -Name datadogagent
+
+# Verificar status
+Get-Service -Name datadogagent
+
+# Parar
+Stop-Service -Name datadogagent
+
+# Reiniciar
+Restart-Service -Name datadogagent
+
+
+
+C:\ProgramData\Datadog

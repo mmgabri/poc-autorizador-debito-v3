@@ -1,6 +1,7 @@
 package br.com.mmgabri.services;
 
 import br.com.mmgabri.domain.RedisCallbackMessage;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +14,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 @Service
+@RequiredArgsConstructor
 public class PendingRequestService {
 
     private static final Logger logger = LoggerFactory.getLogger(PendingRequestService.class);
+
+    private final MetricsService metricsService;
 
     @Value("${app.async.response-timeout-seconds:30}")
     private long responseTimeoutSeconds;
@@ -32,6 +36,7 @@ public class PendingRequestService {
             logger.debug("Callback recebido. correlationId={}", correlationId);
             return result;
         } catch (TimeoutException e) {
+            metricsService.incrementMetricCounter("app_ledger_timeout_callback");
             logger.error("Timeout aguardando callback. correlationId={}", correlationId);
             throw e;
         } finally {
@@ -45,7 +50,8 @@ public class PendingRequestService {
             future.complete(message);
             logger.debug("Future completado. correlationId={}", correlationId);
         } else {
-            logger.warn("Nenhum future pendente para correlationId={}", correlationId);
+            metricsService.incrementMetricCounter("app_ledger_future_nonexistent");
+            logger.error("Nenhum future pendente para correlationId={}", correlationId);
         }
     }
 }

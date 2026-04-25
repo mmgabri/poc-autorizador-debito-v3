@@ -24,9 +24,9 @@ public class AutorizadorGrpcClient {
     public AutorizadorResponse execute(FormatadorRequest payload) {
         try {
             var request = mapper.toAutorizadorRequest(payload);
-            logger.info("Starting autorizador call");
+            logger.debug("Starting autorizador call");
             AutorizadorResponse response = autorizadorGrpcClient.getStub().autorizarTransacao(request);
-            logger.info("Autorizador call succeeded");
+            logger.debug("Autorizador call succeeded");
             return response;
         } catch (Exception e) {
             logger.error("Autorizador call failed", e);

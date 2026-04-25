@@ -29,3 +29,19 @@ logging:
     br.com.mmgabri: ${LOGGING_LEVEL:INFO}
   pattern:
     level: "%5p [ledger-service=${INSTANCIA_IP:localhost}]"
+
+management:
+  metrics:
+    distribution:
+      percentiles-histogram:
+        all: true
+  datadog:
+    metrics:
+      export:
+        apiKey: ${DD_API_KEY}
+        step: 5s
+        uri: https://us5.datadoghq.com/
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

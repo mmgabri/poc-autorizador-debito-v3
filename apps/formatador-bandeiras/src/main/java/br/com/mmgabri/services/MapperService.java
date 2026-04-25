@@ -6,6 +6,9 @@ import br.com.mmgabri.domains.HeaderMessage;
 import br.com.mmgabri.grpc.AutorizadorRequest;
 import br.com.mmgabri.grpc.AutorizadorResponse;
 import br.com.mmgabri.grpc.comuns.HeaderMessageGrpc;
+
+import java.util.HashMap;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,19 +34,43 @@ public class MapperService {
                 .setHeaderMessageGrpc(header)
                 .putAllMessageIso(request.getMessageIso())
                 .setCustomReturnDataEnrichment(request.getCustomReturnDataEnrichment())
-                .setCustomReturnSeguranca(request.getCustomReturnSeguranca())
-                .setCustomReturnFraude(request.getCustomReturnFraude())
-                .setCustomReturnLancamentoConta(request.getCustomReturnLancamentoConta())
-                .setCustomReturnLimite(request.getCustomReturnLimite())
-                .setCustomReturnLimitePortador(request.getCustomReturnLimitePortador())
                 .setSleepDataEnrichment(request.getSleepDataEnrichment())
+                .setCustomReturnRules(request.getCustomReturnRules())
+                .setSleepRules(request.getSleepRules())
+                .setCustomReturnSeguranca(request.getCustomReturnSeguranca())
                 .setSleepSeguranca(request.getSleepSeguranca())
-                .setSleepLimitePortador(request.getSleepLimitePortador())
-                .setSleepLimite(request.getSleepLimite())
-                .setSleepLancamentoConta(request.getSleepLancamentoConta())
+                .setCustomReturnLimit(request.getCustomReturnLimit())
+                .setSleepLimitEfetivacao(request.getSleepLimitEfetivacao())
+                .setSleepLimitSimulacao(request.getSleepLimitSimulacao())
+                .setCustomReturnLedger(request.getCustomReturnLedger())
+                .setSleepLedgerEfetivacao(request.getSleepLedgerEfetivacao())
+                .setSleepLedgerSimulacao(request.getSleepLedgerSimulacao())
+                .setCustomReturnFraude(request.getCustomReturnFraude())
                 .setSleepFraude(request.getSleepFraude())
+                .setTransactionIdReversal(request.getTransactionIdReversal() != null ? request.getTransactionIdReversal() : "")
                 .build();
         return autorizadorRequest;
+    }
+
+    public FormatadorResponse toReversalResponse(FormatadorRequest request) {
+        Map<String, String> iso = request.getMessageIso();
+        Map<String, String> messageIso = new HashMap<>(iso);
+        messageIso.put("039", "00");
+
+        HeaderMessage header = HeaderMessage.builder()
+                .transactionId(request.getTransactionIdReversal())
+                .correlationId(UUID.randomUUID().toString())
+                .bandeira("MASTERCARD")
+                .plataforma("SINGLE_MESSAGE")
+                .timestamp(LocalDateTime.now().toString())
+                .message("Reversal solicitado com sucesso")
+                .isReversal(true)
+                .build();
+
+        return FormatadorResponse.builder()
+                .header(header)
+                .messageIso(messageIso)
+                .build();
     }
 
     public FormatadorResponse toFormatadorResponse(AutorizadorResponse response) {

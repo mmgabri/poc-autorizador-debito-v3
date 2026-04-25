@@ -8,15 +8,17 @@ server:
 grpc:
   autorizador-client:
     port: 59091
-    host: autorizador-service.autorizador-debito.local
+    host: autorizador-debito-service.autorizador-debito.local
     timeout: 6000
-
-custom:
-  sleep: 1000
 
 logging:
   level:
-    br.com.mmgabri: error
+    br.com.mmgabri: DEBUG
+
+aws:
+  sqs:
+    region: "us-east-1"
+    reversal-queue-name: "queue-authorization-reversal"
 
 management:
   metrics:

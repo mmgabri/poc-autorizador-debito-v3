@@ -102,6 +102,19 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
+
+        <dependency>
+            <groupId>com.datadoghq</groupId>
+            <artifactId>java-dogstatsd-client</artifactId>
+            <version>4.4.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-datadog</artifactId>
+        </dependency>
+
+
     </dependencies>
 
     <!-- plugin: protobuf codegen -->

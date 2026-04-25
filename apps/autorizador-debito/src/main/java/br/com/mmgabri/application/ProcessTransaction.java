@@ -21,7 +21,7 @@ public class ProcessTransaction {
 
     private static final Logger logger = LoggerFactory.getLogger(ProcessTransaction.class);
 
-    private final UseCase useCaseFinancial;
+    private final UseCaseAuthorization useCaseAuthorization;
     private final PayloadMapper payloadMapper;
     private final AutorizadorMapper autorizadorMapper;
     private final TransactionSetupService transactionSetup;
@@ -49,6 +49,6 @@ public class ProcessTransaction {
         payload = payloadMapper.mapEnrichedData(payload, enrichResponse);
 
         logger.info("Enrichment completed. Forwarding to financial use case.");
-        return useCaseFinancial.execute(payload);
+        return useCaseAuthorization.execute(payload);
     }
 }

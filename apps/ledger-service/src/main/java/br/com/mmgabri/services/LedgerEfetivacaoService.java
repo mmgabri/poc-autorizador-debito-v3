@@ -6,26 +6,33 @@ import br.com.mmgabri.domain.RedisCallbackMessage;
 import br.com.mmgabri.grpc.LedgerRequest;
 import br.com.mmgabri.grpc.LedgerResponse;
 import br.com.mmgabri.grpc.comuns.HeaderMessageGrpc;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.time.OffsetDateTime;
 
 @Service
 public class LedgerEfetivacaoService {
 
     private static final Logger logger = LoggerFactory.getLogger(LedgerEfetivacaoService.class);
 
+    private final MetricsService metricsService;
     private final ComandoContaSqsPublisher sqsPublisher;
     private final PendingRequestService pendingRequestService;
     private final String instanceId;
 
     public LedgerEfetivacaoService(ComandoContaSqsPublisher sqsPublisher,
                                    PendingRequestService pendingRequestService,
-                                   @Qualifier("instanceId") String instanceId) {
+                                   @Qualifier("instanceId") String instanceId,
+                                   MetricsService metricsService) {
         this.sqsPublisher = sqsPublisher;
         this.pendingRequestService = pendingRequestService;
         this.instanceId = instanceId;
+        this.metricsService = metricsService;
     }
 
     public LedgerResponse execute(LedgerRequest request) throws Exception {
@@ -40,7 +47,11 @@ public class LedgerEfetivacaoService {
         );
         sqsPublisher.publish(comando);
 
+        var startTime = OffsetDateTime.now();
+
         RedisCallbackMessage callback = pendingRequestService.waitForCallback(correlationId);
+
+        metricsService.incrementMetric("app_ledger_duration_call_async", startTime, "tipo_operacao:EFETIVACAO");
 
         HeaderMessageGrpc header = HeaderMessageGrpc.newBuilder()
                 .setTransactionId(request.getHeaderMessageGrpc().getTransactionId())
