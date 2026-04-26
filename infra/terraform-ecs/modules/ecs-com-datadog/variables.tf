@@ -63,51 +63,6 @@ variable "host_port" {
   type        = number
 }
 
-variable "max_cpu_threshold" {
-  description = " "
-  type        = string
-}
-
-variable "min_cpu_threshold" {
-  description = " "
-  type        = string
-}
-
-variable "scale_target_min_capacity" {
-  description = " "
-  type        = string
-}
-
-variable "scale_target_max_capacity" {
-  description = " "
-  type        = string
-}
-
-variable "cooldown" {
-  description = " "
-  type        = string
-}
-
-variable "min_cpu_evaluation_period" {
-  description = " "
-  type        = string
-}
-
-variable "max_cpu_evaluation_period" {
-  description = " "
-  type        = string
-}
-
-variable "max_cpu_period" {
-  description = " "
-  type        = string
-}
-
-variable "min_cpu_period" {
-  description = " "
-  type        = string
-}
-
 variable "namespace_id" {
   description = "ID do namespace DNS privado"
   type        = string
@@ -122,3 +77,12 @@ variable "desired_count" {
   type        = string
 }
 
+variable "logging_level" {
+  description = "Nível de log"
+  type        = string
+}
+
+variable "redis_host" {
+  description = "Host do Redis"
+  type        = string
+}

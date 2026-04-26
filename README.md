@@ -1,183 +1,366 @@
-# PoC — Autorizador de Cartão de Débito (Java | gRPC + REST | AWS)
+# PoC — Autorizador de Cartão de Débito
 
-## Visão Geral
-Este repositório contém uma **Prova de Conceito (PoC)** de um **Autorizador de Transações de Cartão de Débito**, com foco principal em **minimizar o tempo total de resposta** (end-to-end) mantendo **confiabilidade, rastreabilidade e observabilidade**.
+**Java 25 · Spring Boot 3.5.6 · gRPC 1.76 · AWS (ECS/EKS) · Datadog**
 
-A PoC valida padrões arquiteturais, estratégias de integração entre microserviços (gRPC e REST) e boas práticas para execução em **ambiente cloud (AWS)** visando **alta performance e baixa latência**.
-
----
-
-## Objetivo
-- Construir um fluxo de autorização de débito com **menor tempo possível de resposta**.
-- Medir e comparar o impacto de:
-  - **gRPC vs REST**
-  - padrões de concorrência/paralelismo
-  - configurações de infraestrutura e rede na AWS
-  - timeouts, retries e circuit breakers
-- Validar padrões de observabilidade e métricas para **TPS, latência, p95/p99**, erros e saturação.
+Prova de Conceito de um **autorizador de transações de débito** com foco em **minimizar latência end-to-end** e **maximizar throughput**. A PoC valida comparativos entre gRPC e REST, paralelismo de chamadas e padrões de concorrência sob carga real na AWS.
 
 ---
 
-## Requisitos Não-Funcionais (Foco)
-- **Baixa latência** (principal KPI)
-- **Alta concorrência / throughput**
-- **Rastreabilidade por `transactionId`**
-- **Resiliência controlada** (timeouts e falhas tratadas sem explodir latência)
+## Objetivos
+
+- Medir e comparar o impacto de **gRPC vs REST** em comunicação interna entre microserviços
+- Avaliar estratégias de **paralelismo** (chamadas sequenciais vs paralelas) na latência total
+- Validar o padrão **fire-and-wait assíncrono** com SQS + Redis + `CompletableFuture`
+- Estabelecer baseline de **TPS, p95 e p99** sob carga sustentada na AWS
+
+**KPI principal:** latência end-to-end (p95/p99).
 
 ---
 
 ## Arquitetura
-> ![img.png](img.png)
 
+```
+Cliente
+  │
+  └─► autorizador-debito  [REST :9091 | gRPC :59091]
+           │
+           ├─► enrichment-service  (gRPC, timeout 1500ms)
+           ├─► security-service    (gRPC, timeout 15000ms)
+           ├─► rules-service       (gRPC, timeout 15000ms)
+           ├─► limit-service       (gRPC, timeout 1500ms)
+           ├─► antifraud-service   (gRPC, timeout 1500ms)
+           └─► ledger-service      (gRPC, timeout 1500ms)
+                    │
+                    │  1. publica SQS queue-compensation-transaction
+                    │  2. registra CompletableFuture (30s timeout)
+                    │  3. aguarda callback
+                    ▼
+               conta-service  (consome SQS, chama TrataRetornoConta via gRPC)
+                    │
+                    └─► Redis pub/sub  channel:{instanceId}:{correlationId}
+                              │
+                              └─► ledger-service resolve future → retorna gRPC
+```
 
+O diagrama completo está em [`Desenho Arquitetura.drawio`](Desenho%20Arquitetura.drawio).
 
-### Fluxo (alto nível)
-1. Recebe requisição de autorização (entrada **REST** e/ou **gRPC**)
-2. Orquestra chamadas para serviços dependentes (ex.: segurança, fraude, enriquecimento, limites etc.)
-3. Consolida resposta e retorna **em tempo mínimo**
-4. Em paralelo: registra telemetria e eventos (quando aplicável)
+---
+
+## Serviços
+
+| Serviço | Função | REST | gRPC |
+|---|---|---|---|
+| `autorizador-debito` | Orquestrador principal | 9091 | 59091 |
+| `enrichment-service` | Enriquecimento de dados da transação | 9092 | 59092 |
+| `rules-service` | Validação de regras do portador | 9093 | 59093 |
+| `security-service` | Validação de segurança (senha, chip, CVV) | 9094 | 59094 |
+| `limit-service` | Verificação de limite de débito | 9095 | 59095 |
+| `ledger-service` | Lançamento contábil (async SQS + Redis) | 9096 | 59096 |
+| `antifraud-service` | Detecção de fraude | 9097 | 59097 |
+| `conta` | Gerenciamento de conta (consome SQS) | 9098 | — |
+| `formatador-bandeiras` | Formatação por bandeira + roteamento | 9090 | — |
+
+---
+
+## Padrão Async do Ledger (fire-and-wait)
+
+O `ledger-service` implementa request-response assíncrono entre três transportes:
+
+1. Recebe gRPC `GerarLancamento` com `correlationId`
+2. Publica comando JSON na fila SQS `queue-compensation-transaction` (inclui `instanceId` do container)
+3. Registra `CompletableFuture` keyed por `correlationId` com timeout de 30s
+4. Thread gRPC bloqueia em `future.get(30, SECONDS)`
+5. `conta` consome a fila e chama `TrataRetornoConta` no `ledger-service` roteando pelo `instanceId`
+6. `ledger-service` publica resultado no Redis `channel:{instanceId}:{correlationId}`
+7. Subscriber Redis completa o future → chamada gRPC retorna
+
+O `instanceId` é um UUID gerado na inicialização de cada container — garante isolamento em deploys multi-instância.
+
+---
+
+## Catálogo de Produtos
+
+O `autorizador-debito` usa `products_config.yml` para determinar quais serviços executar por tipo de transação:
+
+| Produto | Serviços Executados |
+|---|---|
+| `COMPRA_NACIONAL_COM_CHIP_SENHA` | enrichment → security → rules → limit → ledger → antifraud |
+| `COMPRA_NACIONAL_CONTACTLESS_COM_SENHA` | enrichment → security → rules → ledger |
+| `COMPRA_NACIONAL_CONTACTLESS_SEM_SENHA` | enrichment → security → rules → ledger |
 
 ---
 
 ## Stack Tecnológica
-- **Linguagem:** Java
-- **Framework:** Spring Boot
-- **Integrações:**
-  - **gRPC** 
-  - **REST** 
-- **Observabilidade:** métricas, logs estruturados e tracing distribuído
-- **Infra/Cloud:** AWS (ECS, VPC, dynamodb, endpoints privados etc.)
-- **Testes de carga:** k6
+
+| Componente | Tecnologia |
+|---|---|
+| Linguagem | Java 25 |
+| Framework | Spring Boot 3.5.6 |
+| Comunicação interna | gRPC 1.76.0 (protobuf) |
+| Comunicação externa | REST (Spring MVC) |
+| Concorrência | Java Virtual Threads (Project Loom) |
+| Banco local | H2 (in-memory) |
+| Banco produção | DynamoDB (idempotência e contexto) |
+| Mensageria | AWS SQS |
+| Cache/Pub-sub | AWS ElastiCache (Valkey/Redis) |
+| Observabilidade | Datadog (Micrometer + DogStatsD) |
+| Infra | ECS e EKS via Terraform |
+| Testes de carga | k6 |
+| Build | Maven (multi-stage Docker com Eclipse Temurin) |
 
 ---
 
-## Principais Decisões de Design
-- **Preferência por gRPC** para comunicação interna devido a:
-  - menor overhead de serialização
-  - HTTP/2 e multiplexing
-  - contratos protobuf e compatibilidade
-- **Timeouts agressivos e explícitos** por dependência 
-- **Observabilidade “by default”**: métricas e logs estruturados por transação
-- **Estratégia de paralelismo**: chamadas paralelas quando possível para reduzir latência total
+## Como Executar Localmente
 
----
-
-## Estrutura do Repositório
-```
-.
-├─ apps/
-│  ├─ autorizador/              # serviço principal
-│  └─ ...                       # serviços de apoio / mocks
-├─ proto/                       # contratos gRPC (.proto)
-├─ infra/                       # Terraform (opcional)
-├─ docs/
-│  ├─ arquitetura.png
-│  └─ decisoes.md
-├─ tests/
-│  ├─ k6/                       # scripts de carga
-│  └─ postman/                  # coleções REST
-└─ README.md
-```
-
----
-
-## Como Executar (Local)
 ### Pré-requisitos
-- Java `25` 
-- Maven
-- Docker
 
----
+- Java 25
+- Maven 3.9+
+- Docker (opcional, para Redis local)
+- AWS CLI configurado (para SQS/DynamoDB em modo prod)
 
-## Endpoints
-### REST (exemplo)
-- `POST /api/autorizacoes` — solicita autorização
+### Build
 
-### gRPC (exemplo)
-- `AutorizadorService/Autorizar` — endpoint principal
+```bash
+# Em qualquer diretório de serviço (ex: apps/autorizador-debito)
+mvn clean package -DskipTests
+```
 
-> Documente aqui requests/responses e exemplos (JSON e protobuf).
+### Iniciar os Serviços
+
+Use os scripts em [`apps_run/`](apps_run/) — cada script inicia o respectivo serviço com JVM tunada:
+
+```bat
+apps_run\start_autorizador.bat       # autorizador-debito (4 GB heap)
+apps_run\start_lancamento-conta.bat  # ledger-service
+apps_run\start_seguranca.bat         # security-service
+apps_run\start_limite.bat            # limit-service
+apps_run\start_limite-portador.bat   # rules-service
+apps_run\data_enrichment.bat         # enrichment-service
+apps_run\start_formatador.bat        # formatador-bandeiras
+apps_run\start_fraudes.bat           # antifraud-service
+```
+
+### Regenerar Stubs gRPC
+
+```bash
+mvn protobuf:compile protobuf:compile-custom
+```
+
+### Build Docker
+
+```bash
+docker build -t autorizador-debito apps/autorizador-debito/
+```
 
 ---
 
 ## Configuração
-As configurações são via variáveis de ambiente e/ou `application.yml`.
 
-**Exemplos:**
-- `GRPC_PORT=50051`
-- `SERVER_PORT=8080`
-- `TIMEOUT_MS_SEGURANCA=80`
-- `TIMEOUT_MS_FRAUDE=120`
-- `OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317`
+| Arquivo | Ambiente | Observações |
+|---|---|---|
+| `application.yml` | Local | H2, Redis em `127.0.0.1:6379`, hosts gRPC em `localhost` |
+| `application-prod.yml` | AWS | Lê env vars: `REDIS_HOST`, `LOGGING_LEVEL`, `DD_API_KEY`, `DATABASE_MODE_ASYNC` |
+| `products_config.yml` | Todos | Catálogo de produtos e serviços por tipo de transação |
 
-> Recomenda-se manter timeouts por dependência, e não um timeout global único.
+**Timeouts por dependência** (em ms, configurados em `application-prod.yml`):
+
+| Dependência | Timeout |
+|---|---|
+| enrichment-service | 1500 |
+| security-service | 15000 |
+| rules-service | 15000 |
+| limit-service | 1500 |
+| ledger-service | 1500 |
+| antifraud-service | 1500 |
+
+---
+
+## Endpoints
+
+### REST
+
+```
+POST /authorization          # solicita autorização (principal)
+GET  /actuator/health        # health check
+GET  /actuator/metrics       # métricas Micrometer
+GET  /actuator/prometheus    # scrape Prometheus
+```
+
+### gRPC
+
+Os contratos estão em [`proto/`](proto/) e duplicados em `src/main/proto/` de cada serviço.
+
+Header compartilhado (`comuns/header_message_grpc.proto`): `transactionId`, `correlationId`, `bandeira`.
+
+---
+
+## Simulação / Testes Controlados
+
+Todos os serviços aceitam campos de controle nos requests para simular cenários:
+
+| Campo | Efeito |
+|---|---|
+| `sleep<Servico>` | Injeta delay artificial (ms) na dependência |
+| `customReturn<Servico> = "000"` | Retorna aprovado |
+| `customReturn<Servico> = "999"` | Lança `RuntimeException` → gRPC `INTERNAL` |
+| `customReturn<Servico> = "SDO"/"LIM"/...` | Retorna `approved=false` com `errorCode` |
+
+Exemplo de payload k6:
+
+```json
+{
+  "messageIso": { "mti": "0200", "002": "5899168602146263", "003": "002000", ... },
+  "sleepDataEnrichment": 50,
+  "sleepSeguranca": 50,
+  "customReturnLancamentoConta": "000"
+}
+```
+
+---
+
+## Testes de Carga (k6)
+
+Os scripts estão em [`tests/k6/`](tests/k6/).
+
+### Execução local
+
+```bash
+k6 run tests/k6/test01.js   # Bateria 1 — rampa até 900 TPS, latência 300ms
+k6 run tests/k6/test02.js   # Bateria 2
+k6 run tests/k6/grpc_autorizador.js  # gRPC direto
+```
+
+### Execução na EC2 (maior throughput)
+
+```bash
+# 1. Instalar k6 na EC2 (Ubuntu)
+sudo apt-get update && sudo apt-get install -y gpg ca-certificates
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/k6.gpg
+echo "deb [signed-by=/etc/apt/keyrings/k6.gpg] https://dl.k6.io/deb stable main" \
+  | sudo tee /etc/apt/sources.list.d/k6.list
+sudo apt-get update && sudo apt-get install -y k6
+
+# 2. Ajustes do kernel para alto TPS
+ulimit -n 100000
+sudo sysctl -w net.ipv4.ip_local_port_range="10240 65535"
+sudo sysctl -w net.core.somaxconn=65535
+sudo sysctl -w net.core.netdev_max_backlog=250000
+sudo sysctl -w net.ipv4.tcp_tw_reuse=1
+
+# 3. Upload do script (PowerShell local)
+scp -i keypair.pem tests/k6/test01.js ubuntu@<ec2-host>:/home/ubuntu/
+
+# 4. Executar
+k6 run test01.js
+```
+
+**Cenário padrão (test01.js):** rampa de 50 → 900 TPS em ~15min com degraus de 25 TPS, threshold de 0% dropped iterations e < 1% errors.
 
 ---
 
 ## Observabilidade
-### Métricas recomendadas
-- Latência por endpoint: **avg, p90, p95, p99**
-- TPS (requests/s)
-- Erros por tipo (timeout, unavailable, validation etc.)
-- Saturação (fila, pool, CPU, GC, conexões)
 
-### Logs estruturados
-- Todos os logs com:
-  - `transactionId`
-  - `service`
-  - `latencyMs`
-  - `statusCode` (equivalente)
-  - `dependency` (quando for chamada externa)
+### Métricas (Datadog)
 
-### Tracing
-- Spans por dependência (Segurança/Fraude/Enriquecimento etc.)
-- Correlação com logs pelo `traceId`/`transactionId`
+- Dashboards em [`dashes_datadog/`](dashes_datadog/): `dash_metris_custom.json` e `dash_metris_grpc_http.json`
+- Exportação a cada 5s para `us5.datadoghq.com`
+- Percentis habilitados por padrão (`percentiles-histogram: all: true`)
 
----
+**Métricas-chave:**
 
-## Estratégia de Teste de Performance
-### Cenários (sugestão)
-1. **Baseline**: endpoint único sem dependências (custo mínimo)
-2. **gRPC interno**: dependências via gRPC
-3. **REST interno**: dependências via REST
-4. **Degradação**: latência artificial em uma dependência (validar cauda p99)
-5. **Timeout & fallback**: validar comportamento e impacto
+| Métrica | Descrição |
+|---|---|
+| `app_duration_transaction` | Latência end-to-end por transação |
+| `http_server_requests` | TPS e latência por endpoint REST |
+| `grpc_server_calls` | TPS e latência por RPC gRPC |
 
-### Ferramentas
-- k6 / Gatling
-- Dashboards (Datadog / Grafana)
+### Logs Estruturados
+
+Todos os logs incluem: `transactionId`, `correlationId`, `latencyMs`, `statusCode`, `dependency`.
+
+### Collections REST
+
+Coleção Postman em [`collections/poc-autorizador-debito-rest.postman_collection.json`](collections/poc-autorizador-debito-rest.postman_collection.json).
 
 ---
 
-## Considerações AWS (sugestões para baixa latência)
-- Preferir comunicação **intra-VPC**
-- Avaliar **VPC Endpoints** (Gateway/Interface) quando aplicável
-- Ajustar:
-  - health checks
-  - autoscaling por **latência** e **CPU**
-  - configuração de rede (ALB/NLB) conforme protocolo
-- Evitar hops desnecessários (ex.: NAT quando não precisa)
+## Infraestrutura AWS
+
+Configurações Terraform em [`infra/`](infra/):
+
+| Diretório | Descrição |
+|---|---|
+| `infra/terraform-ecs/` | ECS com ALB, Security Groups, SQS, ECS task definitions |
+| `infra/terraform-eks/` | EKS (alternativo ao ECS) |
+
+**Serviços AWS utilizados:**
+
+- **ECS / EKS** — orquestração de containers
+- **SQS** — fila `queue-compensation-transaction` (async ledger)
+- **ElastiCache (Valkey/Redis)** — pub-sub para callback do ledger
+- **DynamoDB** — chaves de idempotência e contexto de transação
+- **ALB / NLB** — load balancer (HTTP/2 para gRPC via NLB)
+
+**Boas práticas de latência na AWS:**
+
+- Comunicação intra-VPC sem hops externos
+- VPC Endpoints para SQS e DynamoDB (evita NAT)
+- Auto-scaling baseado em latência e CPU
+- Service Discovery via DNS interno (`*.autorizador-debito.local`)
 
 ---
 
-## Roadmap da PoC
-- [ ] Primeira versão do endpoint de autorização (gRPC + REST)
-- [ ] Integração com serviços dependentes (mock + real)
-- [ ] Observabilidade completa (métricas + logs + tracing)
-- [ ] Cenários de carga e relatório comparativo
-- [ ] Ajustes finos de timeouts / paralelismo / retries
-- [ ] Documento final de conclusões e recomendações
+## Decisões de Design
+
+| Decisão | Motivação |
+|---|---|
+| **gRPC preferido** internamente | Menor overhead de serialização, HTTP/2, contratos protobuf |
+| **Virtual Threads (Loom)** | Suporte nativo a alto número de conexões bloqueantes sem pool fixo |
+| **Timeouts explícitos por dependência** | Evita que uma dependência lenta degrade toda a cauda |
+| **Chamadas paralelas onde possível** | Reduz latência total (autorizador-debito pode executar serviços independentes em paralelo) |
+| **Observabilidade por padrão** | Métricas e logs estruturados em toda transação, sem instrumentação manual |
+| **`instanceId` por container** | Redis pub-sub isolado por instância — essencial em deploys multi-container |
 
 ---
 
-## Resultados & Relatórios
-> Coloque aqui os links para relatórios, dashboards e prints.
+## Estrutura do Repositório
 
-- Dashboard: `docs/dashboards/...`
-- Relatório k6/Gatling: `docs/perf/...`
-- Conclusões: `docs/conclusoes.md`
+```
+.
+├── apps/
+│   ├── autorizador-debito/       # Orquestrador principal
+│   ├── enrichment-service/       # Enriquecimento de dados
+│   ├── rules-service/            # Regras do portador
+│   ├── security-service/         # Segurança (senha, chip, CVV)
+│   ├── limit-service/            # Limite de débito
+│   ├── ledger-service/           # Lançamento contábil async
+│   ├── antifraud-service/        # Antifraude
+│   ├── conta/                    # Gerenciamento de conta
+│   └── formatador-bandeiras/     # Formatação por bandeira
+├── apps_run/                     # Scripts .bat para execução local
+├── collections/                  # Coleção Postman
+├── dashes_datadog/               # Dashboards JSON do Datadog
+├── infra/
+│   ├── terraform-ecs/            # Infra ECS (produção)
+│   └── terraform-eks/            # Infra EKS (alternativo)
+├── proto/                        # Contratos .proto compartilhados
+├── results_poc/                  # Resultados das baterias de teste
+├── tests/
+│   └── k6/                      # Scripts de carga k6
+└── Desenho Arquitetura.drawio    # Diagrama de arquitetura
+```
 
 ---
 
-## Licença
-Defina a licença (ou “uso interno”).
+## Resultados
+
+Os relatórios das baterias de teste estão em [`results_poc/`](results_poc/):
+
+- `result_bateria1.docx` — Bateria 1 (900 TPS, latência 300ms)
+- `result_bateria2.docx` — Bateria 2
+
+---
+
+*Uso interno — PoC não destinado a produção.*

@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(mvn compile:*)",
-      "Bash(mvn protobuf:compile protobuf:compile-custom compile -q)"
+      "Bash(mvn protobuf:compile protobuf:compile-custom compile -q)",
+      "Bash(rm \"C:/_git/poc-autorizador-debito-v3/apps/autorizador-debito/src/main/java/br/com/mmgabri/adapters/sqs/SqsConfig.java\")",
+      "Bash(rm \"C:/_git/poc-autorizador-debito-v3/apps/autorizador-debito/src/main/java/br/com/mmgabri/adapters/sqs/SqsReversalNotificationService.java\")"
     ]
   }
 }

@@ -24,3 +24,19 @@ aws:
 logging:
   level:
     br.com.mmgabri: DEBUG
+
+management:
+  metrics:
+    distribution:
+      percentiles-histogram:
+        all: true
+  datadog:
+    metrics:
+      export:
+        apiKey: 1bfbce8c2e8ed2aeb6dcd33f55f207ff
+        step: 5s
+        uri: https://us5.datadoghq.com/
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

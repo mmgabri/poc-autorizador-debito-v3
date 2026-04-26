@@ -19,7 +19,7 @@ aws:
 
 app:
   async:
-    response-timeout-seconds: 30
+    response-timeout-seconds: 10
 
 custom:
   sleep: 1

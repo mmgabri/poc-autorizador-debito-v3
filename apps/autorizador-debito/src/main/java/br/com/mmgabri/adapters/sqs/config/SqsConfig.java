@@ -1,4 +1,4 @@
-package br.com.mmgabri.adapters.sqs;
+package br.com.mmgabri.adapters.sqs.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

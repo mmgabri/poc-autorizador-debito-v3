@@ -48,7 +48,7 @@ public class RulesServiceGrpcClient {
             metricsService.incrementMetric("app_duration_service", startTime, "service:" + RULES_SERVICE.getServiceName(), "status:error_business");
             throw new BusinessException(RULES_SERVICE.getServiceName(), response.getErrorCode(), response.getErrorDescription());
         }
-        logger.info("Service {} executed successfully", RULES_SERVICE.getServiceName());
+        logger.debug("Service {} executed successfully", RULES_SERVICE.getServiceName());
         metricsService.incrementMetric("app_duration_service", startTime, "service:" + RULES_SERVICE.getServiceName(), "status:success");
         return response;
     }

@@ -28,7 +28,7 @@ public class RetornoContaRedisPublisher {
         try {
             String payload = objectMapper.writeValueAsString(message);
             redisTemplate.convertAndSend(channel, payload);
-            metricsService.incrementMetric("app_ledger_duration_publish_redis", startTime, "channel:"+channel);
+            metricsService.incrementMetric("app_ledger_duration_publish_redis", startTime, "instanceId:"+instanceId);
             logger.debug("Publicado no Redis. channel={}", channel);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Erro ao serializar RedisCallbackMessage", e);

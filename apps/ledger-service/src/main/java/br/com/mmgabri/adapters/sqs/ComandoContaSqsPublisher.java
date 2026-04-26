@@ -49,6 +49,7 @@ public class ComandoContaSqsPublisher {
                 .build());
 
         metricsService.incrementMetric("app_ledger_duration_publish_sqs", startTime, "instanceId:"+request.instanceId());
+        metricsService.incrementMetricCounter("app_ledger_msg_send_conta");
 
         logger.debug("Comando publicado no SQS. correlationId={} instanceId={}", request.correlationId(), request.instanceId());
     }

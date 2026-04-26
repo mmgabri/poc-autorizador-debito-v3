@@ -2,7 +2,7 @@ package br.com.mmgabri.application;
 
 import br.com.mmgabri.adapters.grpc.client.*;
 import br.com.mmgabri.adapters.grpc.mappers.AutorizadorMapper;
-import br.com.mmgabri.adapters.sqs.SqsReversalNotificationService;
+import br.com.mmgabri.application.services.CompensationTransactionService;
 import br.com.mmgabri.application.domains.Payload;
 import br.com.mmgabri.application.domains.TransactionExecutionContext;
 import br.com.mmgabri.application.domains.enuns.ServicesEnum;
@@ -39,22 +39,22 @@ public class UseCaseAuthorization {
     private final LimitServiceGrpcClient limiteGrpcClient;
     private final LedgerServiceGrpcClient ledgerGrpcClient;
     private final AntiFraudServiceGrpcClient antiFraudGrpcClient;
-    private final SqsReversalNotificationService sqsReversalNotificationService;
+    private final CompensationTransactionService compensationTransactionService;
     private final TransactionContextRegistryService transactionContextRegistry;
 
     public AutorizadorResponse execute(Payload payload) {
 
-        logger.info("Initiating use case financial execution for product '{}'", payload.getProductDomain().getProductName());
+        logger.debug("Initiating use case financial execution for product '{}'", payload.getProductDomain().getProductName());
 
-        var txCtx = transactionContextRegistry.initializeTransactionExecutionContext(payload);
+        var transactionContext = transactionContextRegistry.initializeTransactionExecutionContext(payload);
 
         logger.debug("Phase 1 - parallel simulation calls");
 
         // ── Phase 1: SIMULACAO (parallel) ────────────────────────────────────
-        var rulesFuture = handleCompletion(supplyAsync(() -> rulesGrpcClient.execute(payload)), txCtx, RULES_SERVICE);
-        var securityFuture = handleCompletion(supplyAsync(() -> segurancaGrpcClient.execute(payload)), txCtx, SECURITY_SERVICE);
-        var limitSimuFuture = handleCompletion(supplyAsync(() -> limiteGrpcClient.execute(payload, "SIMULACAO")), txCtx, LIMIT_SERVICE_SIMULATION);
-        var ledgerSimuFuture = handleCompletion(supplyAsync(() -> ledgerGrpcClient.execute(payload, "SIMULACAO")), txCtx, LEDGER_SERVICE_SIMULATION);
+        var rulesFuture = handleCompletion(supplyAsync(() -> rulesGrpcClient.execute(payload)), transactionContext, RULES_SERVICE);
+        var securityFuture = handleCompletion(supplyAsync(() -> segurancaGrpcClient.execute(payload)), transactionContext, SECURITY_SERVICE);
+        var limitSimuFuture = handleCompletion(supplyAsync(() -> limiteGrpcClient.execute(payload, "SIMULACAO")), transactionContext, LIMIT_SERVICE_SIMULATION);
+        var ledgerSimuFuture = handleCompletion(supplyAsync(() -> ledgerGrpcClient.execute(payload, "SIMULACAO")), transactionContext, LEDGER_SERVICE_SIMULATION);
 
         waitAll(rulesFuture, securityFuture, limitSimuFuture, ledgerSimuFuture);
 
@@ -62,37 +62,37 @@ public class UseCaseAuthorization {
         if (phase1Error.isPresent()) {
             Throwable error = phase1Error.get();
             logger.error("Phase 1 denied. Reason: {}", error.getMessage());
-            return onCompleteTransactionDenied(txCtx, payload, error);
+            return onCompleteTransactionDenied(transactionContext, payload, error);
         }
 
         logger.debug("Phase 1 approved - proceeding to Phase 2 EFETIVACAO");
 
         // ── Phase 2: EFETIVACAO (parallel) ───────────────────────────────────
-        var antiFraudFuture = handleCompletion(supplyAsync(() -> antiFraudGrpcClient.execute(payload)), txCtx, ANTIFRAUD_SERVICE);
-        var limitEfetFuture = handleCompletion(supplyAsync(() -> limiteGrpcClient.execute(payload, "EFETIVACAO")), txCtx, LIMIT_SERVICE);
-        var ledgerEfetFuture = handleCompletion(supplyAsync(() -> ledgerGrpcClient.execute(payload, "EFETIVACAO")), txCtx, LEDGER_SERVICE);
+        var antiFraudFuture = handleCompletion(supplyAsync(() -> antiFraudGrpcClient.execute(payload)), transactionContext, ANTIFRAUD_SERVICE);
+        var limitEfetFuture = handleCompletion(supplyAsync(() -> limiteGrpcClient.execute(payload, "EFETIVACAO")), transactionContext, LIMIT_SERVICE);
+        var ledgerEfetFuture = handleCompletion(supplyAsync(() -> ledgerGrpcClient.execute(payload, "EFETIVACAO")), transactionContext, LEDGER_SERVICE);
 
         waitAll(antiFraudFuture, limitEfetFuture, ledgerEfetFuture);
 
         if (allSucceeded(antiFraudFuture, limitEfetFuture, ledgerEfetFuture)) {
-            return onCompleteTransactionApproved(txCtx, payload);
+            return onCompleteTransactionApproved(transactionContext, payload);
         }
 
         // ── SAGA: at least one succeeded — publish compensation notification ──
         triggerSagaCompensation(antiFraudFuture, limitEfetFuture, ledgerEfetFuture, payload);
 
         Optional<Throwable> phase2Error = findFirstError(antiFraudFuture, limitEfetFuture, ledgerEfetFuture);
-        return onCompleteTransactionDenied(txCtx, payload, phase2Error.orElseGet(() -> new BusinessException("efetivacao", "999", "Phase 2 failed")));
+        return onCompleteTransactionDenied(transactionContext, payload, phase2Error.orElseGet(() -> new BusinessException("efetivacao", "999", "Phase 2 failed")));
     }
 
     private AutorizadorResponse onCompleteTransactionApproved(TransactionExecutionContext txCtx, Payload payload) {
-        logger.info("Use case financial completed - Transaction approved.");
+        logger.debug("Use case financial completed - Transaction approved.");
         transactionContextRegistry.updateStatusTransactionContext(txCtx, APPROVED);
         return autorizadorMapper.toAutorizadorResponseSuccess(payload);
     }
 
     private AutorizadorResponse onCompleteTransactionDenied(TransactionExecutionContext txCtx, Payload payload, Throwable throwable) {
-        logger.info("Use case financial completed - Transaction denied.");
+        logger.debug("Use case financial completed - Transaction denied.");
         transactionContextRegistry.updateStatusTransactionContext(txCtx, DENIED);
         return autorizadorMapper.toAutorizadorResponseError(payload, throwable);
     }
@@ -100,7 +100,7 @@ public class UseCaseAuthorization {
     private void triggerSagaCompensation(CompletableFuture<?> antiFraud, CompletableFuture<?> limit, CompletableFuture<?> ledger, Payload payload) {
         if (serviceSucceeded(antiFraud) || serviceSucceeded(limit) || serviceSucceeded(ledger)) {
             logger.warn("Phase 2 partial failure - publishing reversal notification");
-            sqsReversalNotificationService.publish(payload, serviceSucceeded(limit), serviceSucceeded(ledger), serviceSucceeded(antiFraud));
+            compensationTransactionService.publish(payload.getHeaderMessage().getTransactionId());
         }
     }
 
@@ -118,7 +118,7 @@ public class UseCaseAuthorization {
     private <T> CompletableFuture<T> handleCompletion(CompletableFuture<T> future, TransactionExecutionContext txCtx, ServicesEnum service) {
         return future.whenComplete((ignored, ex) -> {
             if (ex == null) {
-                logger.info("Service '{}' completed successfully", service.getServiceName());
+                logger.debug("Service '{}' completed successfully", service.getServiceName());
                 transactionContextRegistry.registerServiceExecution(txCtx, service, APPROVED);
             } else {
                 Throwable cause = unwrap(ex);

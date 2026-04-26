@@ -48,7 +48,7 @@ public class LedgerServiceGrpcClient {
             metricsService.incrementMetric("app_duration_service", startTime, "service:" + LEDGER_SERVICE.getServiceName(), "status:error_business");
             throw new BusinessException(LEDGER_SERVICE.getServiceName(), response.getErrorCode(), response.getErrorDescription());
         }
-        logger.info("Service {} [{}] executed successfully", LEDGER_SERVICE.getServiceName(), tipoOperacao);
+        logger.debug("Service {} [{}] executed successfully", LEDGER_SERVICE.getServiceName(), tipoOperacao);
         metricsService.incrementMetric("app_duration_service", startTime, "service:" + LEDGER_SERVICE.getServiceName(), "status:success");
         return response;
     }

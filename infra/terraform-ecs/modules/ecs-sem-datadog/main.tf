@@ -2,7 +2,7 @@
 # AWS Service Discovery (Cloud Map)
 #------------------------------------------------------------------------------
 resource "aws_service_discovery_service" "service_discovery" {
-  name = "${var.micro_service_name}-service"
+  name = "${var.micro_service_name}-svc"
 
   dns_config {
     namespace_id = var.namespace_id
@@ -43,8 +43,7 @@ resource "aws_ecs_task_definition" "service_task" {
         }
       ]
       environment = [
-          { name = "SLEEP", value = "100" },
-          { name = "LOGGING_LEVEL", value = "DEBUG" }
+          { name = "LOGGING_LEVEL", value = var.logging_level },
         ]
       logConfiguration = {
         logDriver = "awslogs"
@@ -68,12 +67,11 @@ resource "aws_ecs_task_definition" "service_task" {
   ])
 }
 
-
 #------------------------------------------------------------------------------
 # AWS Service
 #------------------------------------------------------------------------------
 resource "aws_ecs_service" "service_task" {
-  name          = "${var.micro_service_name}-service"
+  name          = "${var.micro_service_name}-svc"
   cluster = var.ecs_cluster_name
   task_definition = aws_ecs_task_definition.service_task.arn
   launch_type = "FARGATE"

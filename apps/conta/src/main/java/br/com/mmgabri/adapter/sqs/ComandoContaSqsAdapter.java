@@ -2,6 +2,7 @@ package br.com.mmgabri.adapter.sqs;
 
 import br.com.mmgabri.domain.ComandoContaRequest;
 import br.com.mmgabri.services.ContaService;
+import br.com.mmgabri.services.MetricsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -49,33 +51,35 @@ public class ComandoContaSqsAdapter implements SmartLifecycle {
     @Value("${aws.sqs.consumer-threads:10}")
     private int consumerThreads;
 
+    @Value("${aws.sqs.poll-threads:5}")
+    private int pollThreads;
+
     private final SqsClient sqsClient;
     private final ObjectMapper objectMapper;
     private final ContaService contaService;
+    private final MetricsService metricsService;
     private final AtomicBoolean running = new AtomicBoolean(false);
     private ExecutorService pollExecutor;
     private ExecutorService messageExecutor;
-    private String queueUrl;
+    private volatile String queueUrl;
 
     @Override
     public void start() {
         if (!running.compareAndSet(false, true)) {
             return;
         }
+        queueUrl = sqsClient.getQueueUrl(GetQueueUrlRequest.builder().queueName(queueName).build()).queueUrl();
         messageExecutor = Executors.newFixedThreadPool(consumerThreads);
-        pollExecutor = Executors.newSingleThreadExecutor();
-        pollExecutor.submit(this::pollLoop);
-        logger.info("SQS adapter iniciado. queueName={}, consumerThreads={}", queueName, consumerThreads);
+        pollExecutor = Executors.newFixedThreadPool(pollThreads);
+        for (int i = 0; i < pollThreads; i++) {
+            pollExecutor.submit(this::pollLoop);
+        }
+        logger.info("SQS adapter iniciado. queueName={}, pollThreads={}, consumerThreads={}", queueName, pollThreads, consumerThreads);
     }
 
     private void pollLoop() {
         while (running.get()) {
             try {
-                if (queueUrl == null || queueUrl.isBlank()) {
-                    queueUrl = sqsClient.getQueueUrl(GetQueueUrlRequest.builder().queueName(queueName).build()).queueUrl();
-                    logger.info("Fila SQS resolvida---------------. queueUrl={}", queueUrl);
-                }
-
                 ReceiveMessageRequest request = ReceiveMessageRequest.builder()
                         .queueUrl(queueUrl)
                         .maxNumberOfMessages(maxMessages)
@@ -96,11 +100,14 @@ public class ComandoContaSqsAdapter implements SmartLifecycle {
     }
 
     private void processMessage(Message message) {
+        var startTime = OffsetDateTime.now();
+
         String messageId = message.messageId();
 
         try {
-            logger.debug("Mensagem recebida da fila SQS. messageId={} payloadLength={}", messageId, message.body() != null ? message.body().length() : 0);
+            metricsService.incrementMetricCounter("app_conta_msg_received_ledger");
             ComandoContaRequest body = objectMapper.readValue(message.body(), ComandoContaRequest.class);
+            logger.debug("Mensagem recebida da fila SQS. messageId={} correlationId={}", messageId, body.correlationId());
             String instanceId = message.messageAttributes().get("instanceId").stringValue();
             ComandoContaRequest request = new ComandoContaRequest(body.correlationId(), instanceId, body.customReturnConta(), body.sleepConta());
 
@@ -111,12 +118,12 @@ public class ComandoContaSqsAdapter implements SmartLifecycle {
                     .receiptHandle(message.receiptHandle())
                     .build());
 
+            metricsService.incrementMetric("app_conta_duration_transaction", startTime, "method:processMessage");
             logger.debug("Mensagem processada com sucesso. messageId={} correlationId={}", messageId, request.correlationId());
         } catch (Exception e) {
             logger.error("Falha ao processar mensagem SQS. messageId={}", messageId, e);
         }
     }
-
 
     private void sleep(long millis) {
         try {

@@ -44,8 +44,8 @@ public class AppConfig {
     }
 
     @Bean
-    public RetornoContaControllerGrpc retornoContaControllerGrpc(RetornoContaRedisPublisher redisPublisher) {
-        return new RetornoContaControllerGrpc(redisPublisher);
+    public RetornoContaControllerGrpc retornoContaControllerGrpc(RetornoContaRedisPublisher redisPublisher, MetricsService metricsService) {
+        return new RetornoContaControllerGrpc(redisPublisher, metricsService);
     }
 
     @Bean

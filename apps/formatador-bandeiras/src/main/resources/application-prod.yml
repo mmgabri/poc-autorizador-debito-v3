@@ -8,17 +8,17 @@ server:
 grpc:
   autorizador-client:
     port: 59091
-    host: autorizador-debito-service.autorizador-debito.local
+    host: autorizador-debito-svc.autorizador-debito.local
     timeout: 6000
 
 logging:
   level:
-    br.com.mmgabri: DEBUG
+    br.com.mmgabri: ${LOGGING_LEVEL:INFO}
 
 aws:
   sqs:
     region: "us-east-1"
-    reversal-queue-name: "queue-authorization-reversal"
+    reversal-queue-name: "queue-reversal-notification"
 
 management:
   metrics:

@@ -5,6 +5,7 @@ import br.com.mmgabri.domain.RedisCallbackMessage;
 import br.com.mmgabri.grpc.RetornoContaRequest;
 import br.com.mmgabri.grpc.RetornoContaResponse;
 import br.com.mmgabri.grpc.RetornoContaServiceGrpc;
+import br.com.mmgabri.services.MetricsService;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ public class RetornoContaControllerGrpc extends RetornoContaServiceGrpc.RetornoC
     private static final Logger logger = LoggerFactory.getLogger(RetornoContaControllerGrpc.class);
 
     private final RetornoContaRedisPublisher redisPublisher;
+    private final MetricsService metricsService;
 
     @Override
     public void trataRetornoConta(RetornoContaRequest request, StreamObserver<RetornoContaResponse> responseObserver) {
@@ -27,8 +29,8 @@ public class RetornoContaControllerGrpc extends RetornoContaServiceGrpc.RetornoC
                     request.getErrorCode(),
                     request.getErrorDescription()
             );
+            metricsService.incrementMetricCounter("app_ledger_msg_received_conta");
             redisPublisher.publish(request.getInstanceId(), message);
-
             responseObserver.onNext(RetornoContaResponse.newBuilder().setMessage("OK").build());
             responseObserver.onCompleted();
         } catch (Exception e) {

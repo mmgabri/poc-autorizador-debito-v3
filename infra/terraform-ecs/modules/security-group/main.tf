@@ -4,127 +4,120 @@ resource "aws_security_group" "ecs_sg" {
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port   = 8080
-    to_port     = 8080
+    from_port   = 9090
+    to_port     = 9090
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port   = 8081
-    to_port     = 8081
+    from_port   = 9091
+    to_port     = 9091
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port   = 8082
-    to_port     = 8082
+    from_port   = 9092
+    to_port     = 9092
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port   = 8083
-    to_port     = 8083
+    from_port   = 9093
+    to_port     = 9093
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port   = 8084
-    to_port     = 8084
+    from_port   = 9094
+    to_port     = 9094
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port   = 8085
-    to_port     = 8085
+    from_port   = 9095
+    to_port     = 9095
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port   = 8086
-    to_port     = 8086
+    from_port   = 9096
+    to_port     = 9096
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
  ingress {
-      from_port   = 8087
-      to_port     = 8087
+      from_port   = 9097
+      to_port     = 9097
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-      from_port   = 8088
-      to_port     = 8088
+      from_port   = 9098
+      to_port     = 9098
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
   }
 
-  ingress {
-      from_port   = 8089
-      to_port     = 8089
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 58081
-    to_port     = 58081
+ ingress {
+    from_port   = 59091
+    to_port     = 59091
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port   = 58082
-    to_port     = 58082
+    from_port   = 59092
+    to_port     = 59092
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port   = 58083
-    to_port     = 58083
+    from_port   = 59093
+    to_port     = 59093
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port   = 58084
-    to_port     = 58084
+    from_port   = 59094
+    to_port     = 59094
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port   = 58085
-    to_port     = 58085
+    from_port   = 59095
+    to_port     = 59095
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port   = 58086
-    to_port     = 58086
+    from_port   = 59096
+    to_port     = 59096
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
     ingress {
-    from_port   = 58088
-    to_port     = 58088
+    from_port   = 59097
+    to_port     = 59097
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
     ingress {
-    from_port   = 58089
-    to_port     = 58089
+    from_port   = 59098
+    to_port     = 59098
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

@@ -49,7 +49,7 @@ public class EnrichmentServiceGrpcClient {
             metricsService.incrementMetric("app_duration_service", startTime, "service:"+ ENRICHMENT_SERVICE.getServiceName(), "status:error_business");
             throw new BusinessException(ENRICHMENT_SERVICE.getServiceName(), response.getErrorCode(), response.getErrorDescription());
         }
-        logger.info("Service {} executed successfully", ENRICHMENT_SERVICE.getServiceName());
+        logger.debug("Service {} executed successfully", ENRICHMENT_SERVICE.getServiceName());
         metricsService.incrementMetric("app_duration_service", startTime, "service:"+ ENRICHMENT_SERVICE.getServiceName(), "status:success");
         return response;
     }

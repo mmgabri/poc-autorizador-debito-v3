@@ -48,7 +48,7 @@ public class SecurityServiceGrpcClient {
             metricsService.incrementMetric("app_duration_service", startTime, "service:"+ SECURITY_SERVICE.getServiceName(), "status:error_business");
             throw new BusinessException(SECURITY_SERVICE.getServiceName(), response.getErrorCode(), response.getErrorDescription());
         }
-        logger.info("Service {} executed successfully", SECURITY_SERVICE.getServiceName());
+        logger.debug("Service {} executed successfully", SECURITY_SERVICE.getServiceName());
         metricsService.incrementMetric("app_duration_service", startTime, "service:"+ SECURITY_SERVICE.getServiceName(), "status:success");
         return response;
     }

@@ -63,3 +63,8 @@ variable "datadog_api_key" {
   type        = string
 }
 
+variable "logging_level" {
+  description = "Nível de log"
+  type        = string
+}
+

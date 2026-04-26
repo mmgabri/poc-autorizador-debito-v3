@@ -49,7 +49,7 @@ public class LimitServiceGrpcClient {
             metricsService.incrementMetric("app_duration_service", startTime, "service:"+ LIMIT_SERVICE.getServiceName(), "status:error_business");
             throw new BusinessException(LIMIT_SERVICE.getServiceName(), response.getErrorCode(), response.getErrorDescription());
         }
-        logger.info("Service {} executed successfully", LIMIT_SERVICE.getServiceName());
+        logger.debug("Service {} executed successfully", LIMIT_SERVICE.getServiceName());
         metricsService.incrementMetric("app_duration_service", startTime, "service:"+ LIMIT_SERVICE.getServiceName(), "status:success");
         return response;
     }

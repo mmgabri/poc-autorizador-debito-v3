@@ -48,7 +48,7 @@ public class AntiFraudServiceGrpcClient {
             metricsService.incrementMetric("app_duration_service", startTime, "service:" + ANTIFRAUD_SERVICE.getServiceName(), "status:error_business");
             throw new BusinessException(ANTIFRAUD_SERVICE.getServiceName(), response.getErrorCode(), response.getErrorDescription());
         }
-        logger.info("Service {} executed successfully", ANTIFRAUD_SERVICE.getServiceName());
+        logger.debug("Service {} executed successfully", ANTIFRAUD_SERVICE.getServiceName());
         metricsService.incrementMetric("app_duration_service", startTime, "service:" + ANTIFRAUD_SERVICE.getServiceName(), "status:success");
         return response;
     }

@@ -10,7 +10,7 @@ resource "aws_lb" "alb" {
 # 2. Criação do Target Group para ECS (Ajustado para HTTP)
 resource "aws_lb_target_group" "formatador" {
   name        = "formatador-tg"
-  port        = 8080
+  port        = 9090
   protocol    = "HTTP"                           # Mudado de TCP para HTTP
   vpc_id      = var.vpc_id
   target_type = "ip"                             # Mantido para Fargate/ECS
@@ -30,7 +30,7 @@ resource "aws_lb_target_group" "formatador" {
 # 3. Criação do Listener do ALB (Ajustado para HTTP)
 resource "aws_lb_listener" "alb_listener_formatador" {
   load_balancer_arn = aws_lb.alb.arn
-  port              = 8080
+  port              = 9090
   protocol          = "HTTP"                     # Mudado de TCP para HTTP
 
   default_action {

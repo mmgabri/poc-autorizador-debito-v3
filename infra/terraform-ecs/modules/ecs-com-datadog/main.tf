@@ -2,7 +2,7 @@
 # AWS Service Discovery (Cloud Map)
 #------------------------------------------------------------------------------
 resource "aws_service_discovery_service" "service_discovery" {
-  name = "${var.micro_service_name}-service"
+  name = "${var.micro_service_name}-svc"
 
   dns_config {
     namespace_id = var.namespace_id
@@ -55,9 +55,9 @@ resource "aws_ecs_task_definition" "service_task" {
         { name = "DD_JMXFETCH_STATSD_HOST", value = "localhost" },
         { name = "DD_JMXFETCH_STATSD_PORT", value = "8125" },
         { name = "DD_API_KEY", value = var.datadog_api_key },
-        { name = "LOGGING_LEVEL", value = "error" },
-        { name = "DATABASE_MEMO", value = "false" },
+        { name = "LOGGING_LEVEL", value = var.logging_level  },
         { name = "DATABASE_MODE_ASYNC", value = "false" },
+        { name = "REDIS_HOST", value = var.redis_host },
       ]
       logConfiguration = {
         logDriver = "awslogs"
@@ -79,7 +79,7 @@ resource "aws_ecs_task_definition" "service_task" {
       }
     },
     # -------------------------------
-    # 🟡 Datadog Agent Sidecar
+    # Datadog Agent Sidecar
     # -------------------------------
     {
       name  = "datadog-agent"
@@ -139,7 +139,7 @@ resource "aws_ecs_task_definition" "service_task" {
 # AWS Service
 #------------------------------------------------------------------------------
 resource "aws_ecs_service" "service_task" {
-  name            = "${var.micro_service_name}-service"
+  name            = "${var.micro_service_name}-svc"
   cluster         = var.ecs_cluster_name
   task_definition = aws_ecs_task_definition.service_task.arn
   launch_type     = "FARGATE"

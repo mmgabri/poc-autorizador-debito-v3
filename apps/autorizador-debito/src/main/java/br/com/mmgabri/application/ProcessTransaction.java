@@ -48,7 +48,7 @@ public class ProcessTransaction {
         var enrichResponse = dataEnrichmentGrpcClient.execute(payload);
         payload = payloadMapper.mapEnrichedData(payload, enrichResponse);
 
-        logger.info("Enrichment completed. Forwarding to financial use case.");
+        logger.debug("Enrichment completed. Forwarding to financial use case.");
         return useCaseAuthorization.execute(payload);
     }
 }

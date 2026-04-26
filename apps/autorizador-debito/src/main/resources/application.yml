@@ -39,10 +39,10 @@ grpc:
 
 aws:
   sqs:
-    reversal-notification-queue-url: "https://sqs.us-east-1.amazonaws.com/000000000000/queue-reversal-notification"
+    compensation-transaction-queue-name: "queue-compensation-transaction"
 
 custom:
-  database-mode-async: true
+  database-mode-async: false
 
 logging:
   level:

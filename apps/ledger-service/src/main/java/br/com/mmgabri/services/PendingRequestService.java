@@ -26,10 +26,15 @@ public class PendingRequestService {
 
     private final ConcurrentHashMap<String, CompletableFuture<RedisCallbackMessage>> pending = new ConcurrentHashMap<>();
 
-    @SneakyThrows
-    public RedisCallbackMessage waitForCallback(String correlationId) {
+    public CompletableFuture<RedisCallbackMessage> register(String correlationId) {
         CompletableFuture<RedisCallbackMessage> future = new CompletableFuture<>();
         pending.put(correlationId, future);
+        logger.debug("Future registrado. correlationId={}", correlationId);
+        return future;
+    }
+
+    @SneakyThrows
+    public RedisCallbackMessage waitForCallback(String correlationId, CompletableFuture<RedisCallbackMessage> future) {
         try {
             logger.debug("Aguardando callback. correlationId={}", correlationId);
             var result = future.get(responseTimeoutSeconds, TimeUnit.SECONDS);

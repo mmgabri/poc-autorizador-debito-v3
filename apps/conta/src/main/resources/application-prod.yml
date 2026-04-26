@@ -4,7 +4,7 @@ server:
 grpc:
   ledger-service-client:
     port: 59096
-    host: ledger-service.autorizador-debito.local
+    host: ledger-service-svc.autorizador-debito.local
     timeout: 1100
 
 custom:
@@ -19,8 +19,25 @@ aws:
     wait-time-seconds: 20
     visibility-timeout-seconds: 30
     error-backoff-millis: 2000
-    consumer-threads: 10
+    poll-threads: 5
+    consumer-threads: 50
 
 logging:
   level:
-    ${LOGGING_LEVEL:INFO}
+    br.com.mmgabri: ${LOGGING_LEVEL:INFO}
+
+management:
+  metrics:
+    distribution:
+      percentiles-histogram:
+        all: true
+  datadog:
+    metrics:
+      export:
+        apiKey: ${DD_API_KEY}
+        step: 5s
+        uri: https://us5.datadoghq.com/
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

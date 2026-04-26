@@ -21,7 +21,8 @@ export const options = {
         // Sobe rápido até perto do seu limite
         { target: 100, duration: '60s' },
         { target: 200, duration: '60s' },
-        { target: 300, duration: '60s' }
+        { target: 300, duration: '2m' },
+        { target: 400, duration: '3m' }
 
       ],
     },
@@ -35,7 +36,7 @@ export const options = {
 
 export default function () {
   const url =
-    'http://autorizador-debito-alb-1878241556.us-east-1.elb.amazonaws.com:8080/authorization';
+    'http://autorizador-debito-alb-26035050.us-east-1.elb.amazonaws.com:9090/authorization';
 
   const payloadObj = {
     messageIso: {
@@ -54,19 +55,25 @@ export default function () {
       '063': '123456789',
     },
 
-    customReturnDataEnrichment: '000',
-    customReturnSeguranca: '000',
-    customReturnLimitePortador: '000',
-    customReturnLimite: '000',
-    customReturnLancamentoConta: '000',
-    customReturnFraude: '000',
+    customReturnDataEnrichment: "000",
+    customReturnSeguranca: "000",
+    customReturnFraude: "000",
+    customReturnLedger: "000",
+    customReturnLimit: "000",
+    customReturnRules: "000",
 
-    sleepDataEnrichment: 100,
-    sleepSeguranca: 100,
-    sleepLimitePortador: 100,
-    sleepLimite: 100,
-    sleepLancamentoConta: 180,
-    sleepFraude: 100,
+    sleepDataEnrichment: 90,
+
+    sleepLedgerSimulacao: 200,
+    sleepLimitSimulacao: 150,
+    sleepSeguranca: 400,
+    sleepRules: 50,
+    
+    sleepLedgerEfetivacao: 350,
+    sleepLimitEfetivacao: 200,  
+    sleepFraude: 300,
+
+    transactionIdReversal: "",
   };
 
   const params = {

@@ -25,7 +25,7 @@ public class AutorizadorGrpcServer extends AutorizadorServiceGrpc.AutorizadorSer
     @Override
     public void autorizarTransacao(AutorizadorRequest request, StreamObserver<AutorizadorResponse> responseObserver) {
         var startTime = OffsetDateTime.now();
-        logger.info("Incoming gRPC request: autorizarTransacao. transactionId={}", request.getHeaderMessageGrpc().getCorrelationId());
+        logger.debug("Incoming gRPC request: autorizarTransacao. transactionId={}", request.getHeaderMessageGrpc().getCorrelationId());
 
         try {
             var response = processTransaction.execute(request);
@@ -47,7 +47,7 @@ public class AutorizadorGrpcServer extends AutorizadorServiceGrpc.AutorizadorSer
     }
 
     private void onSuccess(OffsetDateTime startTime, AutorizadorResponse response) {
-        logger.info("Authorization completed in {} ms", Duration.between(startTime, OffsetDateTime.now()).toMillis());
+        logger.debug("Authorization completed in {} ms", Duration.between(startTime, OffsetDateTime.now()).toMillis());
         metricsService.incrementMetric("app_duration_transaction", startTime, "status:"+response.getMessageIsoMap().get("039"));
     }
 }

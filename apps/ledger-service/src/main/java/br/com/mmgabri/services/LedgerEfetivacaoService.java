@@ -45,11 +45,16 @@ public class LedgerEfetivacaoService {
                 request.getCustomReturnLedger(),
                 request.getSleepLedgerEfetivacao()
         );
+
+        // Register future BEFORE publishing to SQS to avoid race condition:
+        // if conta-service processes and calls back before the future is registered,
+        // the callback would be lost and waitForCallback would timeout.
+        var future = pendingRequestService.register(correlationId);
         sqsPublisher.publish(comando);
 
         var startTime = OffsetDateTime.now();
 
-        RedisCallbackMessage callback = pendingRequestService.waitForCallback(correlationId);
+        RedisCallbackMessage callback = pendingRequestService.waitForCallback(correlationId, future);
 
         metricsService.incrementMetric("app_ledger_duration_call_async", startTime, "tipo_operacao:EFETIVACAO");
 

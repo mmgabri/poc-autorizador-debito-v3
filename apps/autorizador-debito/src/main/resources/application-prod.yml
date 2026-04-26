@@ -14,32 +14,32 @@ grpc:
     host: localhost
   enrichment-service-client:
     port: 59092
-    host: enrichment-service.autorizador-debito.local
+    host: enrichment-service-svc.autorizador-debito.local
     timeout: 1500
   security-service-client:
     port: 59094
-    host: security-service.autorizador-debito.local
+    host: security-service-svc.autorizador-debito.local
     timeout: 15000
   rules-service-client:
     port: 59093
-    host: rules-service.autorizador-debito.local
+    host: rules-service-svc.autorizador-debito.local
     timeout: 15000
   limit-service-client:
     port: 59095
-    host: limit-service.autorizador-debito.local
+    host: limit-service-svc.autorizador-debito.local
     timeout: 1500
   ledger-service-client:
     port: 59096
-    host: ledger-service.autorizador-debito.local
+    host: ledger-service-svc.autorizador-debito.local
     timeout: 1500
   antifraud-service-client:
     port: 59097
-    host: antifraud-service.autorizador-debito.local
+    host: antifraud-service-svc.autorizador-debito.local
     timeout: 1500
 
 aws:
   sqs:
-    reversal-notification-queue-url: ${SQS_REVERSAL_NOTIFICATION_QUEUE_URL}
+    reversal-notification-queue-name: "queue-compensation-transaction"
 
 custom:
   database-mode-async: ${DATABASE_MODE_ASYNC}

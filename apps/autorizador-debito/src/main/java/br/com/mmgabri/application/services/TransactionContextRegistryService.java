@@ -9,6 +9,7 @@ import br.com.mmgabri.application.domains.TransactionExecutionContext;
 import br.com.mmgabri.application.domains.enuns.AuthorizationStatusEnum;
 import br.com.mmgabri.application.domains.enuns.ServicesEnum;
 import br.com.mmgabri.application.exceptions.ServiceAwareException;
+import br.com.mmgabri.application.utils.JsonConverter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ public class TransactionContextRegistryService {
     private final TransactionContextRepository repoTransaction;
     private final ServiceContextRepository repoService;
     private final DatabaseMapper databaseMapper;
+    private final JsonConverter jsonConverter;
 
     public TransactionExecutionContext initializeTransactionExecutionContext(Payload payload) {
 
@@ -42,9 +44,13 @@ public class TransactionContextRegistryService {
                 .transactionId(payload.getHeaderMessage().getTransactionId())
                 .status(AuthorizationStatusEnum.IN_PROGRESS)
                 .createdAt(LocalDateTime.now().toString())
+                .payload(payload)
                 .services(services)
                 .build();
         logger.debug("[Registry] Create transaction");
+
+        updateStatusTransactionContext(transaction, IN_PROGRESS);
+
         return transaction;
     }
 
