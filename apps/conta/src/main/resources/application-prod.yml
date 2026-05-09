@@ -5,10 +5,10 @@ grpc:
   ledger-service-client:
     port: 59096
     host: ledger-service-svc.autorizador-debito.local
-    timeout: 1100
+    timeout: 5000
 
 custom:
-  sleep: 1
+  sleep: 0
 
 aws:
   sqs:
@@ -17,10 +17,10 @@ aws:
     queue-name: "queue-comando-conta"
     max-messages: 10
     wait-time-seconds: 20
-    visibility-timeout-seconds: 30
-    error-backoff-millis: 2000
-    poll-threads: 5
-    consumer-threads: 50
+    visibility-timeout-seconds: 120
+    error-backoff-millis: 1000
+    poll-threads: 20
+    consumer-threads: 500
 
 logging:
   level:

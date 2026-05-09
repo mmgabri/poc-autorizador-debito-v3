@@ -15,15 +15,22 @@ export const options = {
       maxVUs: 12000,
 
       stages: [
-        // Warm-up curto (deixa o Dynamo "acordar")
+        // Warm-up curto (deixa o Dynamodb "acordar")
         { target: 50, duration: '60s' },
 
-        // Sobe rápido até perto do seu limite
+        // Sobe gradualmente até tps de 1.200
         { target: 100, duration: '60s' },
         { target: 200, duration: '60s' },
         { target: 300, duration: '2m' },
-        { target: 400, duration: '3m' }
+        { target: 400, duration: '2m' },
+        { target: 600, duration: '2m' },
+        { target: 800, duration: '2m' },
+        { target: 900, duration: '1m' },
+        { target: 1000, duration: '1m' },
+        { target: 1100, duration: '1m' },
 
+        // Mantem tps de 1.200
+        { target: 1200, duration: '2m' }
       ],
     },
   },
@@ -36,7 +43,7 @@ export const options = {
 
 export default function () {
   const url =
-    'http://autorizador-debito-alb-26035050.us-east-1.elb.amazonaws.com:9090/authorization';
+    'http://autorizador-debito-alb-429061104.us-east-1.elb.amazonaws.com:9090/authorization';
 
   const payloadObj = {
     messageIso: {
@@ -62,7 +69,7 @@ export default function () {
     customReturnLimit: "000",
     customReturnRules: "000",
 
-    sleepDataEnrichment: 90,
+    sleepDataEnrichment: 100,
 
     sleepLedgerSimulacao: 200,
     sleepLimitSimulacao: 150,

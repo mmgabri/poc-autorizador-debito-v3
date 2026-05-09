@@ -38,7 +38,7 @@ management:
   datadog:
     metrics:
       export:
-        apiKey: 1bfbce8c2e8ed2aeb6dcd33f55f207ff
+        apiKey: 35ca9af351b9a33a19bce59652d93092
         step: 5s
         uri: https://us5.datadoghq.com/
   endpoints:
@@ -46,3 +46,4 @@ management:
       exposure:
         include: health,info,metrics,prometheus
 
+-

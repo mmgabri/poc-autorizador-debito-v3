@@ -69,8 +69,8 @@ public class ComandoContaSqsAdapter implements SmartLifecycle {
             return;
         }
         queueUrl = sqsClient.getQueueUrl(GetQueueUrlRequest.builder().queueName(queueName).build()).queueUrl();
-        messageExecutor = Executors.newFixedThreadPool(consumerThreads);
-        pollExecutor = Executors.newFixedThreadPool(pollThreads);
+        messageExecutor = Executors.newVirtualThreadPerTaskExecutor();
+        pollExecutor = Executors.newVirtualThreadPerTaskExecutor();
         for (int i = 0; i < pollThreads; i++) {
             pollExecutor.submit(this::pollLoop);
         }

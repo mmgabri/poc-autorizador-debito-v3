@@ -19,7 +19,8 @@ aws:
     wait-time-seconds: 20
     visibility-timeout-seconds: 30
     error-backoff-millis: 2000
-    consumer-threads: 10
+    poll-threads: 5
+    consumer-threads: 50
 
 logging:
   level:
@@ -33,7 +34,7 @@ management:
   datadog:
     metrics:
       export:
-        apiKey: 1bfbce8c2e8ed2aeb6dcd33f55f207ff
+        apiKey: 35ca9af351b9a33a19bce59652d93092
         step: 5s
         uri: https://us5.datadoghq.com/
   endpoints:

@@ -19,13 +19,16 @@ public class GrpcChannelsConfig {
 
     @Bean
     public ManagedChannel managedChannelAsyncBridge() {
-        return ManagedChannelBuilder
+        ManagedChannel channel = ManagedChannelBuilder
                 .forTarget("dns:///" + asyncBridgeHost + ":" + asyncBridgePort)
                 .defaultLoadBalancingPolicy("round_robin")
                 .usePlaintext()
-                .keepAliveTime(60, TimeUnit.SECONDS)
-                .keepAliveTimeout(60, TimeUnit.SECONDS)
-                .idleTimeout(60, TimeUnit.SECONDS)
+                .keepAliveTime(30, TimeUnit.SECONDS)
+                .keepAliveTimeout(10, TimeUnit.SECONDS)
+                .keepAliveWithoutCalls(true)
+                .idleTimeout(600, TimeUnit.SECONDS)
                 .build();
+        channel.getState(true);
+        return channel;
     }
 }

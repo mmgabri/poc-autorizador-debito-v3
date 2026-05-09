@@ -38,6 +38,16 @@ public class MetricsService {
         }
     }
 
+    public void incrementMetricCounter(String name, String... tags) {
+        try {
+            statsDClient.incrementCounter(name, buildTags(tags));
+        } catch (Exception e) {
+            logger.error("Error sending metric", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+
     private String[] buildTags(String... extraTags) {
         if (extraTags == null || extraTags.length == 0) {
             return new String[] { "app:autorizador" };

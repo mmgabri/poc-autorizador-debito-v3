@@ -91,11 +91,11 @@ module "redis_valkey" {
 #---------------------------------------------------------------------------------------------------
 # Cria EC2 Bastion - Necessário se for executar localmente o Valkey CLI para sincronizar as réplicas
 #---------------------------------------------------------------------------------------------------
-module "ec2_bastion" {
-  source        = "./modules/ec2-bastion"
-  public_subnet = module.base.public_subnets[0]
-  vpc_id        = module.base.vpc_id
-}
+#module "ec2_bastion" {
+#  source        = "./modules/ec2-bastion"
+#  public_subnet = module.base.public_subnets[0]
+#  vpc_id        = module.base.vpc_id
+#}
 
 #------------------------------------------------------------------------------
 # Cria Cluster ECS
