@@ -1,6 +1,6 @@
 package br.com.mmgabri.adapters.grpc.config;
 
-import br.com.mmgabri.grpc.AntiFraudServiceGrpc;
+import br.com.mmgabri.grpc.antifraud.v1.AntiFraudServiceGrpc;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

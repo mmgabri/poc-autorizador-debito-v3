@@ -3,9 +3,9 @@ package br.com.mmgabri.services;
 import br.com.mmgabri.domains.FormatadorRequest;
 import br.com.mmgabri.domains.FormatadorResponse;
 import br.com.mmgabri.domains.HeaderMessage;
-import br.com.mmgabri.grpc.AutorizadorRequest;
-import br.com.mmgabri.grpc.AutorizadorResponse;
-import br.com.mmgabri.grpc.comuns.HeaderMessageGrpc;
+import br.com.mmgabri.grpc.autorizador.v1.AutorizadorRequest;
+import br.com.mmgabri.grpc.autorizador.v1.AutorizadorResponse;
+import br.com.mmgabri.grpc.comuns.v1.HeaderMessageGrpc;
 
 import java.util.HashMap;
 import java.util.Map;

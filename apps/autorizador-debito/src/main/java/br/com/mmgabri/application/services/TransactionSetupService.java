@@ -3,7 +3,7 @@ package br.com.mmgabri.application.services;
 import br.com.mmgabri.application.domains.ProductDomain;
 import br.com.mmgabri.application.domains.enuns.TransactionOperationEnum;
 import br.com.mmgabri.application.exceptions.TechnicalException;
-import br.com.mmgabri.grpc.AutorizadorRequest;
+import br.com.mmgabri.grpc.autorizador.v1.AutorizadorRequest;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

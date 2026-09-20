@@ -4,42 +4,82 @@ spring:
       enabled: true
   config:
     import: "classpath:products_config.yml"
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+  grpc:
+    server:
+      port: 59091
+    client:
+      channel:
+        enrichment:
+          target: dns:///localhost:59092
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        rules:
+          target: dns:///localhost:59093
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        security:
+          target: dns:///localhost:59094
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        limit:
+          target: dns:///localhost:59095
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        ledger:
+          target: dns:///localhost:59096
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        antifraud:
+          target: dns:///localhost:59097
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
 
 server:
   port: 9091
 
 grpc:
-  server:
-    port: 59091
-    host: localhost
   enrichment-service-client:
-    port: 59092
-    host: localhost
     timeout: 3600000
   security-service-client:
-    port: 59094
-    host: localhost
     timeout: 3600000
   rules-service-client:
-    port: 59093
-    host: localhost
     timeout: 3600000
   limit-service-client:
-    port: 59095
-    host: localhost
     timeout: 3600000
   ledger-service-client:
-    port: 59096
-    host: localhost
     timeout: 3600000
+    completion-timeout: 600
   antifraud-service-client:
-    port: 59097
-    host: localhost
     timeout: 3600000
 
 aws:
   sqs:
     compensation-transaction-queue-name: "queue-compensation-transaction"
+    comando-conta-queue-name: "queue-comando-conta"
+  dynamodb:
+    comando-conta-pending-ttl-seconds: 120
 
 custom:
   database-mode-async: false

@@ -5,7 +5,7 @@ import br.com.mmgabri.adapters.grpc.mappers.DataEnrichmentMapper;
 import br.com.mmgabri.application.domains.Payload;
 import br.com.mmgabri.application.exceptions.BusinessException;
 import br.com.mmgabri.application.services.MetricsService;
-import br.com.mmgabri.grpc.EnrichByCardResponse;
+import br.com.mmgabri.grpc.enrichment.v1.EnrichByCardResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;

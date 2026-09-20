@@ -6,7 +6,7 @@ import br.com.mmgabri.application.domains.Payload;
 import br.com.mmgabri.application.exceptions.BusinessException;
 import br.com.mmgabri.application.services.MetricsService;
 import br.com.mmgabri.application.services.TransactionContextRegistryService;
-import br.com.mmgabri.grpc.LimiteResponse;
+import br.com.mmgabri.grpc.limit.v1.LimiteResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;

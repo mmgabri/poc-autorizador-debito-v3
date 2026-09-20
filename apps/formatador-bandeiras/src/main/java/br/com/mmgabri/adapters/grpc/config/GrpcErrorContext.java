@@ -1,6 +1,6 @@
 package br.com.mmgabri.adapters.grpc.config;
 
-import br.com.mmgabri.grpc.AutorizadorRequest;
+import br.com.mmgabri.grpc.autorizador.v1.AutorizadorRequest;
 
 public class GrpcErrorContext {
     private final Throwable throwable;

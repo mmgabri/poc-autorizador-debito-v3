@@ -1,8 +1,8 @@
 package br.com.mmgabri.services;
 
-import br.com.mmgabri.grpc.AntiFraudRequest;
-import br.com.mmgabri.grpc.AntiFraudResponse;
-import br.com.mmgabri.grpc.comuns.HeaderMessageGrpc;
+import br.com.mmgabri.grpc.antifraud.v1.AntiFraudRequest;
+import br.com.mmgabri.grpc.antifraud.v1.AntiFraudResponse;
+import br.com.mmgabri.grpc.comuns.v1.HeaderMessageGrpc;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 

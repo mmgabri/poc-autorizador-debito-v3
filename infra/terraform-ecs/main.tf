@@ -79,6 +79,15 @@ module "sqs" {
 }
 
 #------------------------------------------------------------------------------
+# Pipe: TTL/Stream do comando_conta -> queue-transactions-pending (sem Lambda)
+#------------------------------------------------------------------------------
+module "ttl_reconciliation_pipe" {
+  source            = "./modules/ttl-reconciliation-pipe"
+  source_stream_arn = module.dynamodb.comando_conta_table_stream_arn
+  target_queue_arn  = module.sqs.transactions_pending_queue_arn
+}
+
+#------------------------------------------------------------------------------
 # Cria Redis Vankey
 #------------------------------------------------------------------------------
 module "redis_valkey" {
@@ -144,7 +153,7 @@ module "ecs_autorizador_debito" {
   security_groups    = [module.security_group.ecs_sg_id]
   target_group_arn   = []
   datadog_api_key    = var.datadog_api_key
-  redis_host         = ""
+  redis_host         = module.redis_valkey.valkey_endpoint
   namespace_id       = module.service_discovery.namespace_id
   cpu                = 4096
   memory             = 8192

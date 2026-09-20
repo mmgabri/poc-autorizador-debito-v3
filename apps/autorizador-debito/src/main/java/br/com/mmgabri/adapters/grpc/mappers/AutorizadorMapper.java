@@ -1,9 +1,9 @@
 package br.com.mmgabri.adapters.grpc.mappers;
 
 import br.com.mmgabri.application.domains.Payload;
-import br.com.mmgabri.grpc.AutorizadorRequest;
-import br.com.mmgabri.grpc.AutorizadorResponse;
-import br.com.mmgabri.grpc.comuns.HeaderMessageGrpc;
+import br.com.mmgabri.grpc.autorizador.v1.AutorizadorRequest;
+import br.com.mmgabri.grpc.autorizador.v1.AutorizadorResponse;
+import br.com.mmgabri.grpc.comuns.v1.HeaderMessageGrpc;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

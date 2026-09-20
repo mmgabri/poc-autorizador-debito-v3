@@ -1,12 +1,13 @@
 server:
   port: 9096
 
-grpc:
-  server:
-    port: 59096
-    host: localhost
-
 spring:
+  threads:
+    virtual:
+      enabled: true
+  grpc:
+    server:
+      port: 59096
   data:
     redis:
       host: ${REDIS_HOST:}
@@ -14,12 +15,15 @@ spring:
 
 aws:
   sqs:
+    enabled: true
     region: "us-east-1"
     queue-name: "queue-comando-conta"
-
-app:
-  async:
-    response-timeout-seconds: 10
+    max-messages: 10
+    wait-time-seconds: 20
+    visibility-timeout-seconds: 120
+    error-backoff-millis: 1000
+    poll-threads: 20
+    consumer-threads: 500
 
 custom:
   sleep: 1

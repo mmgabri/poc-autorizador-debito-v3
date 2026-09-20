@@ -1,0 +1,32 @@
+package br.com.mmgabri.adapters.dynamodb.entity;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@DynamoDbBean
+public class ComandoContaEntity {
+    public static final String TABLE_NAME = "comando_conta";
+
+    private String correlationId;
+    private String status;
+    private String contaId;
+    private Boolean approved;
+    private String errorCode;
+    private String errorDescription;
+    private String updatedAt;
+    // TTL do DynamoDB (epoch seconds) — safety net: se o registro nunca sair de
+    // PENDING/TIMEOUT (mensagem perdida, ledger caiu antes de terminar), a tabela
+    // apaga sozinha e um Pipe no Stream encaminha pra queue-transactions-pending.
+    private Long expiresAt;
+
+    @DynamoDbPartitionKey
+    public String getCorrelationId() {
+        return correlationId;
+    }
+}

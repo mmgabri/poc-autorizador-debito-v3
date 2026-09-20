@@ -1,16 +1,16 @@
 package br.com.mmgabri.controller;
 
-import br.com.mmgabri.grpc.AntiFraudRequest;
-import br.com.mmgabri.grpc.AntiFraudResponse;
-import br.com.mmgabri.grpc.AntiFraudServiceGrpc;
+import br.com.mmgabri.grpc.antifraud.v1.AntiFraudRequest;
+import br.com.mmgabri.grpc.antifraud.v1.AntiFraudResponse;
+import br.com.mmgabri.grpc.antifraud.v1.AntiFraudServiceGrpc;
 import br.com.mmgabri.services.AntiFraudService;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.grpc.server.service.GrpcService;
 
-@Component
+@GrpcService
 @RequiredArgsConstructor
 public class AntiFraudControllerGrpc extends AntiFraudServiceGrpc.AntiFraudServiceImplBase {
 

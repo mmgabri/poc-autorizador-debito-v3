@@ -1,8 +1,8 @@
 package br.com.mmgabri.adapters.grpc.mappers;
 
 import br.com.mmgabri.application.domains.Payload;
-import br.com.mmgabri.grpc.AntiFraudRequest;
-import br.com.mmgabri.grpc.comuns.HeaderMessageGrpc;
+import br.com.mmgabri.grpc.antifraud.v1.AntiFraudRequest;
+import br.com.mmgabri.grpc.comuns.v1.HeaderMessageGrpc;
 import org.springframework.stereotype.Component;
 
 @Component

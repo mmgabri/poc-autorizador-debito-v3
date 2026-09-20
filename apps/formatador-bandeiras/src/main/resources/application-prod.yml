@@ -1,14 +1,23 @@
 spring:
   threads:
     virtual:
-      enabled=true:
+      enabled: true
+  grpc:
+    client:
+      channel:
+        autorizador:
+          target: dns:///autorizador-debito-svc.autorizador-debito.svc.cluster.local:59091
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+
 server:
   port: 9090
 
 grpc:
   autorizador-client:
-    port: 59091
-    host: autorizador-debito-svc.autorizador-debito.local
     timeout: 6000
 
 logging:

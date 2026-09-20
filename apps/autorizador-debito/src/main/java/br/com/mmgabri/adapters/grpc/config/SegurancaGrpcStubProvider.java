@@ -1,6 +1,6 @@
 package br.com.mmgabri.adapters.grpc.config;
 
-import br.com.mmgabri.grpc.SegurancaServiceGrpc;
+import br.com.mmgabri.grpc.security.v1.SegurancaServiceGrpc;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

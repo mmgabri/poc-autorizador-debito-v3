@@ -3,7 +3,7 @@ package br.com.mmgabri.adapters.grpc.client;
 import br.com.mmgabri.adapters.grpc.config.AutorizadorGrpcStubProvider;
 import br.com.mmgabri.services.MapperService;
 import br.com.mmgabri.domains.FormatadorRequest;
-import br.com.mmgabri.grpc.AutorizadorResponse;
+import br.com.mmgabri.grpc.autorizador.v1.AutorizadorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;

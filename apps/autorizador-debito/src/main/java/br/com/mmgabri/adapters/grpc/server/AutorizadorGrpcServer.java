@@ -2,17 +2,19 @@ package br.com.mmgabri.adapters.grpc.server;
 
 import br.com.mmgabri.application.ProcessTransaction;
 import br.com.mmgabri.application.services.MetricsService;
-import br.com.mmgabri.grpc.AutorizadorRequest;
-import br.com.mmgabri.grpc.AutorizadorResponse;
-import br.com.mmgabri.grpc.AutorizadorServiceGrpc;
+import br.com.mmgabri.grpc.autorizador.v1.AutorizadorRequest;
+import br.com.mmgabri.grpc.autorizador.v1.AutorizadorResponse;
+import br.com.mmgabri.grpc.autorizador.v1.AutorizadorServiceGrpc;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.grpc.server.service.GrpcService;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
 
+@GrpcService
 @RequiredArgsConstructor
 public class AutorizadorGrpcServer extends AutorizadorServiceGrpc.AutorizadorServiceImplBase {
 

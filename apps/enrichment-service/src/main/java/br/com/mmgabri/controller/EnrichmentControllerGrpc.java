@@ -1,14 +1,16 @@
 package br.com.mmgabri.controller;
 
-import br.com.mmgabri.grpc.DataEnrichmentServiceGrpc;
-import br.com.mmgabri.grpc.EnrichByCardRequest;
-import br.com.mmgabri.grpc.EnrichByCardResponse;
+import br.com.mmgabri.grpc.enrichment.v1.DataEnrichmentServiceGrpc;
+import br.com.mmgabri.grpc.enrichment.v1.EnrichByCardRequest;
+import br.com.mmgabri.grpc.enrichment.v1.EnrichByCardResponse;
 import br.com.mmgabri.services.EnrichmentService;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.grpc.server.service.GrpcService;
 
+@GrpcService
 @RequiredArgsConstructor
 public class EnrichmentControllerGrpc extends DataEnrichmentServiceGrpc.DataEnrichmentServiceImplBase {
 

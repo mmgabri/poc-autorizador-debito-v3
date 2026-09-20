@@ -1,31 +1,18 @@
 package br.com.mmgabri.adapters.grpc.config;
 
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.concurrent.TimeUnit;
+import org.springframework.grpc.client.GrpcChannelFactory;
 
 @Configuration
 public class GrpcChannelsConfig {
 
-    @Value("${grpc.autorizador-client.host}")
-    private String autorizadorHost;
-
-    @Value("${grpc.autorizador-client.port}")
-    private int autorizadorPort;
-
+    // O endereço/keepalive/idle-timeout agora vêm de
+    // spring.grpc.client.channel.autorizador.* (application.yml),
+    // resolvidos pela auto-configuração nativa do Boot 4.1.
     @Bean
-    public ManagedChannel managedChannelAutorizador() {
-        return ManagedChannelBuilder
-                .forTarget("dns:///" + autorizadorHost + ":" + autorizadorPort)
-                .defaultLoadBalancingPolicy("round_robin")
-                .usePlaintext()
-                .keepAliveTime(60, TimeUnit.SECONDS)  // Mantém a conexão ativa
-                .keepAliveTimeout(60, TimeUnit.SECONDS)
-                .idleTimeout(60, TimeUnit.SECONDS)
-                .build();
+    public ManagedChannel managedChannelAutorizador(GrpcChannelFactory channelFactory) {
+        return channelFactory.createChannel("autorizador");
     }
 }

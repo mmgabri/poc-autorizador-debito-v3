@@ -1,0 +1,19 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.mmgabri.grpc.retornoconta.v1;
+
+service RetornoContaService {
+    rpc TrataRetornoConta (RetornoContaRequest) returns (RetornoContaResponse);
+}
+
+message RetornoContaRequest {
+    bool approved = 1;
+    string errorCode = 2;
+    string errorDescription = 3;
+    string correlationId = 4;
+    string instanceId = 5;
+}
+
+message RetornoContaResponse {
+    string message = 1;
+}

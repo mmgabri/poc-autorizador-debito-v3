@@ -7,7 +7,7 @@ resource "aws_elasticache_subnet_group" "valkey_subnets" {
 # 2. Security Group (Portão de entrada)
 resource "aws_security_group" "valkey_sg" {
   name        = "valkey-sg"
-  description = "Permitir acesso gRPC sync via Valkey"
+  description = "Permitir acesso ao Valkey (sinal de conclusao da efetivacao do ledger)"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -33,8 +33,8 @@ resource "aws_security_group" "valkey_sg" {
 
 # 3. Cluster Valkey (Replication Group)
 resource "aws_elasticache_replication_group" "valkey_cluster" {
-  replication_group_id = "lancamento-conta-sync-valkey"
-  description          = "Sincronizacao de replicas do lancamento-conta via Valkey"
+  replication_group_id = "ledger-efetivacao-valkey"
+  description          = "Sinalizacao de conclusao da efetivacao do ledger-service via Valkey"
   
   engine         = "valkey"
   engine_version = "7.2"

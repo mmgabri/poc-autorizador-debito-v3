@@ -1,0 +1,29 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.mmgabri.grpc.ledger.v1;
+
+import "comuns/header_message_grpc.proto";
+
+service LedgerService {
+    rpc GerarLancamento (LedgerRequest) returns (LedgerResponse);
+}
+
+message LedgerRequest {
+   br.com.mmgabri.grpc.comuns.v1.HeaderMessageGrpc headerMessageGrpc = 1;
+    string contaId = 2;
+    string valor = 3;
+    string literal = 4;
+    string roteiroContabil = 5;
+    string customReturnLedger = 6;
+    int32 sleepLedgerEfetivacao = 7;
+    string tipoOperacao = 8;
+    int32 sleepLedgerSimulacao = 9;
+}
+
+message LedgerResponse {
+    br.com.mmgabri.grpc.comuns.v1.HeaderMessageGrpc headerMessageGrpc = 1;
+    string contaId = 2;
+    bool approved = 3;
+    string errorCode = 4;
+    string errorDescription = 5;
+}

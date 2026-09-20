@@ -4,42 +4,82 @@ spring:
       enabled: true
   config:
     import: "classpath:products_config.yml"
+  data:
+    redis:
+      host: ${REDIS_HOST:}
+      port: 6379
+  grpc:
+    server:
+      port: 59091
+    client:
+      channel:
+        enrichment:
+          target: dns:///enrichment-service-svc.autorizador-debito.svc.cluster.local:59092
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        rules:
+          target: dns:///rules-service-svc.autorizador-debito.svc.cluster.local:59093
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        security:
+          target: dns:///security-service-svc.autorizador-debito.svc.cluster.local:59094
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        limit:
+          target: dns:///limit-service-svc.autorizador-debito.svc.cluster.local:59095
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        ledger:
+          target: dns:///ledger-service-svc.autorizador-debito.svc.cluster.local:59096
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        antifraud:
+          target: dns:///antifraud-service-svc.autorizador-debito.svc.cluster.local:59097
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
 
 server:
   port: 9091
 
 grpc:
-  server:
-    port: 59091
-    host: localhost
   enrichment-service-client:
-    port: 59092
-    host: enrichment-service-svc.autorizador-debito.local
     timeout: 1500
   security-service-client:
-    port: 59094
-    host: security-service-svc.autorizador-debito.local
     timeout: 15000
   rules-service-client:
-    port: 59093
-    host: rules-service-svc.autorizador-debito.local
     timeout: 15000
   limit-service-client:
-    port: 59095
-    host: limit-service-svc.autorizador-debito.local
     timeout: 1500
   ledger-service-client:
-    port: 59096
-    host: ledger-service-svc.autorizador-debito.local
     timeout: 1500
+    completion-timeout: 600
   antifraud-service-client:
-    port: 59097
-    host: antifraud-service-svc.autorizador-debito.local
     timeout: 1500
 
 aws:
   sqs:
-    reversal-notification-queue-name: "queue-compensation-transaction"
+    compensation-transaction-queue-name: "queue-compensation-transaction"
+    comando-conta-queue-name: "queue-comando-conta"
+  dynamodb:
+    comando-conta-pending-ttl-seconds: 300
 
 custom:
   database-mode-async: ${DATABASE_MODE_ASYNC}

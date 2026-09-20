@@ -1,6 +1,6 @@
 package br.com.mmgabri.adapters.grpc.config;
 
-import br.com.mmgabri.grpc.RulesServiceGrpc;
+import br.com.mmgabri.grpc.rules.v1.RulesServiceGrpc;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,6 @@
 package br.com.mmgabri.adapters.grpc.config;
 
-import br.com.mmgabri.grpc.AutorizadorServiceGrpc;
+import br.com.mmgabri.grpc.autorizador.v1.AutorizadorServiceGrpc;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

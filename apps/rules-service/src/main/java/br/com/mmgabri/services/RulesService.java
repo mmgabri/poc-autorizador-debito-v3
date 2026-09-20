@@ -1,8 +1,8 @@
 package br.com.mmgabri.services;
 
-import br.com.mmgabri.grpc.RulesRequest;
-import br.com.mmgabri.grpc.RulesResponse;
-import br.com.mmgabri.grpc.comuns.HeaderMessageGrpc;
+import br.com.mmgabri.grpc.rules.v1.RulesRequest;
+import br.com.mmgabri.grpc.rules.v1.RulesResponse;
+import br.com.mmgabri.grpc.comuns.v1.HeaderMessageGrpc;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,11 @@
 package br.com.mmgabri.adapters.grpc.config;
 
-import br.com.mmgabri.grpc.*;
+import br.com.mmgabri.grpc.antifraud.v1.AntiFraudServiceGrpc;
+import br.com.mmgabri.grpc.enrichment.v1.DataEnrichmentServiceGrpc;
+import br.com.mmgabri.grpc.ledger.v1.LedgerServiceGrpc;
+import br.com.mmgabri.grpc.limit.v1.LimiteServiceGrpc;
+import br.com.mmgabri.grpc.rules.v1.RulesServiceGrpc;
+import br.com.mmgabri.grpc.security.v1.SegurancaServiceGrpc;
 import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
 import org.springframework.beans.factory.annotation.Qualifier;

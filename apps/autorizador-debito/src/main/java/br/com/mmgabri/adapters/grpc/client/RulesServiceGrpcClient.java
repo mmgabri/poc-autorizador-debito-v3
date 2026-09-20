@@ -5,7 +5,7 @@ import br.com.mmgabri.adapters.grpc.mappers.RulesMapper;
 import br.com.mmgabri.application.domains.Payload;
 import br.com.mmgabri.application.exceptions.BusinessException;
 import br.com.mmgabri.application.services.MetricsService;
-import br.com.mmgabri.grpc.RulesResponse;
+import br.com.mmgabri.grpc.rules.v1.RulesResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;

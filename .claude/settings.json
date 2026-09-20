@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(javap -v -cp \"C:\\\\Users\\\\Usuário\\\\.m2\\\\repository\\\\org\\\\springframework\\\\grpc\\\\spring-grpc-core\\\\1.1.1\\\\spring-grpc-core-1.1.1.jar\" org.springframework.grpc.server.service.GrpcService)",
+      "Bash(mvn -q spring-boot:run)",
+      "Bash(echo \"PID=$!\")",
+      "Read(//tmp/**)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //F //PID 19096)"
+    ]
+  }
+}

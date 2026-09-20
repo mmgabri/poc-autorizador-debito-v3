@@ -1,0 +1,27 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.mmgabri.grpc.security.v1;
+
+import "comuns/header_message_grpc.proto";
+
+service SegurancaService {
+    rpc ValidarSeguranca (SegurancaRequest) returns (SegurancaResponse);
+}
+
+message SegurancaRequest {
+    br.com.mmgabri.grpc.comuns.v1.HeaderMessageGrpc headerMessageGrpc = 1;
+    string contaId = 2;
+    string numeroCartao = 3;
+    string senha = 4;
+    string dadosChip = 5;
+    string customReturnSeguranca = 6;
+    int32 sleepSeguranca = 7;
+}
+
+message SegurancaResponse {
+    br.com.mmgabri.grpc.comuns.v1.HeaderMessageGrpc headerMessageGrpc = 1;
+    string contaId = 2;
+    bool approved = 3;
+    string errorCode = 4;
+    string errorDescription = 5;
+}

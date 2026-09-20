@@ -1,14 +1,16 @@
 package br.com.mmgabri.controller;
 
-import br.com.mmgabri.grpc.RulesRequest;
-import br.com.mmgabri.grpc.RulesResponse;
-import br.com.mmgabri.grpc.RulesServiceGrpc;
+import br.com.mmgabri.grpc.rules.v1.RulesRequest;
+import br.com.mmgabri.grpc.rules.v1.RulesResponse;
+import br.com.mmgabri.grpc.rules.v1.RulesServiceGrpc;
 import br.com.mmgabri.services.RulesService;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.grpc.server.service.GrpcService;
 
+@GrpcService
 @RequiredArgsConstructor
 public class RulesControllerGrpc extends RulesServiceGrpc.RulesServiceImplBase {
 

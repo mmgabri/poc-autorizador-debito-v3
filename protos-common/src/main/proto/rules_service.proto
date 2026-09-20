@@ -1,0 +1,23 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.mmgabri.grpc.rules.v1;
+
+import "comuns/header_message_grpc.proto";
+
+service RulesService {
+    rpc ValidateRules (RulesRequest) returns (RulesResponse);
+}
+
+message RulesRequest {
+    br.com.mmgabri.grpc.comuns.v1.HeaderMessageGrpc headerMessageGrpc = 1;
+    map<string, string> messageIso = 2;
+    string customReturnRules = 3;
+    int32 sleepRules = 4;
+}
+
+message RulesResponse {
+    br.com.mmgabri.grpc.comuns.v1.HeaderMessageGrpc headerMessageGrpc = 1;
+    bool approved = 2;
+    string errorCode = 3;
+    string errorDescription = 4;
+}

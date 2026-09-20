@@ -1,14 +1,16 @@
 package br.com.mmgabri.controller;
 
-import br.com.mmgabri.grpc.LimiteRequest;
-import br.com.mmgabri.grpc.LimiteResponse;
-import br.com.mmgabri.grpc.LimiteServiceGrpc;
+import br.com.mmgabri.grpc.limit.v1.LimiteRequest;
+import br.com.mmgabri.grpc.limit.v1.LimiteResponse;
+import br.com.mmgabri.grpc.limit.v1.LimiteServiceGrpc;
 import br.com.mmgabri.services.LimitService;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.grpc.server.service.GrpcService;
 
+@GrpcService
 @RequiredArgsConstructor
 public class LimitControllerGrpc extends LimiteServiceGrpc.LimiteServiceImplBase {
 

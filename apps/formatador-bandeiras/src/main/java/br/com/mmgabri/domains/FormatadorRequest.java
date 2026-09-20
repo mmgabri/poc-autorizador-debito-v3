@@ -1,12 +1,17 @@
 package br.com.mmgabri.domains;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
 public class FormatadorRequest {
     private Map<String, String> messageIso;
     private String customReturnDataEnrichment;

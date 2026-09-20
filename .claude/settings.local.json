@@ -3,7 +3,13 @@
     "allow": [
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(javap -p -c -cp 'C:\\\\Users\\\\Usuário\\\\.m2\\\\repository\\\\org\\\\springframework\\\\boot\\\\spring-boot-grpc-server\\\\4.1.1\\\\spring-boot-grpc-server-4.1.1.jar' org.springframework.boot.grpc.server.autoconfigure.NettyGrpcServerConfiguration)",
+      "Bash(mkdir -p /tmp/grpcinspect2)",
+      "Read(//tmp/**)",
+      "Bash(rm -rf *)",
+      "Bash(jar xf *)",
+      "Bash(javap -p -c org/springframework/boot/grpc/server/autoconfigure/GrpcServerBuilderCustomizers.class)"
     ]
   }
 }

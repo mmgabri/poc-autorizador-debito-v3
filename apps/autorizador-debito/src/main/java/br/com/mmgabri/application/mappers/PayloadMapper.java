@@ -1,8 +1,8 @@
 package br.com.mmgabri.application.mappers;
 
 import br.com.mmgabri.application.domains.*;
-import br.com.mmgabri.grpc.AutorizadorRequest;
-import br.com.mmgabri.grpc.EnrichByCardResponse;
+import br.com.mmgabri.grpc.autorizador.v1.AutorizadorRequest;
+import br.com.mmgabri.grpc.enrichment.v1.EnrichByCardResponse;
 import org.springframework.stereotype.Service;
 
 @Service

@@ -1,8 +1,8 @@
 package br.com.mmgabri.services;
 
-import br.com.mmgabri.grpc.LedgerRequest;
-import br.com.mmgabri.grpc.LedgerResponse;
-import br.com.mmgabri.grpc.comuns.HeaderMessageGrpc;
+import br.com.mmgabri.grpc.ledger.v1.LedgerRequest;
+import br.com.mmgabri.grpc.ledger.v1.LedgerResponse;
+import br.com.mmgabri.grpc.comuns.v1.HeaderMessageGrpc;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

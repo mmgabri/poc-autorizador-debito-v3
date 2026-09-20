@@ -1,35 +1,19 @@
 package br.com.mmgabri.config;
 
-import br.com.mmgabri.adapters.grpc.server.LedgerControllerGrpc;
-import br.com.mmgabri.adapters.grpc.server.RetornoContaControllerGrpc;
-import br.com.mmgabri.adapters.redis.RetornoContaRedisPublisher;
-import br.com.mmgabri.adapters.redis.RetornoContaRedisSubscriber;
-import br.com.mmgabri.services.LedgerEfetivacaoService;
-import br.com.mmgabri.services.LedgerSimulacaoService;
-import br.com.mmgabri.services.MetricsService;
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.grpc.BindableService;
+import io.grpc.protobuf.services.ProtoReflectionService;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomizer;
+import org.springframework.boot.grpc.server.autoconfigure.GrpcServerExecutorProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.core.task.support.TaskExecutorAdapter;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.listener.PatternTopic;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
-import java.util.UUID;
 import java.util.concurrent.Executors;
 
 @Configuration
 public class AppConfig {
-
-    @Bean(name = "instanceId")
-    public String instanceId() {
-        return UUID.randomUUID().toString();
-    }
 
     @Bean
     public SqsClient sqsClient(@Value("${aws.sqs.region:us-east-1}") String awsRegion) {
@@ -37,34 +21,21 @@ public class AppConfig {
     }
 
     @Bean
-    public LedgerControllerGrpc ledgerControllerGrpc(LedgerSimulacaoService simulacaoService,
-                                                     LedgerEfetivacaoService efetivacaoService,
-                                                     MetricsService metricsService) {
-        return new LedgerControllerGrpc(simulacaoService, efetivacaoService, metricsService);
+    public BindableService protoReflectionService() {
+        return ProtoReflectionService.newInstance();
+    }
+
+    // Boot 4.1 auto-configura um ObjectMapper do Jackson 3 (tools.jackson.databind);
+    // este serviço usa Jackson 2 clássico (com.fasterxml.jackson.databind) diretamente
+    // no ComandoContaSqsAdapter, então precisa do bean explícito.
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 
     @Bean
-    public RetornoContaControllerGrpc retornoContaControllerGrpc(RetornoContaRedisPublisher redisPublisher, MetricsService metricsService) {
-        return new RetornoContaControllerGrpc(redisPublisher, metricsService);
+    public GrpcServerExecutorProvider grpcServerExecutorProvider() {
+        return Executors::newVirtualThreadPerTaskExecutor;
     }
 
-    @Bean
-    public RedisMessageListenerContainer redisListenerContainer(RedisConnectionFactory connectionFactory,
-                                                                RetornoContaRedisSubscriber subscriber,
-                                                                @Qualifier("instanceId") String instanceId) {
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory);
-        container.addMessageListener(subscriber, new PatternTopic("channel:" + instanceId + ":*"));
-        return container;
-    }
-
-    @Bean
-    public AsyncTaskExecutor applicationTaskExecutor() {
-        return new TaskExecutorAdapter(Executors.newVirtualThreadPerTaskExecutor());
-    }
-
-    @Bean
-    public TomcatProtocolHandlerCustomizer<?> protocolHandlerVirtualThreadExecutorCustomizer() {
-        return protocolHandler -> protocolHandler.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
-    }
 }

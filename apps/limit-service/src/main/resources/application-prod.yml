@@ -1,9 +1,13 @@
 server:
   port: 9095
 
-grpc:
-  server:
-    port: 59095
+spring:
+  threads:
+    virtual:
+      enabled: true
+  grpc:
+    server:
+      port: 59095
 
 logging:
   level:

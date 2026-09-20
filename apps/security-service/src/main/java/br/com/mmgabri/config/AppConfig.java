@@ -1,12 +1,10 @@
 package br.com.mmgabri.config;
 
-import br.com.mmgabri.controller.SegurancaControllerGrpc;
-import br.com.mmgabri.services.SegurancaService;
-import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomizer;
+import io.grpc.BindableService;
+import io.grpc.protobuf.services.ProtoReflectionService;
+import org.springframework.boot.grpc.server.autoconfigure.GrpcServerExecutorProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.core.task.support.TaskExecutorAdapter;
 
 import java.util.concurrent.Executors;
 
@@ -14,20 +12,13 @@ import java.util.concurrent.Executors;
 public class AppConfig {
 
     @Bean
-    public SegurancaControllerGrpc segurancaControllerGrpc(SegurancaService segurancaService) {
-        return new SegurancaControllerGrpc(segurancaService);
+    public BindableService protoReflectionService() {
+        return ProtoReflectionService.newInstance();
     }
 
     @Bean
-    public AsyncTaskExecutor applicationTaskExecutor() {
-        return new TaskExecutorAdapter(Executors.newVirtualThreadPerTaskExecutor());
-    }
-
-    @Bean
-    public TomcatProtocolHandlerCustomizer<?> protocolHandlerVirtualThreadExecutorCustomizer() {
-        return protocolHandler -> {
-            protocolHandler.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
-        };
+    public GrpcServerExecutorProvider grpcServerExecutorProvider() {
+        return Executors::newVirtualThreadPerTaskExecutor;
     }
 
 }

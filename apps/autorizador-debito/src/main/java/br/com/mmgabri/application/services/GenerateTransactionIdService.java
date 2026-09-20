@@ -1,6 +1,6 @@
 package br.com.mmgabri.application.services;
 
-import br.com.mmgabri.grpc.AutorizadorRequest;
+import br.com.mmgabri.grpc.autorizador.v1.AutorizadorRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;

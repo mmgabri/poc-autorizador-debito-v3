@@ -1,0 +1,13 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.mmgabri.grpc.comuns.v1;
+
+message HeaderMessageGrpc {
+    string transactionId = 1;
+    string correlationId = 2;
+    string bandeira = 3;
+    string plataforma = 4;
+    string timestamp = 5;
+    string message = 6;
+    bool isReversal = 7;
+}
