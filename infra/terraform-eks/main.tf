@@ -8,27 +8,13 @@ module "base" {
 }
 
 #------------------------------------------------------------------------------
-# Cria Tabelas DynamoDb
+# DynamoDB e SQS NÃO são criados aqui de propósito: já existem, criados pelo
+# infra/terraform-local (que virou o dono permanente desses recursos - ver
+# comentário em terraform-local/main.tf). Criar de novo aqui daria conflito de
+# nome (DynamoDB) ou duas stacks gerenciando o mesmo recurso via states
+# diferentes (SQS) - a app só precisa que existam e da permissão IAM (IRSA já
+# libera dynamodb:*/sqs:* pra conta inteira, sem depender de ARN específico).
 #------------------------------------------------------------------------------
-module "dynamodb" {
-  source = "./modules/dynamodb"
-}
-
-#------------------------------------------------------------------------------
-# Cria Fila SQS
-#------------------------------------------------------------------------------
-module "sqs" {
-  source = "./modules/sqs"
-}
-
-#------------------------------------------------------------------------------
-# Pipe: TTL/Stream do comando_conta -> queue-transactions-pending (sem Lambda)
-#------------------------------------------------------------------------------
-module "ttl_reconciliation_pipe" {
-  source            = "./modules/ttl-reconciliation-pipe"
-  source_stream_arn = module.dynamodb.comando_conta_table_stream_arn
-  target_queue_arn  = module.sqs.transactions_pending_queue_arn
-}
 
 #------------------------------------------------------------------------------
 # Cria Roles do control plane e dos nós (não dependem do cluster existir)
@@ -286,30 +272,6 @@ module "k8s_ledger_service" {
   env = {
     LOGGING_LEVEL = var.logging_level
     REDIS_HOST    = module.redis_valkey.valkey_endpoint
-    DD_API_KEY    = var.datadog_api_key
-  }
-}
-
-#------------------------------------------------------------------------------
-# Deployment/Service - conta
-#------------------------------------------------------------------------------
-module "k8s_conta" {
-  source = "./modules/k8s-deployment"
-
-  name                 = "conta"
-  namespace            = kubernetes_namespace.app.metadata[0].name
-  image                = "${var.conta_ecr_repository}:latest"
-  container_port       = 9098
-  replicas             = 3
-  service_account_name = kubernetes_service_account.app.metadata[0].name
-  datadog_apm_enabled  = true
-  cpu_request          = "250m"
-  cpu_limit            = "2"
-  memory_request       = "512Mi"
-  memory_limit         = "4Gi"
-
-  env = {
-    LOGGING_LEVEL = var.logging_level
     DD_API_KEY    = var.datadog_api_key
   }
 }

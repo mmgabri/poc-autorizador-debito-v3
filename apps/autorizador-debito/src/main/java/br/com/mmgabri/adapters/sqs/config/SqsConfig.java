@@ -14,7 +14,7 @@ public class SqsConfig {
     @Bean
     public SqsClient sqsClient() {
         var httpClient = ApacheHttpClient.builder()
-                .maxConnections(50)
+                .maxConnections(200)
                 .connectionTimeout(Duration.ofSeconds(2))
                 .socketTimeout(Duration.ofSeconds(5))
                 .build();

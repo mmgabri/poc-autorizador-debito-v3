@@ -2,6 +2,8 @@ package br.com.mmgabri.config;
 
 import io.grpc.BindableService;
 import io.grpc.protobuf.services.ProtoReflectionService;
+import io.lettuce.core.api.StatefulConnection;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.grpc.server.autoconfigure.GrpcServerExecutorProvider;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +11,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 
 import java.util.concurrent.Executors;
 
@@ -45,11 +49,27 @@ public class AppConfig {
     // outro comando Redis concorrente até o BLPOP terminar. Nome do bean tem que
     // bater com o nome do parâmetro no @RequiredArgsConstructor de quem injeta,
     // já que @Qualifier não é copiado pelo Lombok pro construtor gerado.
+    //
+    // Pool explícito: sem isso, cada BLPOP abre uma conexão TCP nova (sem
+    // reaproveitamento), o que sob alta concorrência de virtual threads pode
+    // estourar o maxclients do Valkey. Dimensionado com folga pro pico de TPS
+    // do stress test (várias transações em BLPOP simultâneo).
     @Bean
     public LettuceConnectionFactory blockingRedisConnectionFactory(
             @Value("${spring.data.redis.host}") String host,
             @Value("${spring.data.redis.port}") int port) {
-        LettuceConnectionFactory factory = new LettuceConnectionFactory(host, port);
+        RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(host, port);
+
+        GenericObjectPoolConfig<StatefulConnection<?, ?>> poolConfig = new GenericObjectPoolConfig<>();
+        poolConfig.setMaxTotal(500);
+        poolConfig.setMaxIdle(100);
+        poolConfig.setMinIdle(10);
+
+        LettucePoolingClientConfiguration clientConfig = LettucePoolingClientConfiguration.builder()
+                .poolConfig(poolConfig)
+                .build();
+
+        LettuceConnectionFactory factory = new LettuceConnectionFactory(redisConfig, clientConfig);
         factory.setShareNativeConnection(false);
         return factory;
     }

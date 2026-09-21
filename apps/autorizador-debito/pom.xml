@@ -100,6 +100,13 @@
             <version>2.30.25</version>
         </dependency>
 
+        <!-- STS - obrigatorio para IRSA (troca do web identity token do EKS por credenciais via AssumeRoleWithWebIdentity) -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sts</artifactId>
+            <version>2.30.25</version>
+        </dependency>
+
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>dynamodb-enhanced</artifactId>
@@ -129,6 +136,14 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <!-- Pool de conexões Lettuce (blockingRedisConnectionFactory) - sem isso o
+             factory abre uma conexão TCP nova a cada BLPOP, sem limite, arriscando
+             estourar o maxclients do Valkey sob alta concorrência -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
         </dependency>
     </dependencies>
 

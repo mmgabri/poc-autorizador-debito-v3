@@ -9,7 +9,7 @@ variable "datadog_api_key" {
 
 variable "datadog_site" {
   type    = string
-  default = "us5.datadoghq.com"
+  default = "datadoghq.com"
 }
 
 variable "datadog_env" {

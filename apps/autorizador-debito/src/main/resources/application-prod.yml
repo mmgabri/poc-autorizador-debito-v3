@@ -78,8 +78,6 @@ aws:
   sqs:
     compensation-transaction-queue-name: "queue-compensation-transaction"
     comando-conta-queue-name: "queue-comando-conta"
-  dynamodb:
-    comando-conta-pending-ttl-seconds: 300
 
 custom:
   database-mode-async: ${DATABASE_MODE_ASYNC}
@@ -98,7 +96,7 @@ management:
       export:
         apiKey: ${DD_API_KEY}
         step: 5s
-        uri: https://us5.datadoghq.com/
+        uri: https://api.datadoghq.com/
   endpoints:
     web:
       exposure:

@@ -1,5 +1,8 @@
 package br.com.mmgabri.domain;
 
+import lombok.Builder;
+
+@Builder
 public record ComandoContaRequest(
         String correlationId,
         String transactionId,

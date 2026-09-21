@@ -45,16 +45,5 @@ resource "aws_dynamodb_table" "comando_conta" {
     name = "correlationId"
     type = "S"
   }
-
-  # Safety net: se o registro nunca sair de PENDING/TIMEOUT (mensagem perdida,
-  # ledger caiu antes de terminar), o TTL apaga sozinho e o Stream alimenta um
-  # Pipe (ver modules/ttl-reconciliation-pipe) que encaminha pra uma fila SQS.
-  ttl {
-    attribute_name = "expiresAt"
-    enabled        = true
-  }
-
-  stream_enabled   = true
-  stream_view_type = "NEW_AND_OLD_IMAGES"
 }
 

@@ -39,7 +39,7 @@ management:
       export:
         apiKey: 35ca9af351b9a33a19bce59652d93092
         step: 5s
-        uri: https://us5.datadoghq.com/
+        uri: https://api.datadoghq.com/
   endpoints:
     web:
       exposure:

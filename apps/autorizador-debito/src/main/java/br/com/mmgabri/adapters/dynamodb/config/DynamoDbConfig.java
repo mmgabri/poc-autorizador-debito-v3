@@ -24,10 +24,10 @@ public class DynamoDbConfig {
     @Bean
     public DynamoDbClient dynamoDbClientProd() {
         var httpClient = ApacheHttpClient.builder()
-                .maxConnections(200) // ajuste: 200 bom ponto de partida
+                .maxConnections(1000) // ~8-9 chamadas dynamo/transacao, precisa de folga p/ picos de TPS alto
                 .connectionTimeout(Duration.ofSeconds(2))
                 .socketTimeout(Duration.ofSeconds(5))
-                .connectionAcquisitionTimeout(Duration.ofMillis(300))
+                .connectionAcquisitionTimeout(Duration.ofSeconds(1))
                 .build();
 
         var override = ClientOverrideConfiguration.builder()

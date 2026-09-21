@@ -1,6 +1,7 @@
 package br.com.mmgabri.adapters.dynamodb.repository;
 
 import br.com.mmgabri.adapters.dynamodb.entity.ComandoContaEntity;
+import br.com.mmgabri.domain.enuns.ComandoContaStatusEnum;
 import br.com.mmgabri.services.MetricsService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -24,71 +25,42 @@ public class ComandoContaRepository {
     private final DynamoDbTable<ComandoContaEntity> table;
     private final MetricsService metricsService;
 
-    public void save(ComandoContaEntity entity) {
-        var startTime = OffsetDateTime.now();
-        try {
-            table.putItem(entity);
-            calculateLatency(startTime, "save", entity.getCorrelationId());
-            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:save", "status:success");
-        } catch (Exception e) {
-            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:save", "status:error");
-            logger.error("Failed to save comando_conta into DynamoDB table. correlationId={}", entity.getCorrelationId(), e);
-        }
-    }
-
     /**
-     * Transição atômica PENDING → completed, condicionada ao status ainda ser
-     * PENDING. Retorna false quando perde a corrida (o autorizador já tinha
-     * desistido e marcado TIMEOUT) — quem chamou deve então gravar o resultado
-     * real sem o sinal de Redis normal, já que ninguém está mais ouvindo.
+     * Tenta a transição {@code from} → {@code to} de forma atômica
+     * (compare-and-swap): só grava {@code fields} (com status já setado para
+     * {@code to}) se o status atual no DynamoDB for exatamente {@code from}.
+     * <p>
+     * Retorna {@code false} sem lançar exceção quando a condição não bate —
+     * isso é esperado sempre que o autorizador já mudou o status antes, não é
+     * um erro. Quem chama decide o que fazer a seguir (ex: tentar outra
+     * transição, ou desistir).
      */
-    public boolean completeIfPending(ComandoContaEntity entity) {
+    public boolean tryTransition(ComandoContaEntity fields, ComandoContaStatusEnum from, ComandoContaStatusEnum to) {
         var startTime = OffsetDateTime.now();
+        fields.setStatus(to);
+
         Expression condition = Expression.builder()
-                .expression("attribute_not_exists(#status) OR #status = :pending")
+                .expression("#status = :from")
                 .putExpressionName("#status", "status")
-                .putExpressionValue(":pending", AttributeValue.builder().s("PENDING").build())
+                .putExpressionValue(":from", AttributeValue.builder().s(from.name()).build())
                 .build();
 
         try {
             table.updateItem(UpdateItemEnhancedRequest.builder(ComandoContaEntity.class)
-                    .item(entity)
-                    .ignoreNullsMode(IgnoreNullsMode.DEFAULT)
+                    .item(fields)
+                    .ignoreNullsMode(IgnoreNullsMode.SCALAR_ONLY)
                     .conditionExpression(condition)
                     .build());
-            calculateLatency(startTime, "completeIfPending", entity.getCorrelationId());
-            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:completeIfPending", "status:success");
+            calculateLatency(startTime, from + "->" + to, fields.getCorrelationId());
+            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:tryTransition", "from:" + from, "to:" + to, "status:success");
             return true;
         } catch (ConditionalCheckFailedException e) {
-            logger.debug("Não concluiu - autorizador já tinha marcado TIMEOUT antes. correlationId={}", entity.getCorrelationId());
-            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:completeIfPending", "status:lost_race");
+            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:tryTransition", "from:" + from, "to:" + to, "status:condition_failed");
             return false;
         } catch (Exception e) {
-            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:completeIfPending", "status:error");
-            logger.error("Failed to complete comando_conta into DynamoDB table. correlationId={}", entity.getCorrelationId(), e);
+            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:tryTransition", "from:" + from, "to:" + to, "status:error");
+            logger.error("Failed to apply transition {}->{} on comando_conta. correlationId={}", from, to, fields.getCorrelationId(), e);
             return false;
-        }
-    }
-
-    /**
-     * Grava o resultado real mesmo tendo perdido a corrida pro TIMEOUT do
-     * autorizador — sem isso o resultado de negócio se perderia. Marca um status
-     * distinto (COMPLETED_LATE) pra ferramentas de conciliação identificarem
-     * exatamente esses casos depois.
-     */
-    public void forceCompleteLate(ComandoContaEntity entity) {
-        var startTime = OffsetDateTime.now();
-        entity.setStatus("COMPLETED_LATE");
-        try {
-            table.updateItem(UpdateItemEnhancedRequest.builder(ComandoContaEntity.class)
-                    .item(entity)
-                    .ignoreNullsMode(IgnoreNullsMode.DEFAULT)
-                    .build());
-            calculateLatency(startTime, "forceCompleteLate", entity.getCorrelationId());
-            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:forceCompleteLate", "status:success");
-        } catch (Exception e) {
-            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:forceCompleteLate", "status:error");
-            logger.error("Failed to force-complete comando_conta into DynamoDB table. correlationId={}", entity.getCorrelationId(), e);
         }
     }
 

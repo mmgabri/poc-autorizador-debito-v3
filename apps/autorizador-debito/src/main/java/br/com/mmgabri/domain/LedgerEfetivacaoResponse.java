@@ -1,6 +1,9 @@
 package br.com.mmgabri.domain;
 
-public record LedgerEfetivacaoResult(
+import lombok.Builder;
+
+@Builder
+public record LedgerEfetivacaoResponse(
         String correlationId,
         String contaId,
         boolean approved,

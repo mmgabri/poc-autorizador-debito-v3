@@ -79,15 +79,6 @@ module "sqs" {
 }
 
 #------------------------------------------------------------------------------
-# Pipe: TTL/Stream do comando_conta -> queue-transactions-pending (sem Lambda)
-#------------------------------------------------------------------------------
-module "ttl_reconciliation_pipe" {
-  source            = "./modules/ttl-reconciliation-pipe"
-  source_stream_arn = module.dynamodb.comando_conta_table_stream_arn
-  target_queue_arn  = module.sqs.transactions_pending_queue_arn
-}
-
-#------------------------------------------------------------------------------
 # Cria Redis Vankey
 #------------------------------------------------------------------------------
 module "redis_valkey" {

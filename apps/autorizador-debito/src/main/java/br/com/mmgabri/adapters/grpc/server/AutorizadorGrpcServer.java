@@ -49,7 +49,7 @@ public class AutorizadorGrpcServer extends AutorizadorServiceGrpc.AutorizadorSer
     }
 
     private void onSuccess(OffsetDateTime startTime, AutorizadorResponse response) {
-        logger.debug("Authorization completed in {} ms", Duration.between(startTime, OffsetDateTime.now()).toMillis());
+        logger.info("Authorization completed in {} ms", Duration.between(startTime, OffsetDateTime.now()).toMillis());
         metricsService.incrementMetric("app_duration_transaction", startTime, "status:"+response.getMessageIsoMap().get("039"));
         metricsService.incrementMetricCounter("app_qtd_transaction", "status:"+response.getMessageIsoMap().get("039"));
     }

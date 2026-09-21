@@ -42,7 +42,7 @@ public class FormatadorService {
         return CompletableFuture.supplyAsync(() -> {
             var grpcResponse = autorizadorGrpcClient.execute(request);
             var resp = autorizadorMapper.toFormatadorResponse(grpcResponse);
-            logger.debug("Authorization completed in {} ms.", Duration.between(startTime, OffsetDateTime.now()).toMillis());
+            logger.info("Authorization completed in {} ms.", Duration.between(startTime, OffsetDateTime.now()).toMillis());
             metricsService.incrementMetric("app_fmt_duration_transaction", startTime);
             return resp;
         }, vtExecutor);

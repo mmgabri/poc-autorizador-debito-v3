@@ -88,3 +88,28 @@ resource "aws_eks_access_policy_association" "admin_caller" {
 
   depends_on = [aws_eks_access_entry.admin_caller]
 }
+
+#------------------------------------------------------------------------------
+# Access Entry pro usuário root da conta - permite visualizar os recursos do
+# cluster (namespaces, pods, etc.) pelo console AWS logado como root. IAM
+# root != acesso ao cluster: são planos de permissão separados (ver comentário
+# acima), então sem isso o console mostra "Unauthorized" na aba Resources
+# mesmo o root podendo fazer qualquer coisa via API da AWS.
+#------------------------------------------------------------------------------
+resource "aws_eks_access_entry" "root" {
+  cluster_name  = aws_eks_cluster.this.name
+  principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+  type          = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "root" {
+  cluster_name  = aws_eks_cluster.this.name
+  principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
+
+  depends_on = [aws_eks_access_entry.root]
+}

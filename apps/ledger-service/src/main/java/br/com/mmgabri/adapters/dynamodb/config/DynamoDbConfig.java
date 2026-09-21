@@ -21,10 +21,10 @@ public class DynamoDbConfig {
     @Bean
     public DynamoDbClient dynamoDbClient() {
         var httpClient = ApacheHttpClient.builder()
-                .maxConnections(50)
+                .maxConnections(200)
                 .connectionTimeout(Duration.ofSeconds(2))
                 .socketTimeout(Duration.ofSeconds(5))
-                .connectionAcquisitionTimeout(Duration.ofMillis(300))
+                .connectionAcquisitionTimeout(Duration.ofSeconds(1))
                 .build();
 
         var override = ClientOverrideConfiguration.builder()

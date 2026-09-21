@@ -82,11 +82,6 @@ variable "autorizador_debito_ecr_repository" {
   type        = string
 }
 
-variable "conta_ecr_repository" {
-  description = "Nome do repositório ECR para o serviço conta"
-  type        = string
-}
-
 variable "datadog_api_key" {
   description = "Api key datadog"
   type        = string

@@ -85,6 +85,13 @@
             <version>${aws.sdk.version}</version>
         </dependency>
 
+        <!-- STS - obrigatorio para IRSA (troca do web identity token do EKS por credenciais via AssumeRoleWithWebIdentity) -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sts</artifactId>
+            <version>${aws.sdk.version}</version>
+        </dependency>
+
         <!-- DynamoDB -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>

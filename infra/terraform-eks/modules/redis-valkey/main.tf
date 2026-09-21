@@ -11,7 +11,7 @@ resource "aws_security_group" "valkey_sg" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description     = "Acesso a partir dos nós/pods do cluster EKS"
+    description     = "Acesso a partir dos nos/pods do cluster EKS"
     from_port       = 6379
     to_port         = 6379
     protocol        = "tcp"

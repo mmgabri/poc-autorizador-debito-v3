@@ -89,7 +89,7 @@ resource "aws_ecs_task_definition" "service_task" {
       environment = [
         { name = "ECS_FARGATE", value = "true" },
         { name = "DD_API_KEY", value = var.datadog_api_key },
-        { name = "DD_SITE", value = "us5.datadoghq.com" },
+        { name = "DD_SITE", value = "datadoghq.com" },
         { name = "DD_APM_ENABLED", value = "true" },
         { name = "DD_LOGS_ENABLED", value = "true" },
         { name = "DD_DOGSTATSD_NON_LOCAL_TRAFFIC", value = "true" },

@@ -1,16 +1,17 @@
 package br.com.mmgabri.services;
 
 import br.com.mmgabri.adapters.dynamodb.entity.ComandoContaEntity;
+import br.com.mmgabri.adapters.dynamodb.mapper.ComandoContaMapper;
 import br.com.mmgabri.adapters.dynamodb.repository.ComandoContaRepository;
 import br.com.mmgabri.adapters.redis.LedgerCompletionRedisPublisher;
 import br.com.mmgabri.domain.ComandoContaRequest;
+import br.com.mmgabri.domain.enuns.ComandoContaStatusEnum;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.time.OffsetDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -20,31 +21,31 @@ public class ComandoContaService {
 
     private final ComandoContaRepository comandoContaRepository;
     private final LedgerCompletionRedisPublisher completionPublisher;
+    private final ComandoContaMapper comandoContaMapper;
 
     public void execute(ComandoContaRequest payload) {
         sleep(Duration.ofMillis(payload.sleepLedgerEfetivacao()));
 
         boolean approved = "000".equals(payload.customReturnLedger());
         String errorDescription = getMessage(payload.customReturnLedger());
+        ComandoContaEntity fields = comandoContaMapper.toResultFields(payload, approved, errorDescription);
 
-        ComandoContaEntity entity = new ComandoContaEntity();
-        entity.setCorrelationId(payload.correlationId());
-        entity.setStatus("completed");
-        entity.setContaId(payload.contaId());
-        entity.setApproved(approved);
-        entity.setErrorCode(payload.customReturnLedger());
-        entity.setErrorDescription(errorDescription);
-        entity.setUpdatedAt(OffsetDateTime.now().toString());
-
-        if (comandoContaRepository.completeIfPending(entity)) {
+        // Caso normal: registro ainda PENDING -> COMPLETED, e sinaliza via Redis
+        // (alguém pode estar esperando).
+        if (comandoContaRepository.tryTransition(fields, ComandoContaStatusEnum.PENDING, ComandoContaStatusEnum.COMPLETED)) {
             completionPublisher.signal(payload.correlationId());
             logger.debug("Efetivação concluída via SQS. correlationId={} approved={}", payload.correlationId(), approved);
-        } else {
-            // Autorizador já desistiu (TIMEOUT) — ninguém está mais ouvindo o Redis.
-            // Grava o resultado real mesmo assim; não sinaliza.
-            comandoContaRepository.forceCompleteLate(entity);
-            logger.warn("Efetivação concluída após o autorizador desistir por timeout. correlationId={} approved={}", payload.correlationId(), approved);
+            return;
         }
+
+        // Caso de corrida: o autorizador já desistiu (TIMEOUT) - ninguém está mais
+        // ouvindo o Redis. Grava o resultado real mesmo assim; não sinaliza.
+        if (comandoContaRepository.tryTransition(fields, ComandoContaStatusEnum.TIMEOUT, ComandoContaStatusEnum.COMPLETED_LATE)) {
+            logger.warn("Efetivação concluída após o autorizador desistir por timeout. correlationId={} approved={}", payload.correlationId(), approved);
+            return;
+        }
+
+        logger.warn("Nenhuma transição aplicada - comando já resolvido (reentrega?). correlationId={}", payload.correlationId());
     }
 
     // Simula processamento
