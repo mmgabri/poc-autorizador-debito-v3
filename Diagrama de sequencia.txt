@@ -1,0 +1,51 @@
+sequenceDiagram
+    participant AUT as Autorizador
+    participant DDB as DynamoDB comando-conta
+    participant SQS as SQS comando-conta
+    participant APA as account-posting
+    participant RED as Redis Valkey
+    participant NTC as sqs-notification-compensation
+    participant SND as sqs-sonda-comando-conta
+    participant SON as sonda-comando-conta
+
+    AUT->>DDB: 1. grava comando status PENDING
+    AUT->>SND: 2. agenda sonda com delay de carencia
+    AUT->>SQS: 3. publica comando de lancamento
+    activate AUT
+    AUT->>RED: 4. BLPOP aguarda resposta
+
+    SQS->>APA: 5. consome comando
+    activate APA
+    Note over APA: efetiva lancamento em conta corrente
+    APA->>DDB: 6. transicao condicional PENDING para COMPLETED
+    APA->>RED: 7. LPUSH resultado correlationId
+    deactivate APA
+
+    alt caminho feliz - BLPOP retornou payload
+        RED-->>AUT: 8. entrega resultado ao autorizador
+        AUT->>DDB: 9. transicao condicional para COMPLETED_ACK
+    else timeout com race condition - BLPOP expirou mas account-posting ja concluiu
+        RED--xAUT: 8. timeout sem payload
+        AUT->>DDB: 9. transicao condicional PENDING para TIMEOUT
+        DDB--xAUT: 10. condicao falhou e devolve item com status COMPLETED
+
+        AUT->>DDB: 11. transicao condicional COMPLETED para COMPLETED_ACK
+    else timeout real - BLPOP expirou sem conclusao
+        RED--xAUT: 8. timeout sem payload
+        AUT->>DDB: 9. transicao condicional PENDING para TIMEOUT
+    end
+    deactivate AUT
+
+    Note over DDB,NTC: conclusao tardia do account-posting
+    APA->>DDB: 12. transicao condicional TIMEOUT para COMPLETED_LATE
+    APA->>RED: 13. LPUSH orfao expira por TTL
+    APA->>NTC: 14. publica pedido de compensacao
+
+    Note over SND,SON: sonda verifica se transação ficou pendente
+    SND-->>SON: 15. mensagem fica visivel
+    SON->>DDB: 16. GetItem por commandId
+    alt status COMPLETED_ACK
+        SON->>SON: 17. descarta, nada a compensar
+    else demais status
+        SON->>NTC: 17. publica pedido de compensacao
+    end

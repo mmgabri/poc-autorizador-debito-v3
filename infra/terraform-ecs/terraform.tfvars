@@ -35,6 +35,6 @@ security_service_ecr_repository     = "140023369634.dkr.ecr.us-east-1.amazonaws.
 autorizador_debito_ecr_repository   = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/autorizador-debito"
 formatador_bandeiras_ecr_repository = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/formatador-bandeiras"
 
-datadog_api_key = "35ca9af351b9a33a19bce59652d93092"
+datadog_api_key = "e1ed6f0aa9f90d5889ab3fc1ff269b9d"
 
 logging_level = "INFO"
