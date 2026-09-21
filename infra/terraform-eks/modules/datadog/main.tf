@@ -23,6 +23,7 @@ resource "helm_release" "datadog" {
         logLevel             = "INFO"
         apm = {
           portEnabled = true
+          useHostPort = true
         }
         logs = {
           enabled             = true
@@ -30,6 +31,7 @@ resource "helm_release" "datadog" {
         }
         dogstatsd = {
           nonLocalTraffic = true
+          useHostPort     = true
         }
         env = [
           {
