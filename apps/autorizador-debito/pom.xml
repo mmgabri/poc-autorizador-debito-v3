@@ -131,20 +131,6 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-datadog</artifactId>
         </dependency>
-
-        <!-- Redis (BLPOP para aguardar a conclusão assíncrona da efetivação) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-
-        <!-- Pool de conexões Lettuce (blockingRedisConnectionFactory) - sem isso o
-             factory abre uma conexão TCP nova a cada BLPOP, sem limite, arriscando
-             estourar o maxclients do Valkey sob alta concorrência -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-pool2</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

@@ -4,10 +4,6 @@ spring:
       enabled: true
   config:
     import: "classpath:products_config.yml"
-  data:
-    redis:
-      host: ${REDIS_HOST:}
-      port: 6379
   grpc:
     server:
       port: 59091
@@ -69,15 +65,16 @@ grpc:
   limit-service-client:
     timeout: 1500
   ledger-service-client:
-    timeout: 1500
-    completion-timeout: 600
+    # Precisa cobrir a EFETIVACAO inteira (SQS + conta + callback + pub/sub),
+    # não só a SIMULACAO - o ledger-service já tem seu próprio timeout interno
+    # (app.async.response-timeout-seconds, 30s) que decide antes deste estourar.
+    timeout: 35000
   antifraud-service-client:
     timeout: 1500
 
 aws:
   sqs:
     compensation-transaction-queue-name: "queue-compensation-transaction"
-    comando-conta-queue-name: "queue-comando-conta"
 
 custom:
   database-mode-async: ${DATABASE_MODE_ASYNC}

@@ -298,3 +298,28 @@ module "k8s_antifraud_service" {
     LOGGING_LEVEL = var.logging_level
   }
 }
+
+#------------------------------------------------------------------------------
+# Deployment/Service - conta (consumidor SQS + callback gRPC pro ledger-service;
+# sem servidor gRPC próprio, por isso sem grpc_port)
+#------------------------------------------------------------------------------
+module "k8s_conta" {
+  source = "./modules/k8s-deployment"
+
+  name                 = "conta"
+  namespace            = kubernetes_namespace.app.metadata[0].name
+  image                = "${var.conta_ecr_repository}:latest"
+  container_port       = 9098
+  replicas             = 3
+  service_account_name = kubernetes_service_account.app.metadata[0].name
+  datadog_apm_enabled  = true
+  cpu_request          = "500m"
+  cpu_limit            = "2"
+  memory_request       = "1Gi"
+  memory_limit         = "4Gi"
+
+  env = {
+    LOGGING_LEVEL = var.logging_level
+    DD_API_KEY    = var.datadog_api_key
+  }
+}

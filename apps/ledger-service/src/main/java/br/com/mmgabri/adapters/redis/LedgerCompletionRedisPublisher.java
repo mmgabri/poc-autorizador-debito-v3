@@ -1,38 +1,50 @@
 package br.com.mmgabri.adapters.redis;
 
+import br.com.mmgabri.grpc.retornoconta.v1.RetornoContaRequest;
 import br.com.mmgabri.services.MetricsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.time.OffsetDateTime;
 
+/**
+ * Passo PUB: publica o resultado real no canal fixo da instância que
+ * despachou (roteado por instanceId — ver {@link RetornoContaPayload}).
+ */
 @Component
 @RequiredArgsConstructor
 public class LedgerCompletionRedisPublisher {
 
     private static final Logger logger = LoggerFactory.getLogger(LedgerCompletionRedisPublisher.class);
-    private static final String KEY_PREFIX = "efetivacao:ledger:";
-    // TTL de segurança: limpa a chave sozinha caso o autorizador nunca faça o BLPOP
-    // (timeout já estourado antes da efetivação terminar).
-    private static final Duration KEY_TTL = Duration.ofSeconds(30);
+    public static final String CHANNEL_PREFIX = "efetivacao:conta:";
 
     private final MetricsService metricsService;
     private final StringRedisTemplate redisTemplate;
+    private final ObjectMapper objectMapper;
 
-    /**
-     * Sinal "acorda" para o autorizador aguardando via BLPOP — o valor em si não
-     * importa, o resultado real da efetivação fica só no DynamoDB (fonte da verdade).
-     */
-    public void signal(String correlationId) {
+    public void publish(RetornoContaRequest retorno) {
         var startTime = OffsetDateTime.now();
-        String key = KEY_PREFIX + correlationId;
-        redisTemplate.opsForList().leftPush(key, OffsetDateTime.now().toString());
-        redisTemplate.expire(key, KEY_TTL);
+        String channel = CHANNEL_PREFIX + retorno.getInstanceId();
+        var payload = new RetornoContaPayload(
+                retorno.getCorrelationId(),
+                retorno.getApproved(),
+                retorno.getErrorCode(),
+                retorno.getErrorDescription()
+        );
+        redisTemplate.convertAndSend(channel, toJson(payload));
         metricsService.incrementMetric("app_ledger_duration_publish_redis", startTime);
-        logger.debug("Sinal de conclusão publicado no Redis. key={}", key);
+        logger.debug("Resultado publicado no canal Redis. channel={} correlationId={}", channel, retorno.getCorrelationId());
+    }
+
+    private String toJson(RetornoContaPayload payload) {
+        try {
+            return objectMapper.writeValueAsString(payload);
+        } catch (Exception e) {
+            throw new IllegalStateException("Erro ao serializar RetornoContaPayload", e);
+        }
     }
 }

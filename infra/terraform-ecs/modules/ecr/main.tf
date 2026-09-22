@@ -14,6 +14,7 @@ locals {
     "autorizador-debito/antifraud-service",
     "autorizador-debito/formatador-bandeiras",
     "autorizador-debito/autorizador-debito",
+    "autorizador-debito/conta",
   ]
 }
 

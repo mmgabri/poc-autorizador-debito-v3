@@ -4,10 +4,6 @@ spring:
       enabled: true
   config:
     import: "classpath:products_config.yml"
-  data:
-    redis:
-      host: 127.0.0.1
-      port: 6379
   grpc:
     server:
       port: 59091
@@ -70,14 +66,12 @@ grpc:
     timeout: 3600000
   ledger-service-client:
     timeout: 3600000
-    completion-timeout: 600
   antifraud-service-client:
     timeout: 3600000
 
 aws:
   sqs:
     compensation-transaction-queue-name: "queue-compensation-transaction"
-    comando-conta-queue-name: "queue-comando-conta"
 
 custom:
   database-mode-async: false

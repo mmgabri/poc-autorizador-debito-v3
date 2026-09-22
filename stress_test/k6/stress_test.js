@@ -43,7 +43,7 @@ export const options = {
 
 export default function () {
   const url =
-    'http://a8adeaf8205254e31835613858b92e0e-ce5a3fba68c4dc90.elb.us-east-1.amazonaws.com:9090/authorization';
+    'http://af2aa120813c44231a1b64d53a1847bd-191a821d2d9c1f3e.elb.us-east-1.amazonaws.com:9090/authorization';
 
   const payloadObj = {
     messageIso: {

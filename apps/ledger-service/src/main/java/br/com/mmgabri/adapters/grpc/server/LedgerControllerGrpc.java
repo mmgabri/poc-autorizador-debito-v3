@@ -3,6 +3,7 @@ package br.com.mmgabri.adapters.grpc.server;
 import br.com.mmgabri.grpc.ledger.v1.LedgerRequest;
 import br.com.mmgabri.grpc.ledger.v1.LedgerResponse;
 import br.com.mmgabri.grpc.ledger.v1.LedgerServiceGrpc;
+import br.com.mmgabri.services.LedgerEfetivacaoService;
 import br.com.mmgabri.services.LedgerSimulacaoService;
 import br.com.mmgabri.services.MetricsService;
 import io.grpc.stub.StreamObserver;
@@ -14,9 +15,6 @@ import org.springframework.grpc.server.service.GrpcService;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 
-// A efetivação não chega mais por aqui — o autorizador-debito publica direto na
-// fila SQS queue-comando-conta (ver ComandoContaSqsAdapter). Este RPC hoje só
-// atende simulação.
 @GrpcService
 @RequiredArgsConstructor
 public class LedgerControllerGrpc extends LedgerServiceGrpc.LedgerServiceImplBase {
@@ -24,6 +22,7 @@ public class LedgerControllerGrpc extends LedgerServiceGrpc.LedgerServiceImplBas
     private static final Logger logger = LoggerFactory.getLogger(LedgerControllerGrpc.class);
 
     private final LedgerSimulacaoService ledgerSimulacaoService;
+    private final LedgerEfetivacaoService ledgerEfetivacaoService;
     private final MetricsService metricsService;
 
     @Override
@@ -31,7 +30,9 @@ public class LedgerControllerGrpc extends LedgerServiceGrpc.LedgerServiceImplBas
         var startTime = OffsetDateTime.now();
         logger.debug("Received gerarLancamento. tipoOperacao={}", request.getTipoOperacao());
         try {
-            var response = ledgerSimulacaoService.execute(request);
+            var response = "EFETIVACAO".equals(request.getTipoOperacao())
+                    ? ledgerEfetivacaoService.execute(request)
+                    : ledgerSimulacaoService.execute(request);
             responseObserver.onNext(response);
             responseObserver.onCompleted();
             onSuccess(startTime, request.getTipoOperacao());
@@ -53,6 +54,6 @@ public class LedgerControllerGrpc extends LedgerServiceGrpc.LedgerServiceImplBas
         var delay = 0L;
         delay = Duration.between(startTime, OffsetDateTime.now()).toMillis();
         metricsService.incrementMetric("app_ledger_duration_transaction", startTime, "method:gerarLancamento", "tipo_operacao:"+tipoOperacao);
-        logger.debug("Processamento concluído em {} (ms)", delay);
+        logger.info("Processamento concluído em {} (ms)", delay);
     }
 }

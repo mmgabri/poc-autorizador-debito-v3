@@ -1,7 +1,6 @@
 package br.com.mmgabri.adapters.sqs;
 
 import br.com.mmgabri.domain.ComandoContaRequest;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -19,9 +18,9 @@ import software.amazon.awssdk.services.sqs.model.SqsException;
 public class ComandoContaSqsPublisher {
 
     private static final Logger logger = LoggerFactory.getLogger(ComandoContaSqsPublisher.class);
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private final SqsClient sqsClient;
+    private final ObjectMapper objectMapper;
 
     @Value("${aws.sqs.comando-conta-queue-name}")
     private String queueName;
@@ -35,7 +34,7 @@ public class ComandoContaSqsPublisher {
                     .messageBody(toJson(request))
                     .build());
 
-            logger.debug("Comando publicado no SQS. correlationId={}", request.correlationId());
+            logger.debug("Comando publicado no SQS para o conta. correlationId={}", request.correlationId());
         } catch (QueueDoesNotExistException e) {
             logger.error("Fila SQS não encontrada. queueName={}", queueName, e);
             queueUrl = null;
@@ -63,7 +62,7 @@ public class ComandoContaSqsPublisher {
     private String toJson(ComandoContaRequest request) {
         try {
             return objectMapper.writeValueAsString(request);
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             throw new IllegalStateException("Erro ao serializar ComandoContaRequest", e);
         }
     }

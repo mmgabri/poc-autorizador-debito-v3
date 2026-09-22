@@ -1,4 +1,4 @@
-package br.com.mmgabri.adapter.sqs;
+package br.com.mmgabri.adapters.sqs;
 
 import br.com.mmgabri.domain.ComandoContaRequest;
 import br.com.mmgabri.services.ContaService;
@@ -17,6 +17,7 @@ import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -85,7 +86,6 @@ public class ComandoContaSqsAdapter implements SmartLifecycle {
                         .maxNumberOfMessages(maxMessages)
                         .waitTimeSeconds(waitTimeSeconds)
                         .visibilityTimeout(visibilityTimeoutSeconds)
-                        .messageAttributeNames("instanceId")
                         .build();
 
                 List<Message> messages = sqsClient.receiveMessage(request).messages();
@@ -101,15 +101,12 @@ public class ComandoContaSqsAdapter implements SmartLifecycle {
 
     private void processMessage(Message message) {
         var startTime = OffsetDateTime.now();
-
         String messageId = message.messageId();
 
         try {
             metricsService.incrementMetricCounter("app_conta_msg_received_ledger");
-            ComandoContaRequest body = objectMapper.readValue(message.body(), ComandoContaRequest.class);
-            logger.debug("Mensagem recebida da fila SQS. messageId={} correlationId={}", messageId, body.correlationId());
-            String instanceId = message.messageAttributes().get("instanceId").stringValue();
-            ComandoContaRequest request = new ComandoContaRequest(body.correlationId(), instanceId, body.customReturnConta(), body.sleepConta());
+            ComandoContaRequest request = objectMapper.readValue(message.body(), ComandoContaRequest.class);
+            logger.debug("Mensagem recebida da fila SQS. messageId={} correlationId={}", messageId, request.correlationId());
 
             contaService.execute(request);
 
@@ -119,7 +116,7 @@ public class ComandoContaSqsAdapter implements SmartLifecycle {
                     .build());
 
             metricsService.incrementMetric("app_conta_duration_transaction", startTime, "method:processMessage");
-            logger.debug("Mensagem processada com sucesso. messageId={} correlationId={}", messageId, request.correlationId());
+            logger.debug("Mensagem processada com sucesso em {} ms | correlationId={}", Duration.between(startTime, OffsetDateTime.now()).toMillis(), request.correlationId());
         } catch (Exception e) {
             logger.error("Falha ao processar mensagem SQS. messageId={}", messageId, e);
         }

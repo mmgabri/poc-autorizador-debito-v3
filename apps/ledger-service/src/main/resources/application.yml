@@ -15,18 +15,12 @@ spring:
 
 aws:
   sqs:
-    enabled: true
     region: "us-east-1"
-    queue-name: "queue-comando-conta"
-    max-messages: 10
-    wait-time-seconds: 20
-    visibility-timeout-seconds: 30
-    error-backoff-millis: 2000
-    poll-threads: 5
-    consumer-threads: 50
+    comando-conta-queue-name: "queue-comando-conta"
 
-custom:
-  sleep: 1
+app:
+  async:
+    response-timeout: 700ms
 
 logging:
   level:

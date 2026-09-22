@@ -1,9 +1,8 @@
 package br.com.mmgabri.services;
 
-
-import br.com.mmgabri.adapter.grpc.client.LedgerServiceGrpcClient;
+import br.com.mmgabri.adapters.grpc.client.LedgerServiceGrpcClient;
 import br.com.mmgabri.domain.ComandoContaRequest;
-import br.com.mmgabri.grpc.RetornoContaRequest;
+import br.com.mmgabri.grpc.retornoconta.v1.RetornoContaRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,14 +16,14 @@ public class ContaService {
 
     public void execute(ComandoContaRequest payload) {
 
-        sleep(Duration.ofMillis(payload.sleepConta()));
+        sleep(Duration.ofMillis(payload.sleepLedgerEfetivacao()));
 
         RetornoContaRequest request = RetornoContaRequest.newBuilder()
                 .setCorrelationId(payload.correlationId())
                 .setInstanceId(payload.instanceId())
-                .setErrorCode(payload.customReturnConta())
-                .setErrorDescription(getMessage(payload.customReturnConta()))
-                .setApproved("000".equals(payload.customReturnConta()))
+                .setErrorCode(payload.customReturnLedger())
+                .setErrorDescription(getMessage(payload.customReturnLedger()))
+                .setApproved("000".equals(payload.customReturnLedger()))
                 .build();
 
         ledgerClient.execute(request);

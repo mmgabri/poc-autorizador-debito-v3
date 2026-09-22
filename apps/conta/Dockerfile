@@ -1,14 +1,24 @@
-# --- STAGE 1: BUILD ---
+# --- STAGE 1: protos-common (dependência compartilhada, ainda sem registry
+# próprio - instala no cache Maven da imagem, do mesmo jeito que aconteceria
+# localmente via ~/.m2). Build context é a raiz do monorepo. ---
+FROM eclipse-temurin:25-jdk AS protos-common
+WORKDIR /build
+RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
+COPY protos-common ./protos-common
+RUN mvn -q -f protos-common/pom.xml -DskipTests clean install
+
+# --- STAGE 2: BUILD ---
 FROM eclipse-temurin:25-jdk AS build
 WORKDIR /app
 RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
+COPY --from=protos-common /root/.m2 /root/.m2
 
-COPY pom.xml .
+COPY apps/conta/pom.xml .
 RUN mvn -q -DskipTests dependency:resolve
-COPY src ./src
+COPY apps/conta/src ./src
 RUN mvn -q -DskipTests clean package
 
-# --- STAGE 2: RUNTIME ---
+# --- STAGE 3: RUNTIME ---
 FROM eclipse-temurin:25-jre
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
@@ -26,5 +36,5 @@ ENV JAVA_TOOL_OPTIONS="\
   -XX:MaxRAMPercentage=75 \
 "
 
-EXPOSE 9090
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+EXPOSE 9098
+ENTRYPOINT ["/bin/sh", "-c", "export INSTANCIA_IP=$(hostname -i | awk '{print $1}') && java $JAVA_TOOL_OPTIONS -jar /app/app.jar"]

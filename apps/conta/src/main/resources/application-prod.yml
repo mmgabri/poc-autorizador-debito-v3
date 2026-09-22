@@ -1,14 +1,24 @@
 server:
   port: 9098
 
+spring:
+  threads:
+    virtual:
+      enabled: true
+  grpc:
+    client:
+      channel:
+        ledger:
+          target: dns:///ledger-service-svc.autorizador-debito.svc.cluster.local:59096
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+
 grpc:
   ledger-service-client:
-    port: 59096
-    host: ledger-service-svc.autorizador-debito.local
     timeout: 5000
-
-custom:
-  sleep: 0
 
 aws:
   sqs:
@@ -36,7 +46,7 @@ management:
       export:
         apiKey: ${DD_API_KEY}
         step: 5s
-        uri: https://us5.datadoghq.com/
+        uri: https://api.datadoghq.com/
   endpoints:
     web:
       exposure:

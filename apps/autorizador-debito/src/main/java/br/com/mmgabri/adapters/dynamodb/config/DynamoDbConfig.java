@@ -1,6 +1,5 @@
 package br.com.mmgabri.adapters.dynamodb.config;
 
-import br.com.mmgabri.adapters.dynamodb.entity.ComandoContaEntity;
 import br.com.mmgabri.adapters.dynamodb.entity.IdempotencyEntity;
 import br.com.mmgabri.adapters.dynamodb.entity.ServiceContextEntity;
 import br.com.mmgabri.adapters.dynamodb.entity.TransactionContextEntity;
@@ -71,13 +70,6 @@ public class DynamoDbConfig {
                             .build()
             );
 
-    private static final TableSchema<ComandoContaEntity> COMANDO_CONTA_SCHEMA =
-            TableSchema.fromBean(
-                    BeanTableSchemaParams.builder(ComandoContaEntity.class)
-                            .lookup(MethodHandles.lookup())
-                            .build()
-            );
-
     @Bean
     public DynamoDbTable<TransactionContextEntity> transactionContextTable(DynamoDbEnhancedClient enhancedClient) {
         return enhancedClient.table(TransactionContextEntity.TABLE_NAME, TRANSACTION_CONTEXT_SCHEMA);
@@ -91,10 +83,5 @@ public class DynamoDbConfig {
     @Bean
     public DynamoDbTable<IdempotencyEntity> idempotencyTable(DynamoDbEnhancedClient enhancedClient) {
         return enhancedClient.table(IdempotencyEntity.TABLE_NAME, IDEMPOTENCY_SCHEMA);
-    }
-
-    @Bean
-    public DynamoDbTable<ComandoContaEntity> comandoContaTable(DynamoDbEnhancedClient enhancedClient) {
-        return enhancedClient.table(ComandoContaEntity.TABLE_NAME, COMANDO_CONTA_SCHEMA);
     }
 }

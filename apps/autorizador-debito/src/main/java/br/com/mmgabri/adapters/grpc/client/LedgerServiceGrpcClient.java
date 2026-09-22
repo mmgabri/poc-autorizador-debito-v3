@@ -5,6 +5,7 @@ import br.com.mmgabri.adapters.grpc.mappers.LedgerMapper;
 import br.com.mmgabri.application.domains.Payload;
 import br.com.mmgabri.application.exceptions.BusinessException;
 import br.com.mmgabri.application.services.MetricsService;
+import br.com.mmgabri.application.domains.enuns.ServicesEnum;
 import br.com.mmgabri.grpc.ledger.v1.LedgerResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -14,46 +15,45 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 
+import static br.com.mmgabri.application.domains.enuns.ServicesEnum.LEDGER_SERVICE;
 import static br.com.mmgabri.application.domains.enuns.ServicesEnum.LEDGER_SERVICE_SIMULATION;
 
-// Simulação continua síncrona via gRPC. Efetivação é assíncrona (SQS/DynamoDB)
-// e vive em LedgerEfetivacaoService — fluxos diferentes, clientes diferentes.
 @Service
 @RequiredArgsConstructor
 public class LedgerServiceGrpcClient {
     private static final Logger logger = LoggerFactory.getLogger(LedgerServiceGrpcClient.class);
-    private static final String TIPO_OPERACAO_SIMULACAO = "SIMULACAO";
 
     private final MetricsService metricsService;
     private final LedgerGrpcStubProvider ledgerGrpcStubProvider;
     private final LedgerMapper mapper;
 
     @SneakyThrows
-    public LedgerResponse execute(Payload payload) {
+    public LedgerResponse execute(Payload payload, String tipoOperacao) {
+        ServicesEnum service = "SIMULACAO".equals(tipoOperacao) ? LEDGER_SERVICE_SIMULATION : LEDGER_SERVICE;
         var startTime = OffsetDateTime.now();
         try {
-            var request = mapper.payloadToLedgerRequest(payload, TIPO_OPERACAO_SIMULACAO);
-            logger.debug("Starting service call: {}", LEDGER_SERVICE_SIMULATION.getServiceName());
+            var request = mapper.payloadToLedgerRequest(payload, tipoOperacao);
+            logger.debug("Starting service call: {} - tipoOperacao: {}", service.getServiceName(), tipoOperacao);
 
             var response = ledgerGrpcStubProvider.getStub().gerarLancamento(request);
-            return handleResponse(response, startTime);
+            return handleResponse(response, startTime, service);
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            logger.error("Service {} execution failed", LEDGER_SERVICE_SIMULATION.getServiceName());
-            metricsService.incrementMetric("app_duration_service", startTime, "service:" + LEDGER_SERVICE_SIMULATION.getServiceName(), "status:error");
-            throw new BusinessException(LEDGER_SERVICE_SIMULATION.getServiceName(), "999", e.getMessage());
+            logger.error("Service {} execution failed", service.getServiceName());
+            metricsService.incrementMetric("app_duration_service", startTime, "service:" + service.getServiceName(), "status:error");
+            throw new BusinessException(service.getServiceName(), "999", e.getMessage());
         }
     }
 
-    private LedgerResponse handleResponse(LedgerResponse response, OffsetDateTime startTime) {
+    private LedgerResponse handleResponse(LedgerResponse response, OffsetDateTime startTime, ServicesEnum service) {
         if (!response.getApproved()) {
-            logger.error("Transaction denied by service '{}': {} - {}", LEDGER_SERVICE_SIMULATION.getServiceName(), response.getErrorCode(), response.getErrorDescription());
-            metricsService.incrementMetric("app_duration_service", startTime, "service:" + LEDGER_SERVICE_SIMULATION.getServiceName(), "status:error_business");
-            throw new BusinessException(LEDGER_SERVICE_SIMULATION.getServiceName(), response.getErrorCode(), response.getErrorDescription());
+            logger.error("Transaction denied by service '{}': {} - {}", service.getServiceName(), response.getErrorCode(), response.getErrorDescription());
+            metricsService.incrementMetric("app_duration_service", startTime, "service:" + service.getServiceName(), "status:error_business");
+            throw new BusinessException(service.getServiceName(), response.getErrorCode(), response.getErrorDescription());
         }
-        logger.debug("Service {} executed successfully", LEDGER_SERVICE_SIMULATION.getServiceName());
-        metricsService.incrementMetric("app_duration_service", startTime, "service:" + LEDGER_SERVICE_SIMULATION.getServiceName(), "status:success");
+        logger.debug("Service {} executed successfully", service.getServiceName());
+        metricsService.incrementMetric("app_duration_service", startTime, "service:" + service.getServiceName(), "status:success");
         return response;
     }
 }

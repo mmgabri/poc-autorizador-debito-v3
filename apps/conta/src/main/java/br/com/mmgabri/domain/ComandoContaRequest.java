@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public record ComandoContaRequest(
         String correlationId,
         String instanceId,
-        String customReturnConta,
-        Integer sleepConta
+        String contaId,
+        String customReturnLedger,
+        long sleepLedgerEfetivacao
 ) {
 }

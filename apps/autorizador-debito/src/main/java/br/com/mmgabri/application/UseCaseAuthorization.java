@@ -8,7 +8,6 @@ import br.com.mmgabri.application.domains.enuns.ServicesEnum;
 import br.com.mmgabri.application.exceptions.BusinessException;
 import br.com.mmgabri.application.exceptions.ServiceAwareException;
 import br.com.mmgabri.application.services.CompensationTransactionService;
-import br.com.mmgabri.application.services.LedgerEfetivacaoService;
 import br.com.mmgabri.application.services.TransactionContextRegistryService;
 import br.com.mmgabri.grpc.autorizador.v1.AutorizadorResponse;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +41,6 @@ public class UseCaseAuthorization {
     private final AntiFraudServiceGrpcClient antiFraudGrpcClient;
     private final CompensationTransactionService compensationTransactionService;
     private final TransactionContextRegistryService transactionContextRegistry;
-    private final LedgerEfetivacaoService ledgerEfetivacaoService;
 
     public AutorizadorResponse execute(Payload payload) {
 
@@ -56,7 +54,7 @@ public class UseCaseAuthorization {
         var rulesFuture = handleCompletion(supplyAsync(() -> rulesGrpcClient.execute(payload)), transactionContext, RULES_SERVICE);
         var securityFuture = handleCompletion(supplyAsync(() -> segurancaGrpcClient.execute(payload)), transactionContext, SECURITY_SERVICE);
         var limitSimuFuture = handleCompletion(supplyAsync(() -> limiteGrpcClient.execute(payload, "SIMULACAO")), transactionContext, LIMIT_SERVICE_SIMULATION);
-        var ledgerSimuFuture = handleCompletion(supplyAsync(() -> ledgerGrpcClient.execute(payload)), transactionContext, LEDGER_SERVICE_SIMULATION);
+        var ledgerSimuFuture = handleCompletion(supplyAsync(() -> ledgerGrpcClient.execute(payload, "SIMULACAO")), transactionContext, LEDGER_SERVICE_SIMULATION);
 
         waitAll(rulesFuture, securityFuture, limitSimuFuture, ledgerSimuFuture);
 
@@ -70,13 +68,10 @@ public class UseCaseAuthorization {
         logger.debug("Phase 1 approved - proceeding to Phase 2 EFETIVACAO");
 
         // ── Phase 2: EFETIVACAO (parallel) ───────────────────────────────────
-        dispatchLedgerEfetivacaoAsync(payload);
         var antiFraudFuture = handleCompletion(supplyAsync(() -> antiFraudGrpcClient.execute(payload)), transactionContext, ANTIFRAUD_SERVICE);
         var limitEfetFuture = handleCompletion(supplyAsync(() -> limiteGrpcClient.execute(payload, "EFETIVACAO")), transactionContext, LIMIT_SERVICE);
-        waitAll(antiFraudFuture, limitEfetFuture);
-
-        var ledgerEfetFuture = handleCompletion(supplyAsync(() -> ledgerEfetivacaoService.awaitCompletion(payload)), transactionContext, LEDGER_SERVICE);
-        waitAll(ledgerEfetFuture);
+        var ledgerEfetFuture = handleCompletion(supplyAsync(() -> ledgerGrpcClient.execute(payload, "EFETIVACAO")), transactionContext, LEDGER_SERVICE);
+        waitAll(antiFraudFuture, limitEfetFuture, ledgerEfetFuture);
 
         if (allSucceeded(antiFraudFuture, limitEfetFuture, ledgerEfetFuture)) {
             return onCompleteTransactionApproved(transactionContext, payload);
@@ -163,16 +158,4 @@ public class UseCaseAuthorization {
     private Throwable unwrap(Throwable ex) {
         return (ex instanceof java.util.concurrent.CompletionException && ex.getCause() != null) ? ex.getCause() : ex;
     }
-
-    private void dispatchLedgerEfetivacaoAsync(Payload payload) {
-        asyncTaskExecutor.execute(() -> {
-            try {
-                ledgerEfetivacaoService.dispatch(payload);
-            } catch (Exception e) {
-                logger.error("Falha ao despachar efetivação do ledger. correlationId={}", payload.getHeaderMessage().getCorrelationId(), e);
-            }
-        });
-    }
-
-
 }

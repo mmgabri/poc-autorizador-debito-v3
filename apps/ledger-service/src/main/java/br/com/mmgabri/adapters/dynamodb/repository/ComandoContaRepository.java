@@ -8,15 +8,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.model.IgnoreNullsMode;
+import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
 
+import static br.com.mmgabri.domain.enuns.ComandoContaStatusEnum.PENDING;
+
+/**
+ * Trilha de auditoria da efetivação (PENDING → COMPLETED → COMPLETED_ACK).
+ * Sem compare-and-swap: nesse desenho as 3 escritas são sempre feitas por
+ * este mesmo serviço, em ordem causal (o passo seguinte só existe porque o
+ * anterior aconteceu) — não há dois processos disputando a mesma transição
+ * como havia no desenho anterior (autorizador vs. ledger).
+ */
 @Repository
 @RequiredArgsConstructor
 public class ComandoContaRepository {
@@ -26,41 +33,57 @@ public class ComandoContaRepository {
     private final MetricsService metricsService;
 
     /**
-     * Tenta a transição {@code from} → {@code to} de forma atômica
-     * (compare-and-swap): só grava {@code fields} (com status já setado para
-     * {@code to}) se o status atual no DynamoDB for exatamente {@code from}.
-     * <p>
-     * Retorna {@code false} sem lançar exceção quando a condição não bate —
-     * isso é esperado sempre que o autorizador já mudou o status antes, não é
-     * um erro. Quem chama decide o que fazer a seguir (ex: tentar outra
-     * transição, ou desistir).
+     * Cria o registro inicial (INSERT → PENDING).
      */
-    public boolean tryTransition(ComandoContaEntity fields, ComandoContaStatusEnum from, ComandoContaStatusEnum to) {
+    public void insertPending(ComandoContaEntity entity) {
+        var startTime = OffsetDateTime.now();
+        entity.setStatus(PENDING);
+
+        try {
+            table.putItem(PutItemEnhancedRequest.builder(ComandoContaEntity.class)
+                    .item(entity)
+                    .build());
+            calculateLatency(startTime, "insertPending", entity.getCorrelationId());
+            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:insertPending", "status:success");
+        } catch (Exception e) {
+            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:insertPending", "status:error");
+            logger.error("Failed to insert comando_conta into DynamoDB table. correlationId={}", entity.getCorrelationId(), e);
+        }
+    }
+
+    /**
+     * Grava o resultado real (approved/errorCode/errorDescription) e marca
+     * COMPLETED — chamado pelo passo PUB, antes do publish no Redis.
+     */
+    public void updateCompleted(ComandoContaEntity fields) {
+        update(fields, ComandoContaStatusEnum.COMPLETED, "updateCompleted");
+    }
+
+    /**
+     * Marca COMPLETED_ACK — chamado pelo passo SUB, depois de consumir a
+     * notificação via pub/sub (com ou sem future pendente ainda vivo).
+     */
+    public void updateCompletedAck(String correlationId) {
+        ComandoContaEntity fields = ComandoContaEntity.builder()
+                .correlationId(correlationId)
+                .updatedAt(OffsetDateTime.now().toString())
+                .build();
+        update(fields, ComandoContaStatusEnum.COMPLETED_ACK, "updateCompletedAck");
+    }
+
+    private void update(ComandoContaEntity fields, ComandoContaStatusEnum to, String method) {
         var startTime = OffsetDateTime.now();
         fields.setStatus(to);
-
-        Expression condition = Expression.builder()
-                .expression("#status = :from")
-                .putExpressionName("#status", "status")
-                .putExpressionValue(":from", AttributeValue.builder().s(from.name()).build())
-                .build();
-
         try {
             table.updateItem(UpdateItemEnhancedRequest.builder(ComandoContaEntity.class)
                     .item(fields)
                     .ignoreNullsMode(IgnoreNullsMode.SCALAR_ONLY)
-                    .conditionExpression(condition)
                     .build());
-            calculateLatency(startTime, from + "->" + to, fields.getCorrelationId());
-            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:tryTransition", "from:" + from, "to:" + to, "status:success");
-            return true;
-        } catch (ConditionalCheckFailedException e) {
-            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:tryTransition", "from:" + from, "to:" + to, "status:condition_failed");
-            return false;
+            calculateLatency(startTime, method, fields.getCorrelationId());
+            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:" + method, "status:success");
         } catch (Exception e) {
-            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:tryTransition", "from:" + from, "to:" + to, "status:error");
-            logger.error("Failed to apply transition {}->{} on comando_conta. correlationId={}", from, to, fields.getCorrelationId(), e);
-            return false;
+            metricsService.incrementMetric("app_duration_dynamodb", startTime, "table:comando_conta", "method:" + method, "status:error");
+            logger.error("Failed to apply {} on comando_conta. correlationId={}", method, fields.getCorrelationId(), e);
         }
     }
 
