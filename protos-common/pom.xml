@@ -13,11 +13,37 @@
       declarado abaixo. Hoje, sem registry definido, é consumido via
       `mvn install` local (~/.m2) — a declaração da dependência nos poms
       dos serviços não muda quando isso migrar para um registry real.
+
+      Multi-módulo: um artefato por contrato (protos-ledger, protos-security,
+      etc.), pra cada serviço poder declarar dependência só do(s) contrato(s)
+      que realmente usa — em vez de importar todos os stubs pra usar só um.
+
+      Versionamento independente por módulo: a <version> deste pom raiz é só
+      a identidade do pom pai (herança de build config) e do reactor em si -
+      NÃO é a versão dos artefatos publicados. Cada módulo filho declara sua
+      própria <version>, que pode evoluir sem mexer nos outros (ex: mudar
+      protos-enrichment sem forçar rebuild de versão em protos-ledger).
+      Quem depende de protos-comuns usa a property ${protos-comuns.version}
+      abaixo em vez de ${project.version} - ao bumpar a versão própria de
+      protos-comuns, atualize essa property junto (é a única duplicação
+      manual desse modelo; Maven não tem "pega a versão do meu irmão").
     -->
     <groupId>br.com.mmgabri</groupId>
     <artifactId>protos-common</artifactId>
-    <version>0.3.0</version>
-    <packaging>jar</packaging>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>protos-comuns</module>
+        <module>protos-antifraud</module>
+        <module>protos-autorizador-debito</module>
+        <module>protos-enrichment</module>
+        <module>protos-ledger</module>
+        <module>protos-limit</module>
+        <module>protos-retorno-conta</module>
+        <module>protos-rules</module>
+        <module>protos-security</module>
+    </modules>
 
     <properties>
         <maven.compiler.release>25</maven.compiler.release>
@@ -25,13 +51,30 @@
         <grpc.version>1.76.0</grpc.version>
         <protobuf.version>3.23.4</protobuf.version>
         <protobuf.plugin.version>0.6.1</protobuf.plugin.version>
+
+        <!-- Versão do artefato protos-comuns, referenciada por todo módulo que
+             dependa dele (ver comentário acima sobre versionamento independente). -->
+        <protos-comuns.version>1.0.0</protos-comuns.version>
     </properties>
 
+    <!-- Herdado por todos os módulos filhos automaticamente. -->
     <dependencies>
+        <!-- Exclui proto-google-common-protos (transitiva, traz dezenas de .proto
+             de google/rpc, google/type, google/longrunning etc. que nenhum
+             contrato deste repo importa) - o protobuf-maven-plugin extrai TODO
+             jar do classpath a cada build, e o volume dessa dependência aumenta
+             bastante a chance de colidir com antivírus/indexador do Windows
+             durante o unzip/cleanup do diretório temporário. -->
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
             <version>${grpc.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.api.grpc</groupId>
+                    <artifactId>proto-google-common-protos</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
@@ -45,7 +88,44 @@
         </dependency>
     </dependencies>
 
+    <!-- Herdado por todos os módulos filhos automaticamente - cada um compila
+         só o .proto que está no seu próprio src/main/proto. -->
     <build>
+        <!-- m2e (build incremental da IDE) não sabe rodar unpack-dependencies
+             sobre um artefato reactor ainda não empacotado (MDEP-98) e erra na
+             IDE mesmo com o `mvn install` via terminal funcionando normalmente.
+             Isso só silencia a execução dentro da IDE - o mvn de linha de
+             comando (usado nos Dockerfiles e por qualquer `mvn install`) não é
+             afetado por pluginManagement do m2e. -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.apache.maven.plugins</groupId>
+                                        <artifactId>maven-dependency-plugin</artifactId>
+                                        <versionRange>[3.0.0,)</versionRange>
+                                        <goals>
+                                            <goal>unpack-dependencies</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore/>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <extensions>
             <extension>
                 <groupId>kr.motd.maven</groupId>
@@ -68,10 +148,22 @@
                         io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
                     </pluginArtifact>
                 </configuration>
+                <!-- compile e compile-custom em executions separadas (não juntas
+                     na mesma execution) - combinadas, o cálculo do diretório de
+                     extração de dependências (target/protoc-dependencies/<hash>)
+                     fica inconsistente entre os dois goals nessa versão do plugin,
+                     causando falhas intermitentes tipo "Proto path element is not
+                     a directory". -->
                 <executions>
                     <execution>
+                        <id>compile-protoc</id>
                         <goals>
                             <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>compile-custom-grpc</id>
+                        <goals>
                             <goal>compile-custom</goal>
                         </goals>
                     </execution>

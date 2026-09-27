@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>br.com.mmgabri</groupId>
+        <artifactId>protos-common</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>protos-antifraud</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>br.com.mmgabri</groupId>
+            <artifactId>protos-comuns</artifactId>
+            <version>${protos-comuns.version}</version>
+        </dependency>
+    </dependencies>
+
+    <!-- Resolve o import cross-módulo (comuns/header_message_grpc.proto) de forma
+         determinística via unpack manual, em vez de depender da extração
+         automática (hash-based) do protobuf-maven-plugin, que se mostrou
+         instável no Windows. -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.7.1</version>
+                <executions>
+                    <execution>
+                        <id>unpack-protos-comuns</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>protos-comuns</includeArtifactIds>
+                            <includes>**/*.proto</includes>
+                            <outputDirectory>${project.build.directory}/proto-deps</outputDirectory>
+                            <excludeTransitive>true</excludeTransitive>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <configuration>
+                    <additionalProtoPathElements>
+                        <additionalProtoPathElement>${project.build.directory}/proto-deps</additionalProtoPathElement>
+                    </additionalProtoPathElements>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

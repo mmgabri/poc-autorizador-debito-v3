@@ -50,11 +50,16 @@
             <artifactId>spring-boot-starter-grpc-server</artifactId>
         </dependency>
 
-        <!-- Contrato gRPC compartilhado (proto + stubs gerados) -->
+        <!-- Contratos gRPC compartilhados (proto + stubs gerados) - só os que este serviço usa -->
         <dependency>
             <groupId>br.com.mmgabri</groupId>
-            <artifactId>protos-common</artifactId>
-            <version>0.3.0</version>
+            <artifactId>protos-ledger</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>br.com.mmgabri</groupId>
+            <artifactId>protos-retorno-conta</artifactId>
+            <version>1.0.0</version>
         </dependency>
 
         <!-- Reflection service (grpcurl/postman) - registrado como @Bean BindableService -->

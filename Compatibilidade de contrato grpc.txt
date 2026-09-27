@@ -1,0 +1,52 @@
+COMPATIBILIDADE DE CONTRATO gRPC (PROTOBUF)
+===========================================
+
++----------------------------+--------------------------------------+--------------------------------+------------+
+| Alteração                  | Exemplo                              | Comportamento no consumidor    | Compatível |
++----------------------------+--------------------------------------+--------------------------------+------------+
+| Inclusão de campo          | novo campo: string canal = 6;        | Ignora o campo novo            | Sim        |
+| Deleção de campo           | remove: int64 valor = 3;             | getValor() retorna 0           | Não        |
+| Tipo (wire type diferente) | string cod = 4; -> int32 cod = 4;    | getCod() retorna ""            | Não        |
+| Tipo (mesmo wire type)     | int64 valor = 3; -> int32 valor = 3; | Valor truncado ou incorreto    | Não        |
+| Reuso de número            | remove valor = 3, cria saldo = 3     | Lê o saldo como se fosse valor | Não        |
++----------------------------+--------------------------------------+--------------------------------+------------+
+
+
+COMPATIBILIDADE DE CONTRATO gRPC (PROTOBUF)
+===========================================
+
+1. Inclusão de campo .............................. COMPATÍVEL
+   Exemplo: novo campo  string canal = 6;
+   Consumidor: ignora o campo novo.
+
+2. Deleção de campo ............................... INCOMPATÍVEL
+   Exemplo: remove  int64 valor = 3;
+   Consumidor: getValor() retorna 0.
+
+3. Alteração de tipo (wire type diferente) ........ INCOMPATÍVEL
+   Exemplo: string cod = 4;  ->  int32 cod = 4;
+   Consumidor: getCod() retorna "".
+
+4. Alteração de tipo (mesmo wire type) ............ INCOMPATÍVEL
+   Exemplo: int64 valor = 3;  ->  int32 valor = 3;
+   Consumidor: recebe o valor truncado ou incorreto.
+
+5. Reaproveitamento de número ..................... INCOMPATÍVEL
+   Exemplo: remove valor = 3 e cria saldo = 3
+   Consumidor: lê o saldo como se fosse o valor.
+
+
+Observações
+-----------
+- Nenhum dos casos gera erro. O consumidor segue com o valor default ou
+  incorreto, sem aviso (erro de lógica silencioso).
+- Valores default: 0 (números), "" (string), false (bool), primeiro valor
+  (enum), lista vazia (repeated), instância vazia (message).
+
+Boas práticas
+-------------
+- Ao remover um campo, reservar o número e o nome:
+    reserved 3;
+    reserved "valor";
+- Para mudar o tipo, criar um campo novo com número novo e depreciar o antigo.
+- Validar quebras de contrato no CI com buf breaking.

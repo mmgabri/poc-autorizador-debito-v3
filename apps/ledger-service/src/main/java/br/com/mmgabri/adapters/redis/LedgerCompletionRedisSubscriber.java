@@ -42,7 +42,7 @@ public class LedgerCompletionRedisSubscriber implements MessageListener {
         var hadPendingFuture = pendingRegistry.complete(payload.correlationId(), retornoContaRequest);
         if (!hadPendingFuture) {
             logger.warn("Notificação recebida sem future pendente (timeout já disparou?). correlationId={}", payload.correlationId());
-            metricsService.incrementMetricCounter("app_efetivacao_completion_late");
+            metricsService.incrementMetricCounter("app_ledger_future_nonexistent");
             // TODO: nesse caso o gRPC do autorizador já desistiu (timeout) antes da
             // resposta do conta chegar - gravar comando_conta como COMPLETION_LATE em
             // vez de cair no updateCompletedAck logo abaixo, que hoje trata os dois

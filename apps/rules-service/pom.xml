@@ -49,11 +49,11 @@
             <artifactId>spring-boot-starter-grpc-server</artifactId>
         </dependency>
 
-        <!-- Contrato gRPC compartilhado (proto + stubs gerados) -->
+        <!-- Contrato gRPC compartilhado (proto + stubs gerados) - só o que este serviço usa -->
         <dependency>
             <groupId>br.com.mmgabri</groupId>
-            <artifactId>protos-common</artifactId>
-            <version>0.3.0</version>
+            <artifactId>protos-rules</artifactId>
+            <version>1.0.0</version>
         </dependency>
 
         <!-- Reflection service (grpcurl/postman) - registrado como @Bean BindableService -->

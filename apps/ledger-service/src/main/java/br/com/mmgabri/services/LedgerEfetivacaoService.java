@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -54,14 +55,16 @@ public class LedgerEfetivacaoService {
         comandoContaSqsPublisher.publish(sqsMessage);
         logger.debug("Efetivação despachada via SQS para o conta. correlationId={}", correlationId);
 
+        var startTime = OffsetDateTime.now();
         try {
             RetornoContaRequest retorno = future.get(responseTimeout.toMillis(), TimeUnit.MILLISECONDS);
+            metricsService.incrementMetric("app_ledger_duration_call_async", startTime, "tipo_operacao:EFETIVACAO");
             logger.debug("Continuando processamento após retorno do conta. correlationId={}", correlationId);
             comandoContaRepository.updateCompletedAck(correlationId);
             return toLedgerResponse(request, retorno);
         } catch (TimeoutException e) {
             pendingRegistry.remove(correlationId);
-            metricsService.incrementMetricCounter("app_timeout_efetivacao_conta");
+            metricsService.incrementMetricCounter("app_ledger_timeout_callback");
             logger.warn("Timeout aguardando confirmação do conta. correlationId={}", correlationId);
             throw new StatusRuntimeException(Status.DEADLINE_EXCEEDED
                     .withDescription("Timeout aguardando confirmação do conta"));

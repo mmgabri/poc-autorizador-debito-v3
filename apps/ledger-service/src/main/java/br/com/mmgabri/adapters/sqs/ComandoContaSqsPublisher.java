@@ -1,6 +1,7 @@
 package br.com.mmgabri.adapters.sqs;
 
 import br.com.mmgabri.domain.ComandoContaRequest;
+import br.com.mmgabri.services.MetricsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -13,6 +14,8 @@ import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SqsException;
 
+import java.time.OffsetDateTime;
+
 @Component
 @RequiredArgsConstructor
 public class ComandoContaSqsPublisher {
@@ -21,6 +24,7 @@ public class ComandoContaSqsPublisher {
 
     private final SqsClient sqsClient;
     private final ObjectMapper objectMapper;
+    private final MetricsService metricsService;
 
     @Value("${aws.sqs.comando-conta-queue-name}")
     private String queueName;
@@ -28,12 +32,15 @@ public class ComandoContaSqsPublisher {
     private volatile String queueUrl;
 
     public void publish(ComandoContaRequest request) {
+        var startTime = OffsetDateTime.now();
         try {
             sqsClient.sendMessage(SendMessageRequest.builder()
                     .queueUrl(resolveQueueUrl())
                     .messageBody(toJson(request))
                     .build());
 
+            metricsService.incrementMetric("app_ledger_duration_publish_sqs", startTime, "instanceId:" + request.instanceId());
+            metricsService.incrementMetricCounter("app_ledger_msg_send_conta");
             logger.debug("Comando publicado no SQS para o conta. correlationId={}", request.correlationId());
         } catch (QueueDoesNotExistException e) {
             logger.error("Fila SQS não encontrada. queueName={}", queueName, e);

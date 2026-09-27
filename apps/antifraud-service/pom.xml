@@ -56,11 +56,11 @@
 			<version>${grpc.version}</version>
 		</dependency>
 
-		<!-- Contrato gRPC compartilhado (proto + stubs gerados) -->
+		<!-- Contrato gRPC compartilhado (proto + stubs gerados) - só o que este serviço usa -->
 		<dependency>
 			<groupId>br.com.mmgabri</groupId>
-			<artifactId>protos-common</artifactId>
-			<version>0.3.0</version>
+			<artifactId>protos-antifraud</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 
 		<dependency>
