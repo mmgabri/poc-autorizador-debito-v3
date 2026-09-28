@@ -1,0 +1,48 @@
+product-catalog:
+  products:
+    - productName: "DOMESTIC_PURCHASE_CHIP_PIN_MASTER"
+      enabled: true
+      operation: "DEBIT"
+      accountingScheme: "003005901"
+      descriptionCode: "21055"
+      securityChecks:
+        - "PIN"
+        - "CHIP"
+        - "CVV"
+      servicesToExecute:
+        - "enrichment"
+        - "security"
+        - "rules-engine"
+        - "limit"
+        - "account-posting"
+        - "antifraud"
+
+    - productName: "DOMESTIC_PURCHASE_CONTACTLESS_WITH_PIN_MASTER"
+      enabled: true
+      operation: "DEBIT"
+      accountingScheme: "003005902"
+      descriptionCode: "95250"
+      securityChecks:
+        - "PIN"
+        - "CHIP"
+        - "CVV"
+      servicesToExecute:
+        - "enrichment"
+        - "security"
+        - "rules-engine"
+        - "account-posting"
+
+    - productName: "DOMESTIC_PURCHASE_CONTACTLESS_WITHOUT_PIN_MASTER"
+      enabled: true
+      operation: "DEBIT"
+      accountingScheme: "003005902"
+      descriptionCode: "95210"
+      securityChecks:
+        - "PIN"
+        - "CHIP"
+        - "CVV"
+      servicesToExecute:
+        - "enrichment"
+        - "security"
+        - "rules-engine"
+        - "account-posting"

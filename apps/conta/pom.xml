@@ -38,22 +38,22 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Spring Boot web (para endpoints REST/health) -->
+        <!-- Spring Boot web (for REST/health endpoints) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- conta só é cliente gRPC (chama o ledger-service de volta) - sem servidor -->
+        <!-- conta is only a gRPC client (calls account-posting back) - no server -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-grpc-client</artifactId>
         </dependency>
 
-        <!-- Contrato gRPC compartilhado (proto + stubs gerados) - só o que este serviço usa -->
+        <!-- Shared gRPC contract (proto + generated stubs) - only the one this service uses -->
         <dependency>
             <groupId>br.com.mmgabri</groupId>
-            <artifactId>protos-retorno-conta</artifactId>
+            <artifactId>account-posting-proto</artifactId>
             <version>1.0.0</version>
         </dependency>
 
@@ -63,7 +63,7 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- Dependência Lombok -->
+        <!-- Lombok dependency -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -83,7 +83,7 @@
             <version>2.41.7</version>
         </dependency>
 
-        <!-- STS - obrigatorio para IRSA (troca do web identity token do EKS por credenciais via AssumeRoleWithWebIdentity) -->
+        <!-- STS - required for IRSA (exchanges the EKS web identity token for credentials via AssumeRoleWithWebIdentity) -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>sts</artifactId>

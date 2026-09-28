@@ -16,9 +16,9 @@ public class AppConfig {
         return new TaskExecutorAdapter(Executors.newVirtualThreadPerTaskExecutor());
     }
 
-    // Boot 4.1 auto-configura um ObjectMapper do Jackson 3 (tools.jackson.databind);
-    // o ComandoContaSqsAdapter usa Jackson 2 clássico (com.fasterxml.jackson.databind)
-    // diretamente, então precisa do bean explícito.
+    // Boot 4.1 auto-configures a Jackson 3 ObjectMapper (tools.jackson.databind);
+    // AccountCommandSqsAdapter uses classic Jackson 2 (com.fasterxml.jackson.databind)
+    // directly, so it needs the explicit bean.
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();

@@ -1,0 +1,100 @@
+spring:
+  threads:
+    virtual:
+      enabled: true
+  config:
+    import: "classpath:products_config.yml"
+  grpc:
+    server:
+      port: 59091
+    client:
+      channel:
+        enrichment:
+          target: dns:///localhost:59092
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        rules:
+          target: dns:///localhost:59093
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        security:
+          target: dns:///localhost:59094
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        limit:
+          target: dns:///localhost:59095
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        ledger:
+          target: dns:///localhost:59096
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        antifraud:
+          target: dns:///localhost:59097
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+
+server:
+  port: 9091
+
+grpc:
+  enrichment-client:
+    timeout: 3600000
+  security-client:
+    timeout: 3600000
+  rules-engine-client:
+    timeout: 3600000
+  limit-client:
+    timeout: 3600000
+  account-posting-client:
+    timeout: 3600000
+  antifraud-client:
+    timeout: 3600000
+
+aws:
+  sqs:
+    compensation-transaction-queue-name: "queue-compensation-transaction"
+
+custom:
+  database-mode-async: false
+
+logging:
+  level:
+    br.com.mmgabri: debug
+  pattern:
+    # correlationId/transactionId come from gRPC metadata (CorrelationServerInterceptor -> MDC).
+    correlation: "[%X{correlationId:-},%X{transactionId:-}] "
+
+management:
+  metrics:
+    distribution:
+      percentiles-histogram:
+        all: true
+  datadog:
+    metrics:
+      export:
+        apiKey: 35ca9af351b9a33a19bce59652d93092
+        step: 5s
+        uri: https://api.datadoghq.com/
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

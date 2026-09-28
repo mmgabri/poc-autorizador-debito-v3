@@ -1,0 +1,18 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.itau.debit.authorizer.common.v1;
+
+import "br/com/itau/debit/authorizer/common/v1/reason_code.proto";
+message BusinessResult {
+    bool approved = 1;          // default false = declined (fail-safe)
+    ReasonCode reasonCode = 2;  // business code (N***) when declined; UNSPECIFIED when approved
+    string message = 3;         // developer-facing, not shown to the cardholder
+}
+
+// Technical failure reported in a message payload, for flows where a gRPC
+// error status cannot be used (e.g. async callback conta -> ledger, where
+// conta is the caller). The receiver converts it into a gRPC error status.
+message TechnicalError {
+    ReasonCode reasonCode = 1;  // technical code (T***)
+    string message = 2;
+}

@@ -8,7 +8,7 @@ import org.springframework.grpc.client.GrpcChannelFactory;
 @Configuration
 public class GrpcChannelsConfig {
 
-    // Endereço/keepalive/idle-timeout do canal vem de
+    // Channel address/keepalive/idle-timeout come from
     // spring.grpc.client.channel.ledger.* (application.yml).
     @Bean
     public ManagedChannel managedChannelLedger(GrpcChannelFactory channelFactory) {

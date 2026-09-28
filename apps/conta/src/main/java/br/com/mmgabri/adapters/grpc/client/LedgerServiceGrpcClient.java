@@ -1,8 +1,8 @@
 package br.com.mmgabri.adapters.grpc.client;
 
 import br.com.mmgabri.adapters.grpc.config.LedgerServiceGrpcStubProvider;
-import br.com.mmgabri.grpc.retornoconta.v1.RetornoContaRequest;
-import br.com.mmgabri.grpc.retornoconta.v1.RetornoContaResponse;
+import br.com.itau.debit.authorizer.accountposting.v1.HandlePostingResultRequest;
+import br.com.itau.debit.authorizer.accountposting.v1.HandlePostingResultResponse;
 import br.com.mmgabri.services.MetricsService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -19,14 +19,15 @@ public class LedgerServiceGrpcClient {
     private final MetricsService metricsService;
 
     @SneakyThrows
-    public void execute(RetornoContaRequest request) {
+    public void execute(HandlePostingResultRequest request) {
         try {
-            logger.debug("Starting ledger-service callback call. correlationId={}", request.getCorrelationId());
-            RetornoContaResponse response = ledgerServiceGrpcStubProvider.getStub().trataRetornoConta(request);
+            logger.debug("Starting account-posting callback call. correlationId={}", request.getCorrelationId());
+            var stub = ledgerServiceGrpcStubProvider.getStub(request.getCorrelationId());
+            HandlePostingResultResponse response = stub.handlePostingResult(request);
             metricsService.incrementMetricCounter("app_conta_msg_send_ledger");
-            logger.debug("ledger-service callback call succeeded. Message: {}", response.getMessage());
+            logger.debug("account-posting callback call succeeded. Message: {}", response.getMessage());
         } catch (Exception e) {
-            logger.error("ledger-service callback call failed", e);
+            logger.error("account-posting callback call failed", e);
             throw e;
         }
     }

@@ -53,7 +53,7 @@ Prova de Conceito de um **autorizador de transações de cartão de débito** co
                         │                     AWS VPC                              │
                         │                                                          │
   Cliente               │  ┌─────────────────────────────────────────────────┐    │
-  (k6 / REST / gRPC)    │  │             autorizador-debito                  │    │
+  (k6 / REST / gRPC)    │  │             debit-authorizer                    │    │
      │                  │  │          REST :9091  │  gRPC :59091             │    │
      └──── ALB :9090 ───┼──►                      │                          │    │
                         │  └──────────┬───────────┘                          │    │
@@ -86,7 +86,7 @@ Prova de Conceito de um **autorizador de transações de cartão de débito** co
                         │          ┌─────▼──────┐                                │
                         │          │ conta-svc  │  (consome SQS)                 │
                         │          └─────┬──────┘                                │
-                        │                │  2. TrataRetornoConta (gRPC)          │
+                        │                │  2. HandlePostingResult (gRPC)        │
                         │                │  3. Redis pub/sub                     │
                         │                │     channel:{instanceId}:{corrId}     │
                         │          ┌─────▼──────┐                                │
@@ -98,7 +98,7 @@ Prova de Conceito de um **autorizador de transações de cartão de débito** co
 
 > O diagrama completo está em [`Desenho Arquitetura.drawio`](Desenho%20Arquitetura.drawio).
 
-Todos os serviços se comunicam internamente via **gRPC sobre HTTP/2** dentro da VPC, sem hops externos. O `formatador-bandeiras` atua como gateway de entrada — recebe o request ISO 8583, identifica o produto/bandeira e roteia para o `autorizador-debito`.
+Todos os serviços se comunicam internamente via **gRPC sobre HTTP/2** dentro da VPC, sem hops externos. O `message-parser` atua como gateway de entrada — recebe o request ISO 8583, identifica o produto/bandeira e roteia para o `debit-authorizer`.
 
 ---
 
@@ -106,14 +106,14 @@ Todos os serviços se comunicam internamente via **gRPC sobre HTTP/2** dentro da
 
 | Serviço | Função | REST | gRPC |
 |---|---|:---:|:---:|
-| `autorizador-debito` | Orquestrador principal — executa os serviços conforme o produto | 9091 | 59091 |
-| `formatador-bandeiras` | Gateway de entrada — parseia ISO 8583, roteia por bandeira | 9090 | — |
-| `enrichment-service` | Enriquecimento de dados da transação (dados do cliente, cartão, conta) | 9092 | 59092 |
-| `rules-service` | Validação de regras do portador | 9093 | 59093 |
-| `security-service` | Validação de segurança (senha, chip, CVV) | 9094 | 59094 |
-| `limit-service` | Verificação de limite de débito | 9095 | 59095 |
-| `ledger-service` | Lançamento contábil assíncrono via SQS + Redis | 9096 | 59096 |
-| `antifraud-service` | Detecção de fraude | 9097 | 59097 |
+| `debit-authorizer` | Orquestrador principal — executa os serviços conforme o produto | 9091 | 59091 |
+| `message-parser` | Gateway de entrada — parseia ISO 8583, roteia por bandeira | 9090 | — |
+| `enrichment` | Enriquecimento de dados da transação (dados do cliente, cartão, conta) | 9092 | 59092 |
+| `rules-engine` | Validação de regras do portador | 9093 | 59093 |
+| `security` | Validação de segurança (senha, chip, CVV) | 9094 | 59094 |
+| `limit` | Verificação de limite de débito | 9095 | 59095 |
+| `account-posting` | Lançamento contábil assíncrono via SQS + Redis | 9096 | 59096 |
+| `antifraud` | Detecção de fraude | 9097 | 59097 |
 | `conta` | Gerenciamento de conta — consome SQS e chama callback no ledger | 9098 | — |
 
 **Service Discovery (AWS):** cada serviço é endereçável via DNS interno:
@@ -125,14 +125,14 @@ Todos os serviços se comunicam internamente via **gRPC sobre HTTP/2** dentro da
 
 ## Padrão Async do Ledger (fire-and-wait)
 
-O `ledger-service` implementa **request-response assíncrono entre três transportes** para desacoplar o lançamento contábil do caminho crítico de autorização:
+O `account-posting` implementa **request-response assíncrono entre três transportes** para desacoplar o lançamento contábil do caminho crítico de autorização:
 
 ```
-autorizador-debito
+debit-authorizer
       │
-      │  gRPC GerarLancamento(correlationId)
+      │  gRPC RequestPosting(correlationId)
       ▼
- ledger-service
+ account-posting
       │
       ├─ 1. Publica JSON na fila SQS queue-compensation-transaction
       │       { correlationId, instanceId, ... }
@@ -143,9 +143,9 @@ autorizador-debito
                           │
                     conta-service
                           │  consome SQS, processa, chama de volta:
-                          │  gRPC TrataRetornoConta(instanceId, correlationId, resultado)
+                          │  gRPC HandlePostingResult(instanceId, correlationId, resultado)
                           │
-                    ledger-service
+                    account-posting
                           │  publica no Redis:
                           │  channel:{instanceId}:{correlationId}
                           │
@@ -161,15 +161,15 @@ autorizador-debito
 
 ## Catálogo de Produtos
 
-O `autorizador-debito` carrega `products_config.yml` para determinar quais serviços executar por tipo de transação. Isso permite adicionar novos produtos sem alterar código.
+O `debit-authorizer` carrega `products_config.yml` para determinar quais serviços executar por tipo de transação. Isso permite adicionar novos produtos sem alterar código.
 
 | Produto | Serviços Executados | roteiro Contábil |
 |---|---|:---:|
-| `COMPRA_NACIONAL_COM_CHIP_SENHA_MASTER` | enrichment → security → rules → limit → ledger → antifraud | 003005901 |
-| `COMPRA_NACIONAL_CONTACTLESS_COM_SENHA_MASTER` | enrichment → security → rules → ledger | 003005902 |
-| `COMPRA_NACIONAL_CONTACTLESS_SEM_SENHA_MASTER` | enrichment → security → rules → ledger | 003005902 |
+| `DOMESTIC_PURCHASE_CHIP_PIN_MASTER` | enrichment → security → rules → limit → ledger → antifraud | 003005901 |
+| `DOMESTIC_PURCHASE_CONTACTLESS_WITH_PIN_MASTER` | enrichment → security → rules → ledger | 003005902 |
+| `DOMESTIC_PURCHASE_CONTACTLESS_WITHOUT_PIN_MASTER` | enrichment → security → rules → ledger | 003005902 |
 
-> Cada produto define também `configSeguranca` (ex: `["SEN", "CHP", "CVV"]`) — os validadores que o `security-service` deve aplicar.
+> Cada produto define também `securityChecks` (ex: `["PIN", "CHIP", "CVV"]`) — os validadores que o `security` deve aplicar.
 
 ---
 
@@ -198,20 +198,22 @@ O `autorizador-debito` carrega `products_config.yml` para determinar quais servi
 poc-autorizador-debito-v3/
 │
 ├── apps/                              # Código-fonte dos microsserviços
-│   ├── autorizador-debito/            # Orquestrador principal
-│   │   ├── src/main/proto/            # Contratos .proto (cliente)
+│   ├── debit-authorizer-protos/       # Contratos gRPC (multi-módulo, um artefato <servico>-proto por microsserviço)
+│   │   ├── common/                    # common-proto: catálogo de reason codes, BusinessResult, TechnicalError
+│   │   └── <microsservico>/           # src/main/proto/br/com/itau/debit/authorizer/<microsservico>/v1/
+│   ├── debit-authorizer/              # Orquestrador principal
 │   │   └── src/main/resources/
 │   │       ├── application.yml        # Config local (H2, localhost)
 │   │       ├── application-prod.yml   # Config AWS (env vars)
 │   │       └── products_config.yml    # Catálogo de produtos
-│   ├── enrichment-service/            # Enriquecimento de dados
-│   ├── rules-service/                 # Regras do portador
-│   ├── security-service/              # Segurança (senha, chip, CVV)
-│   ├── limit-service/                 # Limite de débito
-│   ├── ledger-service/                # Lançamento contábil async (SQS + Redis)
-│   ├── antifraud-service/             # Antifraude
+│   ├── enrichment/                    # Enriquecimento de dados
+│   ├── rules-engine/                  # Regras do portador
+│   ├── security/                      # Segurança (senha, chip, CVV)
+│   ├── limit/                         # Limite de débito
+│   ├── account-posting/               # Lançamento contábil async (SQS + Redis)
+│   ├── antifraud/                     # Antifraude
 │   ├── conta/                         # Gerenciamento de conta (consome SQS)
-│   └── formatador-bandeiras/          # Gateway de entrada — ISO 8583 + roteamento
+│   └── message-parser/                # Gateway de entrada — ISO 8583 + roteamento
 │
 ├── collections/                       # Coleção Postman
 │   └── poc-autorizador-debito-v3.zip
@@ -262,8 +264,11 @@ poc-autorizador-debito-v3/
 Execute em cada diretório de serviço que deseja compilar:
 
 ```bash
+# Pré-requisito: instalar os contratos gRPC no ~/.m2 (common-proto, <servico>-proto)
+mvn -f apps/debit-authorizer-protos/pom.xml clean install
+
 # Exemplo: compilar o orquestrador
-cd apps/autorizador-debito
+cd apps/debit-authorizer
 mvn clean package -DskipTests
 ```
 
@@ -291,25 +296,25 @@ Cada serviço expõe suas portas REST e gRPC (ver tabela em [Serviços](#serviç
 
 ```bash
 # Exemplo: iniciar o autorizador diretamente
-cd apps/autorizador-debito
+cd apps/debit-authorizer
 mvn spring-boot:run
 
 # Ou via JAR buildado (JVM otimizada para alto throughput)
 java -server \
      -Xms2g -Xmx4g \
      -XX:+UseZGC \
-     -jar target/autorizador-debito-*.jar
+     -jar target/debit-authorizer-*.jar
 ```
 
 > **Dica:** inicie os serviços na seguinte ordem para evitar falhas de conexão:
-> `enrichment` → `security` → `rules` → `limit` → `antifraud` → `ledger` → `conta` → `autorizador-debito` → `formatador-bandeiras`
+> `enrichment` → `security` → `rules-engine` → `limit` → `antifraud` → `account-posting` → `conta` → `debit-authorizer` → `message-parser`
 
 ### 4. Build da Imagem Docker
 
 ```bash
 # Cada serviço tem seu próprio Dockerfile multi-stage
-docker build -t autorizador-debito:local apps/autorizador-debito/
-docker build -t ledger-service:local      apps/ledger-service/
+docker build -t debit-authorizer:local -f apps/debit-authorizer/Dockerfile .
+docker build -t account-posting:local  -f apps/account-posting/Dockerfile .
 # ... demais serviços
 ```
 
@@ -321,10 +326,10 @@ docker build -t ledger-service:local      apps/ledger-service/
 
 | Variável | Serviço | Descrição |
 |---|---|---|
-| `REDIS_HOST` | ledger-service, conta | Host do ElastiCache |
+| `REDIS_HOST` | account-posting, conta | Host do ElastiCache |
 | `DD_API_KEY` | todos | Chave da API do Datadog |
 | `LOGGING_LEVEL` | todos | Nível de log (ex: `INFO`, `DEBUG`) |
-| `DATABASE_MODE_ASYNC` | autorizador-debito | Habilita escrita async no DynamoDB |
+| `DATABASE_MODE_ASYNC` | debit-authorizer | Habilita escrita async no DynamoDB |
 
 ### Arquivos de configuração por ambiente
 
@@ -338,45 +343,45 @@ docker build -t ledger-service:local      apps/ledger-service/
 
 | Dependência | Timeout | Justificativa |
 |---|:---:|---|
-| `enrichment-service` | 1.500 ms | Chamada rápida, dados em cache |
-| `security-service` | 15.000 ms | Validação criptográfica (chip EMV) |
-| `rules-service` | 15.000 ms | Consulta a regras complexas do portador |
-| `limit-service` | 1.500 ms | Consulta de saldo/limite |
-| `ledger-service` | 1.500 ms | Enfileiramento rápido no SQS |
-| `antifraud-service` | 1.500 ms | Score de fraude em tempo real |
+| `enrichment` | 1.500 ms | Chamada rápida, dados em cache |
+| `security` | 15.000 ms | Validação criptográfica (chip EMV) |
+| `rules-engine` | 15.000 ms | Consulta a regras complexas do portador |
+| `limit` | 1.500 ms | Consulta de saldo/limite |
+| `account-posting` | 1.500 ms | Enfileiramento rápido no SQS |
+| `antifraud` | 1.500 ms | Score de fraude em tempo real |
 
 ---
 
 ## Contratos gRPC (Protobuf)
 
-Os arquivos `.proto` estão duplicados em cada `src/main/proto/` de cada serviço. O header compartilhado carrega os campos de rastreabilidade usados em todos os RPCs:
+Os contratos ficam em `apps/debit-authorizer-protos/`, com um artefato `<servico>-proto` por microsserviço e package `br.com.itau.debit.authorizer.<servico>.v1`. O `common-proto` só tem tipos compartilhados: o catálogo de reason codes, `BusinessResult` e `TechnicalError`.
 
-```protobuf
-// comuns/header_message_grpc.proto
-message HeaderMessageGrpc {
-    string transactionId  = 1;
-    string correlationId  = 2;
-    string bandeira       = 3;
-    // ...
-}
-```
+**Não existe header no payload.** A divisão é esta:
+
+| Onde | O quê | Exemplo |
+|---|---|---|
+| Payload (campo explícito no request) | Dado que o serviço usa na lógica ou grava | `correlationId` no `AutorizadorRequest` (chave de idempotência) e no `LedgerRequest` (chave do callback); `transactionId` no `AutorizadorResponse` (usado no estorno) |
+| Metadata gRPC | Contexto de observabilidade, transversal | `x-correlation-id`, `x-transaction-id` |
+
+Na saída, o cliente anexa a metadata explicitamente por chamada: `CorrelationMetadata` no debit-authorizer; o message-parser e o conta enviam `x-correlation-id`. Na entrada, o `CorrelationServerInterceptor` (`@GlobalServerInterceptor`) coloca os valores no MDC durante a chamada. Os logs saem com o prefixo `[correlationId,transactionId]` via `logging.pattern.correlation`.
 
 | Arquivo Proto | RPC | Direção |
 |---|---|---|
-| `autorizador_debito.proto` | `AutorizarTransacao` | Cliente → autorizador-debito |
-| `enrichment_service.proto` | `EnrichData` | autorizador → enrichment |
-| `security_service.proto` | `ValidateSecurity` | autorizador → security |
-| `rules_service.proto` | `ValidateRules` | autorizador → rules |
-| `limit_service.proto` | `CheckLimit` | autorizador → limit |
-| `ledger_service.proto` | `GerarLancamento` | autorizador → ledger |
-| `antifraud_service.proto` | `CheckAntifraud` | autorizador → antifraud |
-| `retorno_conta.proto` | `TrataRetornoConta` | conta → ledger (callback) |
+| `debitauthorizer/v1/debit_authorizer.proto` | `AuthorizationService.AuthorizeTransaction` | message-parser → debit-authorizer |
+| `enrichment/v1/enrichment.proto` | `EnrichmentService.EnrichTransaction` | debit-authorizer → enrichment |
+| `security/v1/security.proto` | `SecurityService.ValidateSecurity` | debit-authorizer → security |
+| `security/v1/security.proto` | `SecurityService.ExchangeKeys` | troca de chaves (PEK); ainda não implementado no servidor |
+| `rulesengine/v1/rules_engine.proto` | `RulesEngineService.CheckRules` | debit-authorizer → rules-engine |
+| `limit/v1/limit.proto` | `LimitService.UpdateLimit` | debit-authorizer → limit |
+| `accountposting/v1/account_posting.proto` | `AccountPostingService.RequestPosting` | debit-authorizer → account-posting |
+| `antifraud/v1/antifraud.proto` | `AntifraudService.AnalyzeFraud` | debit-authorizer → antifraud |
+| `accountposting/v1/account_posting.proto` | `AccountPostingService.HandlePostingResult` | conta → account-posting (callback) |
 
 ---
 
 ## Endpoints
 
-### REST (autorizador-debito)
+### REST (debit-authorizer)
 
 ```
 POST /authorization          Autoriza uma transação de débito
@@ -385,17 +390,17 @@ GET  /actuator/metrics       Métricas Micrometer
 GET  /actuator/prometheus    Scrape Prometheus
 ```
 
-### REST (formatador-bandeiras)
+### REST (message-parser)
 
 ```
-POST /authorization          Recebe ISO 8583, formata e roteia para autorizador-debito
+POST /authorization          Recebe ISO 8583, formata e roteia para debit-authorizer
 ```
 
 ### gRPC
 
 ```protobuf
-service AutorizadorService {
-    rpc AutorizarTransacao (AutorizadorRequest) returns (AutorizadorResponse);
+service AuthorizationService {
+    rpc AuthorizeTransaction (AuthorizeTransactionRequest) returns (AuthorizeTransactionResponse);
 }
 ```
 

@@ -1,0 +1,22 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.itau.debit.authorizer.rulesengine.v1;
+
+import "br/com/itau/debit/authorizer/common/v1/business_result.proto";
+
+// Observability context (x-correlation-id, x-transaction-id)
+// travels as gRPC metadata, not in the payload.
+service RulesEngineService {
+    rpc CheckRules (CheckRulesRequest) returns (CheckRulesResponse);
+}
+
+message CheckRulesRequest {
+    map<string, string> messageIso = 1;
+    string customReturn = 2;
+    int32 sleep = 3;
+}
+
+// Technical failures are returned as gRPC error status + google.rpc.ErrorInfo.
+message CheckRulesResponse {
+    br.com.itau.debit.authorizer.common.v1.BusinessResult result = 1;
+}

@@ -107,14 +107,14 @@ module "datadog" {
 }
 
 #------------------------------------------------------------------------------
-# Deployment/Service - formatador-bandeiras (único serviço exposto externamente)
+# Deployment/Service - message-parser (único serviço exposto externamente)
 #------------------------------------------------------------------------------
-module "k8s_formatador_bandeiras" {
+module "k8s_message_parser" {
   source = "./modules/k8s-deployment"
 
-  name                 = "formatador-bandeiras"
+  name                 = "message-parser"
   namespace            = kubernetes_namespace.app.metadata[0].name
-  image                = "${var.formatador_bandeiras_ecr_repository}:latest"
+  image                = "${var.message_parser_ecr_repository}:latest"
   container_port       = 9090
   replicas             = 1
   service_account_name = kubernetes_service_account.app.metadata[0].name
@@ -132,14 +132,14 @@ module "k8s_formatador_bandeiras" {
 }
 
 #------------------------------------------------------------------------------
-# Deployment/Service - autorizador-debito (orquestrador principal)
+# Deployment/Service - debit-authorizer (orquestrador principal)
 #------------------------------------------------------------------------------
-module "k8s_autorizador_debito" {
+module "k8s_debit_authorizer" {
   source = "./modules/k8s-deployment"
 
-  name                 = "autorizador-debito"
+  name                 = "debit-authorizer"
   namespace            = kubernetes_namespace.app.metadata[0].name
-  image                = "${var.autorizador_debito_ecr_repository}:latest"
+  image                = "${var.debit_authorizer_ecr_repository}:latest"
   container_port       = 9091
   grpc_port            = 59091
   replicas             = 2
@@ -159,14 +159,14 @@ module "k8s_autorizador_debito" {
 }
 
 #------------------------------------------------------------------------------
-# Deployment/Service - enrichment-service
+# Deployment/Service - enrichment
 #------------------------------------------------------------------------------
-module "k8s_enrichment_service" {
+module "k8s_enrichment" {
   source = "./modules/k8s-deployment"
 
-  name                 = "enrichment-service"
+  name                 = "enrichment"
   namespace            = kubernetes_namespace.app.metadata[0].name
-  image                = "${var.enrichment_service_ecr_repository}:latest"
+  image                = "${var.enrichment_ecr_repository}:latest"
   container_port       = 9092
   grpc_port            = 59092
   replicas             = 1
@@ -182,14 +182,14 @@ module "k8s_enrichment_service" {
 }
 
 #------------------------------------------------------------------------------
-# Deployment/Service - rules-service
+# Deployment/Service - rules-engine
 #------------------------------------------------------------------------------
-module "k8s_rules_service" {
+module "k8s_rules_engine" {
   source = "./modules/k8s-deployment"
 
-  name                 = "rules-service"
+  name                 = "rules-engine"
   namespace            = kubernetes_namespace.app.metadata[0].name
-  image                = "${var.rules_service_ecr_repository}:latest"
+  image                = "${var.rules_engine_ecr_repository}:latest"
   container_port       = 9093
   grpc_port            = 59093
   replicas             = 1
@@ -205,14 +205,14 @@ module "k8s_rules_service" {
 }
 
 #------------------------------------------------------------------------------
-# Deployment/Service - security-service
+# Deployment/Service - security
 #------------------------------------------------------------------------------
-module "k8s_security_service" {
+module "k8s_security" {
   source = "./modules/k8s-deployment"
 
-  name                 = "security-service"
+  name                 = "security"
   namespace            = kubernetes_namespace.app.metadata[0].name
-  image                = "${var.security_service_ecr_repository}:latest"
+  image                = "${var.security_ecr_repository}:latest"
   container_port       = 9094
   grpc_port            = 59094
   replicas             = 1
@@ -228,14 +228,14 @@ module "k8s_security_service" {
 }
 
 #------------------------------------------------------------------------------
-# Deployment/Service - limit-service
+# Deployment/Service - limit
 #------------------------------------------------------------------------------
-module "k8s_limit_service" {
+module "k8s_limit" {
   source = "./modules/k8s-deployment"
 
-  name                 = "limit-service"
+  name                 = "limit"
   namespace            = kubernetes_namespace.app.metadata[0].name
-  image                = "${var.limit_service_ecr_repository}:latest"
+  image                = "${var.limit_ecr_repository}:latest"
   container_port       = 9095
   grpc_port            = 59095
   replicas             = 1
@@ -251,14 +251,14 @@ module "k8s_limit_service" {
 }
 
 #------------------------------------------------------------------------------
-# Deployment/Service - ledger-service (10 réplicas, igual ao ECS)
+# Deployment/Service - account-posting (10 réplicas, igual ao ECS)
 #------------------------------------------------------------------------------
-module "k8s_ledger_service" {
+module "k8s_account_posting" {
   source = "./modules/k8s-deployment"
 
-  name                 = "ledger-service"
+  name                 = "account-posting"
   namespace            = kubernetes_namespace.app.metadata[0].name
-  image                = "${var.ledger_service_ecr_repository}:latest"
+  image                = "${var.account_posting_ecr_repository}:latest"
   container_port       = 9096
   grpc_port            = 59096
   replicas             = 10
@@ -277,14 +277,14 @@ module "k8s_ledger_service" {
 }
 
 #------------------------------------------------------------------------------
-# Deployment/Service - antifraud-service
+# Deployment/Service - antifraud
 #------------------------------------------------------------------------------
-module "k8s_antifraud_service" {
+module "k8s_antifraud" {
   source = "./modules/k8s-deployment"
 
-  name                 = "antifraud-service"
+  name                 = "antifraud"
   namespace            = kubernetes_namespace.app.metadata[0].name
-  image                = "${var.antifraud_service_ecr_repository}:latest"
+  image                = "${var.antifraud_ecr_repository}:latest"
   container_port       = 9097
   grpc_port            = 59097
   replicas             = 1
@@ -300,7 +300,7 @@ module "k8s_antifraud_service" {
 }
 
 #------------------------------------------------------------------------------
-# Deployment/Service - conta (consumidor SQS + callback gRPC pro ledger-service;
+# Deployment/Service - conta (consumidor SQS + callback gRPC pro account-posting;
 # sem servidor gRPC próprio, por isso sem grpc_port)
 #------------------------------------------------------------------------------
 module "k8s_conta" {

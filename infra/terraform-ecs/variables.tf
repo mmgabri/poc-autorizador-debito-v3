@@ -13,43 +13,43 @@ variable "micro_services" {
   type        = list(string)
 }
 
-variable "enrichment_service_ecr_repository" {
-  description = "Nome do repositório ECR para o serviço enrichment-service"
+variable "enrichment_ecr_repository" {
+  description = "Nome do repositório ECR para o serviço enrichment"
   type        = string
 }
 
-variable "formatador_bandeiras_ecr_repository" {
-  description = "Nome do repositório ECR para o serviço formatador-bandeiras"
+variable "message_parser_ecr_repository" {
+  description = "Nome do repositório ECR para o serviço message-parser"
   type        = string
 }
 
-variable "security_service_ecr_repository" {
-  description = "Nome do repositório ECR para o serviço security-service"
+variable "security_ecr_repository" {
+  description = "Nome do repositório ECR para o serviço security"
   type        = string
 }
 
-variable "rules_service_ecr_repository" {
-  description = "Nome do repositório ECR para o serviço rules-service"
+variable "rules_engine_ecr_repository" {
+  description = "Nome do repositório ECR para o serviço rules-engine"
   type        = string
 }
 
-variable "limit_service_ecr_repository" {
-  description = "Nome do repositório ECR para o serviço limit-service"
+variable "limit_ecr_repository" {
+  description = "Nome do repositório ECR para o serviço limit"
   type        = string
 }
 
-variable "ledger_service_ecr_repository" {
-  description = "Nome do repositório ECR para o serviço ledger-service"
+variable "account_posting_ecr_repository" {
+  description = "Nome do repositório ECR para o serviço account-posting"
   type        = string
 }
 
-variable "antifraud_service_ecr_repository" {
-  description = "Nome do repositório ECR para o serviço antifraud-service"
+variable "antifraud_ecr_repository" {
+  description = "Nome do repositório ECR para o serviço antifraud"
   type        = string
 }
 
-variable "autorizador_debito_ecr_repository" {
-  description = "Nome do repositório ECR para o autorizador-debito"  
+variable "debit_authorizer_ecr_repository" {
+  description = "Nome do repositório ECR para o debit-authorizer"
   type        = string
 }
 

@@ -1,0 +1,103 @@
+spring:
+  threads:
+    virtual:
+      enabled: true
+  config:
+    import: "classpath:products_config.yml"
+  grpc:
+    server:
+      port: 59091
+    client:
+      channel:
+        enrichment:
+          target: dns:///enrichment-svc.autorizador-debito.svc.cluster.local:59092
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        rules:
+          target: dns:///rules-engine-svc.autorizador-debito.svc.cluster.local:59093
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        security:
+          target: dns:///security-svc.autorizador-debito.svc.cluster.local:59094
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        limit:
+          target: dns:///limit-svc.autorizador-debito.svc.cluster.local:59095
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        ledger:
+          target: dns:///account-posting-svc.autorizador-debito.svc.cluster.local:59096
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+        antifraud:
+          target: dns:///antifraud-svc.autorizador-debito.svc.cluster.local:59097
+          keepalive:
+            time: 60s
+            timeout: 60s
+          idle:
+            timeout: 60s
+
+server:
+  port: 9091
+
+grpc:
+  enrichment-client:
+    timeout: 1500
+  security-client:
+    timeout: 15000
+  rules-engine-client:
+    timeout: 15000
+  limit-client:
+    timeout: 1500
+  account-posting-client:
+    # Must cover the whole COMMIT (SQS + conta + callback + pub/sub), not only
+    # the SIMULATION - account-posting already has its own internal timeout
+    # (app.async.response-timeout) that decides before this one fires.
+    timeout: 35000
+  antifraud-client:
+    timeout: 1500
+
+aws:
+  sqs:
+    compensation-transaction-queue-name: "queue-compensation-transaction"
+
+custom:
+  database-mode-async: ${DATABASE_MODE_ASYNC}
+
+logging:
+  level:
+    br.com.mmgabri: ${LOGGING_LEVEL}
+  pattern:
+    # correlationId/transactionId come from gRPC metadata (CorrelationServerInterceptor -> MDC).
+    correlation: "[%X{correlationId:-},%X{transactionId:-}] "
+
+management:
+  metrics:
+    distribution:
+      percentiles-histogram:
+        all: true
+  datadog:
+    metrics:
+      export:
+        apiKey: ${DD_API_KEY}
+        step: 5s
+        uri: https://api.datadoghq.com/
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+      gRPC contracts shared by all the microservices.
+      Versioned independently from the services that consume it: in
+      production this module becomes its own repository, published as a
+      Maven artifact to a registry (CodeArtifact/GitHub Packages/Nexus) and
+      referenced by the services via <dependency>, exactly as it is already
+      declared. Today, with no registry defined, it is consumed via a
+      local `mvn install` (~/.m2) - the dependency declaration in the
+      service poms does not change when this moves to a real registry.
+
+      Multi-module: one artifact per microservice (account-posting-proto,
+      security-proto, etc.), so each service can depend only on the
+      contract(s) it actually uses - instead of importing every stub
+      to use just one. The protobuf package follows the file directory
+      (br.com.itau.debit.authorizer.<microservice>.v1), without java_package.
+
+      Independent versioning per module: the <version> of this root pom is only
+      the identity of the parent pom (build config inheritance) and of the reactor -
+      it is NOT the version of the published artifacts. Each child module declares
+      its own <version>, which can evolve without touching the others (e.g. change
+      enrichment-proto without forcing a version bump of account-posting-proto).
+      Modules depending on common-proto use the ${common-proto.version} property
+      below instead of ${project.version} - when bumping the own version of
+      common-proto, update this property as well (it is the only manual
+      duplication of this model; Maven has no "take my sibling's version").
+    -->
+    <groupId>br.com.mmgabri</groupId>
+    <artifactId>debit-authorizer-protos</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>common</module>
+        <module>account-posting</module>
+        <module>antifraud</module>
+        <module>debit-authorizer</module>
+        <module>enrichment</module>
+        <module>limit</module>
+        <module>rules-engine</module>
+        <module>security</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.release>25</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <grpc.version>1.76.0</grpc.version>
+        <protobuf.version>3.23.4</protobuf.version>
+        <protobuf.plugin.version>0.6.1</protobuf.plugin.version>
+
+        <!-- Version of the common-proto artifact (reason code catalog + BusinessResult),
+             referenced by every module that depends on it (see the comment above
+             about independent versioning). -->
+        <common-proto.version>1.0.0</common-proto.version>
+
+    </properties>
+
+    <!-- Inherited automatically by every child module. -->
+    <dependencies>
+        <!-- Excludes proto-google-common-protos (transitive, brings dozens of .proto
+             files from google/rpc, google/type, google/longrunning etc. that no
+             contract in this repo imports) - protobuf-maven-plugin extracts EVERY
+             classpath jar on each build, and the size of this dependency greatly
+             increases the chance of colliding with the Windows antivirus/indexer
+             during the unzip/cleanup of the temporary directory. -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>${grpc.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.api.grpc</groupId>
+                    <artifactId>proto-google-common-protos</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.version}</version>
+        </dependency>
+    </dependencies>
+
+    <!-- Inherited automatically by every child module - each one compiles
+         only the .proto files in its own src/main/proto. -->
+    <build>
+        <!-- m2e (IDE incremental build) cannot run unpack-dependencies
+             on a reactor artifact that is not packaged yet (MDEP-98) and fails in
+             the IDE even though `mvn install` from the terminal works normally.
+             This only silences the execution inside the IDE - command-line mvn
+             (used by the Dockerfiles and by any `mvn install`) is not
+             affected by the m2e pluginManagement. -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.apache.maven.plugins</groupId>
+                                        <artifactId>maven-dependency-plugin</artifactId>
+                                        <versionRange>[3.0.0,)</versionRange>
+                                        <goals>
+                                            <goal>unpack-dependencies</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore/>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.7.0</version>
+            </extension>
+        </extensions>
+
+        <plugins>
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>${protobuf.plugin.version}</version>
+                <configuration>
+                    <protocArtifact>
+                        com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}
+                    </protocArtifact>
+                    <pluginId>grpc-java</pluginId>
+                    <pluginArtifact>
+                        io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
+                    </pluginArtifact>
+                </configuration>
+                <!-- compile and compile-custom in separate executions (not together
+                     in the same execution) - combined, the computation of the dependency
+                     extraction directory (target/protoc-dependencies/<hash>)
+                     is inconsistent between the two goals in this plugin version,
+                     causing intermittent failures like "Proto path element is not
+                     a directory". -->
+                <executions>
+                    <execution>
+                        <id>compile-protoc</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>compile-custom-grpc</id>
+                        <goals>
+                            <goal>compile-custom</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.0</version>
+                <configuration>
+                    <release>25</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

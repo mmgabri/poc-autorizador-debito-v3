@@ -17,7 +17,7 @@ spring:
             timeout: 60s
 
 grpc:
-  ledger-service-client:
+  account-posting-client:
     timeout: 5000
 
 aws:

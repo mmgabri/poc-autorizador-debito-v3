@@ -1,0 +1,53 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.itau.debit.authorizer.enrichment.v1;
+
+import "br/com/itau/debit/authorizer/common/v1/business_result.proto";
+
+// Observability context (x-correlation-id, x-transaction-id)
+// travels as gRPC metadata, not in the payload.
+service EnrichmentService {
+  rpc EnrichTransaction(EnrichTransactionRequest) returns (EnrichTransactionResponse);
+}
+
+message EnrichTransactionRequest {
+  string cardNumber = 1;
+  string customReturn = 2;
+  int32 sleep = 3;
+}
+
+// result is declined only when the card itself is invalid/unknown (NE01).
+// Technical failures are returned as gRPC error status + google.rpc.ErrorInfo.
+message EnrichTransactionResponse {
+  CardData card = 1;
+  AccountData account = 2;
+  CustomerData customer = 3;
+  TokenData token = 4;
+  br.com.itau.debit.authorizer.common.v1.BusinessResult result = 5;
+}
+
+message CardData {
+  string cardNumber = 1;
+  string cardHash = 2;
+  string accountId = 3;
+  string holderName = 4;
+}
+
+message AccountData {
+  string accountId = 1;
+  string category = 2;
+  string segment = 3;
+  string type = 4;
+}
+
+message CustomerData {
+  string customerId = 1;
+  string documentNumber = 2;  // CPF/CNPJ
+  string phone = 3;
+}
+
+message TokenData {
+  string tokenId = 1;
+  string status = 2;
+  string wallet = 3;
+}

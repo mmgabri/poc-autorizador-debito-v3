@@ -9,7 +9,7 @@ spring:
     client:
       channel:
         ledger:
-          target: dns:///ledger-service-svc.autorizador-debito.svc.cluster.local:59096
+          target: dns:///account-posting-svc.autorizador-debito.svc.cluster.local:59096
           keepalive:
             time: 60s
             timeout: 60s
@@ -17,7 +17,7 @@ spring:
             timeout: 60s
 
 grpc:
-  ledger-service-client:
+  account-posting-client:
     timeout: 5000
 
 aws:

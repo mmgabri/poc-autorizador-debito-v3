@@ -1,0 +1,17 @@
+server:
+  port: 9094
+
+spring:
+  threads:
+    virtual:
+      enabled: true
+  grpc:
+    server:
+      port: 59094
+
+logging:
+  level:
+    br.com.mmgabri: DEBUG
+  pattern:
+    # correlationId/transactionId come from gRPC metadata (CorrelationServerInterceptor -> MDC).
+    correlation: "[%X{correlationId:-},%X{transactionId:-}] "

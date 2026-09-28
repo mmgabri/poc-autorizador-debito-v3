@@ -34,7 +34,7 @@ resource "aws_security_group" "valkey_sg" {
 # 3. Cluster Valkey (Replication Group)
 resource "aws_elasticache_replication_group" "valkey_cluster" {
   replication_group_id = "ledger-efetivacao-valkey"
-  description          = "Sinalizacao de conclusao da efetivacao do ledger-service via Valkey"
+  description          = "Sinalizacao de conclusao da efetivacao do account-posting via Valkey"
   
   engine         = "valkey"
   engine_version = "7.2"

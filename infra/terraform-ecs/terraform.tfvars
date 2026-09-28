@@ -1,39 +1,39 @@
 region = "us-east-1"
 
 micro_services = [
-  "enrichment-service",
-  "rules-service",
-  "limit-service",
-  "ledger-service",
+  "enrichment",
+  "rules-engine",
+  "limit",
+  "account-posting",
   "conta",
-  "antifraud-service",
-  "security-service",
-  "autorizador-debito",
-  "formatador-bandeiras",
+  "antifraud",
+  "security",
+  "debit-authorizer",
+  "message-parser",
   "datadog-agent"
 ]
 
 ecr_repository_names = [
-  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/enrichment-service",
-  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/rules-service",
-  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/limit-service",
-  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/ledger-service",
+  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/enrichment",
+  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/rules-engine",
+  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/limit",
+  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/account-posting",
   "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/conta",
-  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/antifraud-service",
-  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/security-service",
-  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/autorizador-debito",
-  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/formatador-bandeiras"
+  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/antifraud",
+  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/security",
+  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/debit-authorizer",
+  "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/message-parser"
 ]
 
-enrichment_service_ecr_repository   = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/enrichment-service"
-rules_service_ecr_repository        = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/rules-service"
-limit_service_ecr_repository        = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/limit-service"
-ledger_service_ecr_repository       = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/ledger-service"
-conta_ecr_repository                = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/conta"
-antifraud_service_ecr_repository    = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/antifraud-service"
-security_service_ecr_repository     = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/security-service"
-autorizador_debito_ecr_repository   = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/autorizador-debito"
-formatador_bandeiras_ecr_repository = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/formatador-bandeiras"
+enrichment_ecr_repository       = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/enrichment"
+rules_engine_ecr_repository     = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/rules-engine"
+limit_ecr_repository            = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/limit"
+account_posting_ecr_repository  = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/account-posting"
+conta_ecr_repository            = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/conta"
+antifraud_ecr_repository        = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/antifraud"
+security_ecr_repository         = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/security"
+debit_authorizer_ecr_repository = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/debit-authorizer"
+message_parser_ecr_repository   = "140023369634.dkr.ecr.us-east-1.amazonaws.com/autorizador-debito/message-parser"
 
 datadog_api_key = "e1ed6f0aa9f90d5889ab3fc1ff269b9d"
 

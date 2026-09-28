@@ -1,0 +1,46 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.itau.debit.authorizer.common.v1;
+
+import "google/protobuf/descriptor.proto";
+
+enum ReasonType {
+    REASON_TYPE_UNSPECIFIED = 0;
+    REASON_TYPE_BUSINESS = 1;   // B - travels as OK + BusinessResult.reasonCode
+    REASON_TYPE_TECHNICAL = 2;  // T - travels as gRPC error status + ErrorInfo.reason
+}
+
+// Service that detects the cause and emits the code.
+// The code prefix identifies the source (see comment on each value).
+enum Source {
+    SOURCE_UNSPECIFIED = 0;
+    SOURCE_AUTHORIZER = 1;       // AU - debit-authorizer
+    SOURCE_ENRICHMENT = 2;       // EN - enrichment
+    SOURCE_RULES = 3;            // RE - rules-engine
+    SOURCE_SECURITY = 4;         // SE - security
+    SOURCE_LIMIT = 5;            // LI - limit
+    SOURCE_ACCOUNT_POSTING = 6;  // AP - account-posting
+    SOURCE_ACCOUNT = 7;          // AC - conta
+    SOURCE_ANTIFRAUD = 8;        // AF - antifraud
+}
+
+// Custom annotations for ReasonCode values.
+// 50000-99999 is the range protobuf reserves for in-house options.
+extend google.protobuf.EnumValueOptions {
+    // Catalog code: <source prefix>-<B|T><3 digits>, e.g. AP-B001, SE-T003, AU-T099.
+    string code = 50001;
+    Source source = 50002;
+    ReasonType type = 50003;
+    string description = 50004;
+
+    // true when the operation may have been applied even though the caller got a
+    // failure (e.g. a commit that timed out). The authorizer must reconcile these
+    // cases (reversal, advice, status inquiry) - never infer it from the description.
+    bool outcome_uncertain = 50005;
+
+    // ISO 8583 response code (DE39) returned to the card brand, per brand and region.
+    string iso_response_code_visa_nac = 50006;
+    string iso_response_code_visa_int = 50007;
+    string iso_response_code_mast_nac = 50008;
+    string iso_response_code_mast_int = 50009;
+}

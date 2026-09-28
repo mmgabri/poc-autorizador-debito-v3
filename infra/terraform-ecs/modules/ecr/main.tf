@@ -6,14 +6,14 @@
 
 locals {
   repository_names = [
-    "autorizador-debito/enrichment-service",
-    "autorizador-debito/rules-service",
-    "autorizador-debito/security-service",
-    "autorizador-debito/limit-service",
-    "autorizador-debito/ledger-service",
-    "autorizador-debito/antifraud-service",
-    "autorizador-debito/formatador-bandeiras",
-    "autorizador-debito/autorizador-debito",
+    "autorizador-debito/enrichment",
+    "autorizador-debito/rules-engine",
+    "autorizador-debito/security",
+    "autorizador-debito/limit",
+    "autorizador-debito/account-posting",
+    "autorizador-debito/antifraud",
+    "autorizador-debito/message-parser",
+    "autorizador-debito/debit-authorizer",
     "autorizador-debito/conta",
   ]
 }

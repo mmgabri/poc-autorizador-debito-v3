@@ -1,0 +1,52 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.itau.debit.authorizer.accountposting.v1;
+
+import "br/com/itau/debit/authorizer/common/v1/business_result.proto";
+
+// Observability context (x-correlation-id, x-transaction-id)
+// travels as gRPC metadata, not in the payload.
+service AccountPostingService {
+    // Called by debit-authorizer: SIMULACAO answers inline; EFETIVACAO dispatches
+    // the command to conta (SQS) and waits for HandlePostingResult.
+    rpc RequestPosting (RequestPostingRequest) returns (RequestPostingResponse);
+    // Async callback conta -> account-posting with the outcome of an EFETIVACAO.
+    rpc HandlePostingResult (HandlePostingResultRequest) returns (HandlePostingResultResponse);
+}
+
+message RequestPostingRequest {
+    // Business key of the posting: keys the pending callback, the Redis channel
+    // and the comando_conta record.
+    string correlationId = 1;
+    string accountId = 2;
+    string amount = 3;
+    string description = 4;         // ISO DE43 literal shown on the statement
+    string accountingScheme = 5;    // accounting route of the product
+    string operationType = 6;       // "SIMULACAO" | "EFETIVACAO"
+    string customReturn = 7;
+    int32 sleepCommit = 8;
+    int32 sleepSimulation = 9;
+}
+
+// Technical failures are returned as gRPC error status + google.rpc.ErrorInfo
+// (including technical failures reported by conta through the callback).
+message RequestPostingResponse {
+    string accountId = 1;
+    br.com.itau.debit.authorizer.common.v1.BusinessResult result = 2;
+}
+
+// conta is the caller here, so it cannot use a gRPC error status to report its
+// own technical failure: it goes in the payload as TechnicalError, and
+// account-posting converts it into a gRPC error status to the authorizer.
+message HandlePostingResultRequest {
+    string correlationId = 1;
+    string instanceId = 2;          // account-posting instance waiting for this result
+    oneof outcome {
+        br.com.itau.debit.authorizer.common.v1.BusinessResult businessResult = 3;
+        br.com.itau.debit.authorizer.common.v1.TechnicalError technicalError = 4;
+    }
+}
+
+message HandlePostingResultResponse {
+    string message = 1;
+}

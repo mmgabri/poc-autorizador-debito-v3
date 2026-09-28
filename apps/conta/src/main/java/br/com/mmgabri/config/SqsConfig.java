@@ -19,16 +19,16 @@ public class SqsConfig {
     @Bean
     public SqsClient sqsClient(@Value("${aws.sqs.region:us-east-1}") String awsRegion) {
         try {
-            logger.info("Criando cliente AWS SQS. region={}", awsRegion);
+            logger.info("Creating AWS SQS client. region={}", awsRegion);
             var httpClient = ApacheHttpClient.builder()
                     .maxConnections(200)
                     .connectionTimeout(Duration.ofSeconds(2))
-                    // receiveMessage faz long-poll (aws.sqs.wait-time-seconds, até 20s) - o
-                    // socket fica de propósito sem tráfego até esse tempo; socketTimeout
-                    // precisa ser maior que isso com folga real (rede local/latência da AWS
-                    // podem passar um pouco dos 20s), senão todo receiveMessage estoura
-                    // antes do long-poll terminar (era 5s aqui, copiado sem ajuste do
-                    // publisher do autorizador/ledger, que nunca faz long-poll).
+                    // receiveMessage long-polls (aws.sqs.wait-time-seconds, up to 20s) - the
+                    // socket stays idle on purpose for that long; socketTimeout must exceed it
+                    // with real headroom (local network/AWS latency can go slightly past 20s),
+                    // otherwise every receiveMessage times out before the long-poll ends (it
+                    // was 5s here, copied unchanged from the authorizer/ledger publisher,
+                    // which never long-polls).
                     .socketTimeout(Duration.ofSeconds(35))
                     .connectionAcquisitionTimeout(Duration.ofSeconds(1))
                     .build();
@@ -37,10 +37,10 @@ public class SqsConfig {
                     .region(Region.of(awsRegion))
                     .httpClient(httpClient)
                     .build();
-            logger.info("Cliente AWS SQS criado com sucesso. region={}", awsRegion);
+            logger.info("AWS SQS client created. region={}", awsRegion);
             return sqsClient;
         } catch (Exception e) {
-            logger.error("Erro ao criar cliente AWS SQS. region={}, error={}", awsRegion, e.getMessage(), e);
+            logger.error("Failed to create AWS SQS client. region={}, error={}", awsRegion, e.getMessage(), e);
             throw e;
         }
     }

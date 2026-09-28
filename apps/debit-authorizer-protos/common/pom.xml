@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>br.com.mmgabri</groupId>
+        <artifactId>debit-authorizer-protos</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <!-- Types shared by every contract: single reason code catalog
+         (business and technical), BusinessResult and TechnicalError. Correlation/
+         observability context is NOT here - it travels as gRPC metadata. -->
+    <artifactId>common-proto</artifactId>
+    <!-- When bumping this version, also update the common-proto.version property
+         in the root pom - it is what the dependent modules use to reference it. -->
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <!-- Catalog consistency test (code x issuer x type). -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.11.4</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.3</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>

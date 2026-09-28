@@ -1,0 +1,37 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.itau.debit.authorizer.security.v1;
+
+import "br/com/itau/debit/authorizer/common/v1/business_result.proto";
+
+// Observability context (x-correlation-id, x-transaction-id)
+// travels as gRPC metadata, not in the payload.
+service SecurityService {
+    rpc ExchangeKeys (ExchangeKeysRequest) returns (ExchangeKeysResponse);
+    rpc ValidateSecurity (ValidateSecurityRequest) returns (ValidateSecurityResponse);
+}
+
+message ExchangeKeysRequest {
+    string pekKey = 1;              // PIN Encryption Key
+    repeated string functions = 2;
+}
+
+// Technical failures are returned as gRPC error status + google.rpc.ErrorInfo.
+message ExchangeKeysResponse {
+    br.com.itau.debit.authorizer.common.v1.BusinessResult result = 1;
+}
+
+message ValidateSecurityRequest {
+    string accountId = 1;
+    string cardNumber = 2;
+    string pin = 3;
+    string chipData = 4;
+    string customReturn = 5;
+    int32 sleep = 6;
+}
+
+// Technical failures are returned as gRPC error status + google.rpc.ErrorInfo.
+message ValidateSecurityResponse {
+    string accountId = 1;
+    br.com.itau.debit.authorizer.common.v1.BusinessResult result = 2;
+}

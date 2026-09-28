@@ -105,13 +105,13 @@ module "cluster_ecs" {
 }
 
 #------------------------------------------------------------------------------
-# Cria Service / Task formatador-bandeiras
+# Cria Service / Task message-parser
 #------------------------------------------------------------------------------
-module "ecs_formatador_bandeiras" {
+module "ecs_message_parser" {
   source             = "./modules/ecs-com-datadog"
-  micro_service_name = "formatador-bandeiras"
+  micro_service_name = "message-parser"
   private_subnets    = module.base.private_subnets
-  ecr_repository     = var.formatador_bandeiras_ecr_repository
+  ecr_repository     = var.message_parser_ecr_repository
   datadog_api_key    = var.datadog_api_key
   execution_role_arn = module.iam_roles.ecs_execution_role_arn
   task_role_arn      = module.iam_roles.ecs_task_role_arn
@@ -130,14 +130,14 @@ module "ecs_formatador_bandeiras" {
 }
 
 #------------------------------------------------------------------------------
-# Cria Service / Task autorizador-debito
+# Cria Service / Task debit-authorizer
 #------------------------------------------------------------------------------
-module "ecs_autorizador_debito" {
+module "ecs_debit_authorizer" {
   source             = "./modules/ecs-com-datadog"
-  depends_on         = [module.ecs_formatador_bandeiras]
-  micro_service_name = "autorizador-debito"
+  depends_on         = [module.ecs_message_parser]
+  micro_service_name = "debit-authorizer"
   private_subnets    = module.base.private_subnets
-  ecr_repository     = var.autorizador_debito_ecr_repository
+  ecr_repository     = var.debit_authorizer_ecr_repository
   execution_role_arn = module.iam_roles.ecs_execution_role_arn
   task_role_arn      = module.iam_roles.ecs_task_role_arn
   ecs_cluster_name   = module.cluster_ecs.ecs_cluster_autorizador
@@ -156,14 +156,14 @@ module "ecs_autorizador_debito" {
 }
 
 #------------------------------------------------------------------------------
-# Cria Service / Task / Scaling - enrichment-service
+# Cria Service / Task / Scaling - enrichment
 #------------------------------------------------------------------------------
-module "ecs_enrichment_service" {
+module "ecs_enrichment" {
   source             = "./modules/ecs-sem-datadog"
-  depends_on         = [module.ecs_autorizador_debito]
-  micro_service_name = "enrichment-service"
+  depends_on         = [module.ecs_debit_authorizer]
+  micro_service_name = "enrichment"
   private_subnets    = module.base.private_subnets
-  ecr_repository     = var.enrichment_service_ecr_repository
+  ecr_repository     = var.enrichment_ecr_repository
   execution_role_arn = module.iam_roles.ecs_execution_role_arn
   task_role_arn      = module.iam_roles.ecs_task_role_arn
   ecs_cluster_name   = module.cluster_ecs.ecs_cluster_autorizador
@@ -180,14 +180,14 @@ module "ecs_enrichment_service" {
 }
 
 #------------------------------------------------------------------------------
-# Cria Service / Task  - rules-service
+# Cria Service / Task  - rules-engine
 #------------------------------------------------------------------------------
-module "ecs_rules_service" {
+module "ecs_rules_engine" {
   source             = "./modules/ecs-sem-datadog"
-  depends_on         = [module.ecs_enrichment_service]
-  micro_service_name = "rules-service"
+  depends_on         = [module.ecs_enrichment]
+  micro_service_name = "rules-engine"
   private_subnets    = module.base.private_subnets
-  ecr_repository     = var.rules_service_ecr_repository
+  ecr_repository     = var.rules_engine_ecr_repository
   execution_role_arn = module.iam_roles.ecs_execution_role_arn
   task_role_arn      = module.iam_roles.ecs_task_role_arn
   ecs_cluster_name   = module.cluster_ecs.ecs_cluster_autorizador
@@ -205,14 +205,14 @@ module "ecs_rules_service" {
 
 
 #------------------------------------------------------------------------------
-# Cria Service / Task - security-service
+# Cria Service / Task - security
 #------------------------------------------------------------------------------
-module "ecs_security_service" {
+module "ecs_security" {
   source             = "./modules/ecs-sem-datadog"
-  depends_on         = [module.ecs_rules_service]
-  micro_service_name = "security-service"
+  depends_on         = [module.ecs_rules_engine]
+  micro_service_name = "security"
   private_subnets    = module.base.private_subnets
-  ecr_repository     = var.security_service_ecr_repository
+  ecr_repository     = var.security_ecr_repository
   execution_role_arn = module.iam_roles.ecs_execution_role_arn
   task_role_arn      = module.iam_roles.ecs_task_role_arn
   ecs_cluster_name   = module.cluster_ecs.ecs_cluster_autorizador
@@ -230,14 +230,14 @@ module "ecs_security_service" {
 
 
 #------------------------------------------------------------------------------
-# Cria Service / Task - limit-service
+# Cria Service / Task - limit
 #------------------------------------------------------------------------------
-module "ecs_limit_service" {
+module "ecs_limit" {
   source             = "./modules/ecs-sem-datadog"
-  depends_on         = [module.ecs_security_service]
-  micro_service_name = "limit-service"
+  depends_on         = [module.ecs_security]
+  micro_service_name = "limit"
   private_subnets    = module.base.private_subnets
-  ecr_repository     = var.limit_service_ecr_repository
+  ecr_repository     = var.limit_ecr_repository
   execution_role_arn = module.iam_roles.ecs_execution_role_arn
   task_role_arn      = module.iam_roles.ecs_task_role_arn
   ecs_cluster_name   = module.cluster_ecs.ecs_cluster_autorizador
@@ -254,14 +254,14 @@ module "ecs_limit_service" {
 }
 
 #------------------------------------------------------------------------------
-# Cria Service / Task - ledger-service
+# Cria Service / Task - account-posting
 #------------------------------------------------------------------------------
-module "ecs_ledger_service" {
+module "ecs_account_posting" {
   source             = "./modules/ecs-com-datadog"
-  depends_on         = [module.ecs_limit_service]
-  micro_service_name = "ledger-service"
+  depends_on         = [module.ecs_limit]
+  micro_service_name = "account-posting"
   private_subnets    = module.base.private_subnets
-  ecr_repository     = var.ledger_service_ecr_repository
+  ecr_repository     = var.account_posting_ecr_repository
   execution_role_arn = module.iam_roles.ecs_execution_role_arn
   task_role_arn      = module.iam_roles.ecs_task_role_arn
   ecs_cluster_name   = module.cluster_ecs.ecs_cluster_autorizador
@@ -284,7 +284,7 @@ module "ecs_ledger_service" {
 #------------------------------------------------------------------------------
 module "ecs_conta" {
   source             = "./modules/ecs-com-datadog"
-  depends_on         = [module.ecs_ledger_service]
+  depends_on         = [module.ecs_account_posting]
   micro_service_name = "conta"
   private_subnets    = module.base.private_subnets
   ecr_repository     = var.conta_ecr_repository
@@ -306,14 +306,14 @@ module "ecs_conta" {
 }
 
 #------------------------------------------------------------------------------
-# Cria Service / Task - antifraud-service
+# Cria Service / Task - antifraud
 #------------------------------------------------------------------------------
-module "ecs_antifraud_service" {
+module "ecs_antifraud" {
   source             = "./modules/ecs-sem-datadog"
   depends_on         = [module.ecs_conta]
-  micro_service_name = "antifraud-service"
+  micro_service_name = "antifraud"
   private_subnets    = module.base.private_subnets
-  ecr_repository     = var.antifraud_service_ecr_repository
+  ecr_repository     = var.antifraud_ecr_repository
   execution_role_arn = module.iam_roles.ecs_execution_role_arn
   task_role_arn      = module.iam_roles.ecs_task_role_arn
   ecs_cluster_name   = module.cluster_ecs.ecs_cluster_autorizador
