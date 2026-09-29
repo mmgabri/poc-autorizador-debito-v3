@@ -1,0 +1,79 @@
+repo: debit-authorization-protos
+
+Hoje	Sugestão
+protos-common (pai/agregador)	debit-authorization-protos (mesmo nome do repo)
+protos-comuns				common-proto
+protos-reason-codes			reason-codes-proto
+protos-autorizador-debito	authorizer-proto
+protos-antifraud			antifraud-proto
+protos-enrichment			enrichment-proto
+protos-ledger				ledger-proto
+protos-limit				limit-proto
+protos-rules				rules-proto
+protos-security				security-proto
+protos-retorno-conta		account-callback-proto
+
+
+debit-authorization-protos/     ← pai, só organiza (sem código)
+├── common-proto/               ← header compartilhado, base de todos
+├── reason-codes-proto/         ← códigos de erro compartilhados
+├── authorizer-proto/           ← contrato do autorizador-debito
+├── ledger-proto/               ← contrato do ledger-service
+├── limit-proto/                ← contrato do limit-service
+└── ...
+
+
+Arquivo																	Import
+protos-comuns/src/main/proto/comuns/header_message_grpc.proto			import "comuns/header_message_grpc.proto";
+protos-reason-codes/src/main/proto/reasoncodes/business_result.proto	import "reasoncodes/business_result.proto";
+
+
+package br.com.itau.debit.authorizer.messageparser.v1;
+
+debit-authorization-protos/
+├── pom.xml                              → parent (packaging pom, lista os módulos)
+├── common/
+│   ├── pom.xml
+│   └── src/main/proto/br/com/itau/debit/authorizer/common/v1/
+│       └── iso8583.proto
+├── message-parser/
+│   ├── pom.xml                          → depende de common
+│   └── src/main/proto/br/com/itau/debit/authorizer/messageparser/v1/
+│       └── message_parser.proto
+└── message-discovery/
+    ├── pom.xml
+    └── src/main/proto/br/com/itau/debit/authorizer/messagediscovery/v1/
+        └── message_discovery.proto
+
+
+Quero que vc faça uma mudança estrutural:
+
+1- Renomear e ajustar todos os micro-serviços conforme abaixo:
+ - antifraud-service --> antifraud
+ - autorizador-debito --> debit-authorizer
+ - enrichment-service --> enrichment
+ - formatador-bandeiras --> message-parser
+ - ledger-service --> account-posting
+ - limit-service --> limit
+ - rules-service --> rules-engine
+ - security-service --> security
+ 
+2-  Ajuste a organização do respositório dos protos, conforme a seguir:
+
+exemplo: 
+debit-authorizer-protos/
+├── pom.xml                              → parent (packaging pom, lista os módulos)
+├── common/
+│   ├── pom.xml
+│   └── src/main/proto/br/com/itau/debit/authorizer/common/v1/
+│       └── header_message_grpc.proto
+├── account-posting/
+│   ├── pom.xml                          → depende de common
+│   └── src/main/proto/br/com/itau/debit/authorizer/accountposting/v1/
+│       └── account_posting.proto
+└──antifraud/
+    ├── pom.xml
+    └── src/main/proto/br/com/itau/debit/authorizer/antifraud/v1/
+		
+ - No artifactId coloque o sufixo -proto nos módulos		
+ - package use br.com.itau.debit.authorizer.$nomedomicroservico.v1 sem usar java_package, ou seja, mantem a mesma estrutura da pasta
