@@ -1,0 +1,12 @@
+Como o ReasonCode funciona entre os serviços
+
+O serviço consumidor (ex.: security) só envia um número, que é o valor do enum ReasonCode. Exemplo: se ele retorna REASON_CODE_LIMIT_EXCEEDED = 2, na rede vai apenas o 2. Código, descrição e códigos ISO por bandeira não trafegam.
+
+Quem transforma esse número em informação é o chamador (autorizador). Ao receber o 2, o Java já o converte de volta para o enum REASON_CODE_LIMIT_EXCEEDED. Os metadados desse enum são options do .proto, uma espécie de annotation. O protoc embute tudo isso nas classes geradas, num objeto chamado descriptor. O autorizador busca as options no descriptor que está no próprio .jar dele, com getValueDescriptor().getOptions().getExtension(...).
+
+Por isso:
+
+O que vale é a versão do common no autorizador. A versão que o security usa não influencia em nada. Mudou um código ISO, precisa atualizar a lib e redeployar o autorizador.
+Se o security mandar um número de enum que o autorizador ainda não conhece, ele vira UNRECOGNIZED, então precisamos de um fallback de recusa genérica.
+
+O ganho é payload mínimo e o mapeamento ISO num lugar só. O security não precisa saber nada de bandeira.
